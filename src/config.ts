@@ -217,6 +217,15 @@ const opencodeServerVersion = getOptionalOpencodeServerVersionEnvVar("OPENCODE_S
 
 export const config = {
   telegram: buildTelegramConfig(),
+  reasonix: {
+    /** The `reasonix` binary this bot starts one `serve` per project root with. */
+    serveBinary: getEnvVar("REASONIX_SERVE_BINARY", false) || "reasonix",
+    /**
+     * Roots the bot may serve. Empty means the working directory; a session
+     * outside these roots cannot be opened from Telegram.
+     */
+    roots: getOptionalPathListEnvVar("REASONIX_ROOTS"),
+  },
   opencode: {
     serverVersion: opencodeServerVersion,
     apiUrl:
