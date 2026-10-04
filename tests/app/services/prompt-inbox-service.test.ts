@@ -2,8 +2,8 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const inboxMock = vi.hoisted(() => ({ list: vi.fn(), cancel: vi.fn() }));
 
-vi.mock("../../../src/opencode/client.js", () => ({
-  opencodeV2Client: { session: { inbox: inboxMock } },
+vi.mock("../../../src/reasonix/client.js", () => ({
+  reasonixClient: { session: { inbox: inboxMock } },
 }));
 
 import { promptQueue, type QueuedPrompt } from "../../../src/app/managers/prompt-queue-manager.js";

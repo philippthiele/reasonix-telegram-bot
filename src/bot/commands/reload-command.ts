@@ -1,7 +1,7 @@
 import { CommandContext, Context } from "grammy";
 import type { AppContainer } from "../../app/bootstrap/app-container.js";
 import {
-  reloadOpencodeConfig,
+  reloadReasonixConfig,
   type ConfigReloadResult,
 } from "../../app/services/config-reload-service.js";
 import { t } from "../../i18n/index.js";
@@ -32,7 +32,7 @@ async function reloadAndReport(
 ): Promise<void> {
   let text: string;
   try {
-    const result = await reloadOpencodeConfig();
+    const result = await reloadReasonixConfig();
     if (result.kind === "success") {
       if (result.modelChanged) {
         await refreshModelViews(deps);
@@ -54,15 +54,15 @@ async function reloadAndReport(
 }
 
 /**
- * Command handler for /reload (OpenCode V2 only)
- * Reloads the server configuration; the rebuild runs in the background so the bot keeps
- * answering while it lasts.
+ * Command handler for /reload.
+ * Puts a changed configuration into effect; the restart runs in the background so the
+ * bot keeps answering while it lasts.
  */
 export async function reloadCommand(ctx: CommandContext<Context>, deps: ReloadCommandDeps) {
   try {
     const statusMessage = await ctx.reply(t("reload.reloading"));
     safeBackgroundTask({
-      taskName: "bot.reloadOpencodeConfig",
+      taskName: "bot.reloadReasonixConfig",
       task: () => reloadAndReport(ctx, statusMessage.message_id, deps),
     });
   } catch (error) {

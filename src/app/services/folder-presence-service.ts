@@ -1,97 +1,42 @@
+import fs from "node:fs/promises";
 import path from "node:path";
-import { opencodeServerVersion, opencodeV2Client } from "../../opencode/client.js";
 import { logger } from "../../utils/logger.js";
 
 /**
- * Whether a folder still exists, as the OpenCode server sees it. "unknown" covers every
- * answer that is not a confirmed absence, and callers treat it as "present".
+ * Whether a folder still exists. "unknown" covers every answer that is not a
+ * confirmed absence, and callers treat it as "present".
  */
 export type FolderPresence = "present" | "missing" | "unknown";
 
 /** The global project of non-git folders; it is never a folder that can vanish. */
 const GLOBAL_PROJECT_FOLDER = "/";
 
-// The folder's own listing failed with a 500, the server's answer for a folder it cannot resolve.
-const SERVER_ERROR = "server_error";
-const OTHER_FAILURE = "other_failure";
-
-type FolderListing = string[] | typeof SERVER_ERROR | typeof OTHER_FAILURE;
-
-// Server paths are read in the server's style, which may differ from the bot's (Docker).
-function pathStyleOf(folder: string): typeof path.win32 | typeof path.posix {
-  return /^[a-zA-Z]:[\\/]/.test(folder) || /^\\\\/.test(folder) ? path.win32 : path.posix;
-}
-
-function isServerError(error: unknown): boolean {
-  if (!(error instanceof Error) || error.name !== "ClientError") {
-    return false;
-  }
-  const { reason, cause } = error as Error & { reason?: unknown; cause?: unknown };
-  return (
-    reason === "UnexpectedStatus" && (cause as { status?: unknown } | undefined)?.status === 500
-  );
-}
-
-async function listFolder(folder: string): Promise<FolderListing> {
-  const { data, error } = await opencodeV2Client.file.list({ path: folder });
-  if (data) {
-    return data;
-  }
-  logger.debug(`[FolderPresence] Listing failed for ${folder}:`, error);
-  return isServerError(error) ? SERVER_ERROR : OTHER_FAILURE;
-}
-
-function namesMatch(pathStyle: typeof path.win32 | typeof path.posix, left: string, right: string) {
-  return pathStyle === path.win32 ? left.toLowerCase() === right.toLowerCase() : left === right;
-}
-
 /**
- * Asks the server about one folder. It counts as missing only when its own listing fails
- * with a 500 and the nearest ancestor the server still lists has no entry on the way to it;
- * any other answer is "unknown", so a folder the server merely failed to answer for stays.
+ * The bot and Reasonix run on the same machine, so the bot can look at a folder
+ * itself instead of asking a server that may only be able to answer for the
+ * workspace it was started in.
  */
 export async function checkFolderPresence(folder: string): Promise<FolderPresence> {
   if (folder === GLOBAL_PROJECT_FOLDER) {
     return "present";
   }
-  if (opencodeServerVersion !== "v2") {
-    return "unknown";
-  }
 
-  const own = await listFolder(folder);
-  if (Array.isArray(own)) {
-    return "present";
-  }
-  if (own !== SERVER_ERROR) {
-    return "unknown";
-  }
-
-  const pathStyle = pathStyleOf(folder);
-  let child = folder;
-  let parent = pathStyle.dirname(child);
-  while (parent !== child) {
-    const entries = await listFolder(parent);
-    if (Array.isArray(entries)) {
-      const name = pathStyle.basename(child);
-      const listed = entries.some((entry) =>
-        namesMatch(pathStyle, pathStyle.basename(entry.replace(/[\\/]+$/, "")), name),
-      );
-      if (listed) {
-        return "unknown";
-      }
-      logger.info(`[FolderPresence] Folder no longer exists on the OpenCode server: ${folder}`);
+  try {
+    // `stat` follows a symlink, so a link into a folder that is gone counts as gone.
+    const stats = await fs.stat(folder);
+    return stats.isDirectory() ? "present" : "unknown";
+  } catch (error) {
+    const code = (error as NodeJS.ErrnoException).code;
+    if (code === "ENOENT" || code === "ENOTDIR") {
+      logger.info(`[FolderPresence] Folder no longer exists: ${folder}`);
       return "missing";
     }
-    if (entries !== SERVER_ERROR) {
-      return "unknown";
-    }
-    child = parent;
-    parent = pathStyle.dirname(child);
+    logger.debug(`[FolderPresence] Could not tell whether ${folder} exists:`, error);
+    return "unknown";
   }
-  return "unknown";
 }
 
-/** The folders among these that the server confirms are gone; each is asked about once. */
+/** The folders among these that are confirmed gone; each is asked about once. */
 export async function findMissingFolders(folders: Iterable<string>): Promise<Set<string>> {
   const unique = [...new Set(folders)];
   const presences = await Promise.all(unique.map((folder) => checkFolderPresence(folder)));
@@ -125,4 +70,10 @@ export async function collectFromPresentFolders<T>(
     }
     limit *= 2;
   }
+}
+
+/** The folder's own name, which is what a person recognises in a list. */
+export function folderName(folder: string): string {
+  const name = path.basename(folder.replace(/[\\/]+$/, ""));
+  return name.length > 0 ? name : folder;
 }

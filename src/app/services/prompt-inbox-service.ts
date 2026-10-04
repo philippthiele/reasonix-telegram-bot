@@ -1,4 +1,4 @@
-import { opencodeV2Client } from "../../opencode/client.js";
+import { reasonixClient } from "../../reasonix/client.js";
 import { logger } from "../../utils/logger.js";
 import {
   promptQueue,
@@ -9,7 +9,7 @@ import {
 export type InboxWithdrawResult = "removed" | "gone" | "failed";
 
 /**
- * Withdraws one mirrored prompt from the OpenCode V2 session inbox. OpenCode answers a
+ * Withdraws one mirrored prompt from the Reasonix session inbox. Reasonix answers a
  * cancel of an already delivered prompt with success too, so the inbox list decides
  * whether the prompt was still waiting.
  */
@@ -20,7 +20,7 @@ export async function withdrawInboxPrompt(item: QueuedPrompt): Promise<InboxWith
   }
 
   try {
-    const { data: waitingIds, error: listError } = await opencodeV2Client.session.inbox.list({
+    const { data: waitingIds, error: listError } = await reasonixClient.session.inbox.list({
       sessionID: inbox.sessionId,
     });
     if (listError || !waitingIds) {
@@ -34,7 +34,7 @@ export async function withdrawInboxPrompt(item: QueuedPrompt): Promise<InboxWith
       return "gone";
     }
 
-    const { error: cancelError } = await opencodeV2Client.session.inbox.cancel({
+    const { error: cancelError } = await reasonixClient.session.inbox.cancel({
       sessionID: inbox.sessionId,
       inboxID: inbox.inboxId,
     });
@@ -55,10 +55,10 @@ export async function withdrawInboxPrompt(item: QueuedPrompt): Promise<InboxWith
   }
 }
 
-/** Cancels a prompt in the OpenCode V2 session inbox; failures are logged, not thrown. */
+/** Cancels a prompt in the Reasonix session inbox; failures are logged, not thrown. */
 export async function cancelInboxPrompt(inbox: QueuedPromptInbox, reason: string): Promise<void> {
   try {
-    const { error } = await opencodeV2Client.session.inbox.cancel({
+    const { error } = await reasonixClient.session.inbox.cancel({
       sessionID: inbox.sessionId,
       inboxID: inbox.inboxId,
     });
@@ -79,7 +79,7 @@ export async function cancelInboxPrompt(inbox: QueuedPromptInbox, reason: string
 }
 
 /**
- * Clears the prompt queue and withdraws every prompt still waiting in the OpenCode V2
+ * Clears the prompt queue and withdraws every prompt still waiting in the Reasonix
  * inbox. Admissions still on their way lose their reservation and cancel themselves.
  */
 export async function withdrawPromptQueue(reason: string): Promise<void> {
@@ -97,7 +97,7 @@ export async function reconcileInboxPrompts(sessionId: string): Promise<void> {
   }
 
   try {
-    const { data: waitingIds, error } = await opencodeV2Client.session.inbox.list({
+    const { data: waitingIds, error } = await reasonixClient.session.inbox.list({
       sessionID: sessionId,
     });
     if (error || !waitingIds) {

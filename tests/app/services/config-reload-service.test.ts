@@ -1,13 +1,13 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const mocked = vi.hoisted(() => ({
-  reload: vi.fn(),
+  restartAllInstances: vi.fn(),
   refreshModelCatalogAfterConfigReload: vi.fn(),
   getStoredModel: vi.fn(),
 }));
 
-vi.mock("../../../src/opencode/client.js", () => ({
-  opencodeV2Client: { location: { reload: mocked.reload } },
+vi.mock("../../../src/reasonix/instance.js", () => ({
+  restartAllInstances: mocked.restartAllInstances,
 }));
 
 vi.mock("../../../src/opencode/ready-refresh.js", () => ({
@@ -18,7 +18,7 @@ vi.mock("../../../src/app/services/model-selection-service.js", () => ({
   getStoredModel: mocked.getStoredModel,
 }));
 
-import { reloadOpencodeConfig } from "../../../src/app/services/config-reload-service.js";
+import { reloadReasonixConfig } from "../../../src/app/services/config-reload-service.js";
 
 const STORED_MODEL = { providerID: "anthropic", modelID: "claude", variant: "default" };
 const FALLBACK_MODEL = { providerID: "test-provider", modelID: "test-model", variant: "default" };
@@ -33,16 +33,16 @@ function deferred<T>() {
 
 describe("app/services/config-reload-service", () => {
   beforeEach(() => {
-    mocked.reload.mockResolvedValue({ data: true, error: undefined });
+    mocked.restartAllInstances.mockResolvedValue(2);
     mocked.refreshModelCatalogAfterConfigReload.mockResolvedValue(undefined);
     mocked.getStoredModel.mockReturnValue(STORED_MODEL);
   });
 
   it("refreshes the model catalog after a successful reload", async () => {
-    const result = await reloadOpencodeConfig();
+    const result = await reloadReasonixConfig();
 
     expect(result).toEqual({ kind: "success", modelChanged: false });
-    expect(mocked.reload).toHaveBeenCalledOnce();
+    expect(mocked.restartAllInstances).toHaveBeenCalledOnce();
     expect(mocked.refreshModelCatalogAfterConfigReload).toHaveBeenCalledOnce();
   });
 
@@ -51,65 +51,72 @@ describe("app/services/config-reload-service", () => {
       mocked.getStoredModel.mockReturnValue(FALLBACK_MODEL);
     });
 
-    await expect(reloadOpencodeConfig()).resolves.toEqual({ kind: "success", modelChanged: true });
+    await expect(reloadReasonixConfig()).resolves.toEqual({ kind: "success", modelChanged: true });
   });
 
   it("still reports success when the catalog refresh fails", async () => {
     mocked.refreshModelCatalogAfterConfigReload.mockRejectedValue(new Error("catalog down"));
 
-    await expect(reloadOpencodeConfig()).resolves.toEqual({ kind: "success", modelChanged: false });
+    await expect(reloadReasonixConfig()).resolves.toEqual({ kind: "success", modelChanged: false });
   });
 
-  it("returns the server's error text when the reload is rejected", async () => {
-    mocked.reload.mockResolvedValue({
-      data: undefined,
-      error: new Error("Invalid config: unknown field"),
-    });
+  it("reports the restart's own message when it fails", async () => {
+    mocked.restartAllInstances.mockRejectedValue(new Error("the port is still in use"));
 
-    await expect(reloadOpencodeConfig()).resolves.toEqual({
+    await expect(reloadReasonixConfig()).resolves.toEqual({
       kind: "failed",
-      error: "Invalid config: unknown field",
+      error: "the port is still in use",
     });
     expect(mocked.refreshModelCatalogAfterConfigReload).not.toHaveBeenCalled();
   });
 
-  it("returns no error text when the error carries none", async () => {
-    mocked.reload.mockResolvedValue({ data: undefined, error: {} });
+  it("reports a failure that is not an Error without an error text", async () => {
+    mocked.restartAllInstances.mockRejectedValue({});
 
-    await expect(reloadOpencodeConfig()).resolves.toEqual({ kind: "failed", error: null });
+    await expect(reloadReasonixConfig()).resolves.toEqual({
+      kind: "failed",
+      error: "[object Object]",
+    });
+  });
+
+  it("succeeds with nothing to do when no instance was running", async () => {
+    mocked.restartAllInstances.mockResolvedValue(0);
+
+    await expect(reloadReasonixConfig()).resolves.toEqual({ kind: "success", modelChanged: false });
+    expect(mocked.refreshModelCatalogAfterConfigReload).toHaveBeenCalledOnce();
   });
 
   it("joins a reload that is already in flight", async () => {
-    const pending = deferred<{ data: true; error: undefined }>();
-    mocked.reload.mockReturnValue(pending.promise);
+    const pending = deferred<number>();
+    mocked.restartAllInstances.mockReturnValue(pending.promise);
 
-    const first = reloadOpencodeConfig();
-    const second = reloadOpencodeConfig();
-    pending.resolve({ data: true, error: undefined });
+    const first = reloadReasonixConfig();
+    const second = reloadReasonixConfig();
+    pending.resolve(1);
 
     await expect(first).resolves.toEqual({ kind: "success", modelChanged: false });
     await expect(second).resolves.toEqual({ kind: "success", modelChanged: false });
-    expect(mocked.reload).toHaveBeenCalledOnce();
+    expect(mocked.restartAllInstances).toHaveBeenCalledOnce();
 
-    await reloadOpencodeConfig();
-    expect(mocked.reload).toHaveBeenCalledTimes(2);
+    await reloadReasonixConfig();
+    expect(mocked.restartAllInstances).toHaveBeenCalledTimes(2);
   });
 
   it("times out without abandoning the catalog refresh of a late success", async () => {
     vi.useFakeTimers();
-    const pending = deferred<{ data: true; error: undefined }>();
-    mocked.reload.mockReturnValueOnce(pending.promise);
+    const pending = deferred<number>();
+    mocked.restartAllInstances.mockReturnValueOnce(pending.promise);
 
-    const result = reloadOpencodeConfig();
+    const result = reloadReasonixConfig();
     await vi.advanceTimersByTimeAsync(60_000);
 
     await expect(result).resolves.toEqual({ kind: "timeout" });
 
-    const retry = reloadOpencodeConfig();
+    const retry = reloadReasonixConfig();
     await expect(retry).resolves.toEqual({ kind: "success", modelChanged: false });
-    expect(mocked.reload).toHaveBeenCalledTimes(2);
+    expect(mocked.restartAllInstances).toHaveBeenCalledTimes(2);
 
-    pending.resolve({ data: true, error: undefined });
+    pending.resolve(1);
     await vi.advanceTimersByTimeAsync(0);
     expect(mocked.refreshModelCatalogAfterConfigReload).toHaveBeenCalledTimes(2);
   });

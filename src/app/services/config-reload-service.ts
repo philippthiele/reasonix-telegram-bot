@@ -1,11 +1,10 @@
-import { opencodeV2Client } from "../../opencode/client.js";
+import { restartAllInstances } from "../../reasonix/instance.js";
 import { refreshModelCatalogAfterConfigReload } from "../../opencode/ready-refresh.js";
 import type { ModelInfo } from "../types/model.js";
 import { logger } from "../../utils/logger.js";
-import { extractErrorMessage } from "../../utils/opencode-error.js";
 import { getStoredModel } from "./model-selection-service.js";
 
-// A reload rebuilds every loaded location, MCP servers and plugins included.
+// A restart takes as long as the last serve process needs to let go of its port.
 const CONFIG_RELOAD_TIMEOUT_MS = 60_000;
 
 export type ConfigReloadResult =
@@ -24,13 +23,20 @@ function isSameModel(left: ModelInfo, right: ModelInfo): boolean {
 }
 
 async function reloadAndRefreshModelCatalog(): Promise<ConfigReloadResult> {
-  const { error } = await opencodeV2Client.location.reload();
-  if (error) {
-    logger.warn("[ConfigReload] OpenCode rejected the config reload", error);
-    return { kind: "failed", error: extractErrorMessage(error) };
+  let restarted: number;
+  try {
+    restarted = await restartAllInstances();
+  } catch (error) {
+    logger.warn("[ConfigReload] Could not restart the Reasonix instances", error);
+    return { kind: "failed", error: error instanceof Error ? error.message : String(error) };
   }
 
-  logger.info("[ConfigReload] OpenCode configuration reloaded");
+  logger.info(
+    restarted === 0
+      ? "[ConfigReload] No Reasonix instance was running; the new settings apply on the next message"
+      : `[ConfigReload] Restarted ${restarted} Reasonix instance(s)`,
+  );
+
   const modelBefore = { ...getStoredModel() };
   try {
     await refreshModelCatalogAfterConfigReload();
@@ -52,11 +58,12 @@ function startReload(): Promise<ConfigReloadResult> {
 }
 
 /**
- * Asks the V2 server to reload its configuration and re-reads the model catalog after it.
- * A call made while a reload is in flight joins it. The time limit ends only the wait: a
- * reload that succeeds later still refreshes the catalog, and the next call starts afresh.
+ * Puts the changed configuration into effect and re-reads the model catalog
+ * afterwards. A call made while a reload is in flight joins it. The time limit
+ * ends only the wait: a reload that succeeds later still refreshes the catalog,
+ * and the next call starts afresh.
  */
-export async function reloadOpencodeConfig(): Promise<ConfigReloadResult> {
+export async function reloadReasonixConfig(): Promise<ConfigReloadResult> {
   const operation = reloadInFlight ?? startReload();
   let timer: ReturnType<typeof setTimeout> | undefined;
   const timeout = new Promise<ConfigReloadResult>((resolve) => {

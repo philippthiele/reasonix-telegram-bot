@@ -44,6 +44,9 @@ export interface ReasonixSession {
  * serve process works on one session at a time, so a second conversation in the
  * same folder has to wait for the first to stop.
  */
+/** Where a prompt waits while a session is busy: for the running turn, or for its end. */
+export type ReasonixInboxDelivery = "steer" | "queue";
+
 export class ReasonixBusyError extends Error {
   constructor(readonly root: string) {
     super(`Reasonix is still working in ${root}`);
@@ -174,7 +177,7 @@ export class ReasonixClient {
       sessionID: string;
       parts?: Array<{ type: string; text?: string }>;
       directory?: string;
-      delivery?: "steer" | "queue";
+      delivery?: ReasonixInboxDelivery;
     }): Promise<Result<{ inboxID: string }>> =>
       this.call(params.directory, async (instance) => {
         const text = promptText(params.parts);

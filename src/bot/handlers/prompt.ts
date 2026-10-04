@@ -1,8 +1,8 @@
 import { Bot, Context } from "grammy";
 import type { FilePartInput, TextPartInput } from "@opencode-ai/sdk/v2";
 import type { Model } from "@opencode-ai/sdk/v2";
-import { opencodeClient, opencodeV2Client } from "../../opencode/client.js";
-import type { V2InboxDelivery } from "../../opencode/v2/client.js";
+import { opencodeClient } from "../../opencode/client.js";
+import { reasonixClient, type ReasonixInboxDelivery } from "../../reasonix/client.js";
 import {
   clearSession,
   getCurrentSession,
@@ -33,10 +33,7 @@ import {
 } from "../../app/managers/prompt-attachment-manager.js";
 import { resolvePendingAttachment } from "../../app/services/prompt-attachment-service.js";
 import { getMissingFolderNotice } from "../../app/services/missing-folder-notice-service.js";
-import {
-  downloadTelegramFile,
-  toDataUri,
-} from "../../app/services/file-download-service.js";
+import { downloadTelegramFile, toDataUri } from "../../app/services/file-download-service.js";
 import {
   getModelCapabilities,
   supportsInput,
@@ -122,22 +119,21 @@ async function resetMismatchedSessionContext(deps: ProcessPromptDeps): Promise<v
   }
 }
 
-export interface ProcessPromptDeps
-  extends Pick<
-    AppContainer,
-    | "assistantRunState"
-    | "attachManager"
-    | "externalUserInputSuppressionManager"
-    | "foregroundSessionState"
-    | "interactionManager"
-    | "keyboardManager"
-    | "permissionManager"
-    | "pinnedMessageManager"
-    | "questionManager"
-    | "resetAggregator"
-    | "resetInteractions"
-    | "summaryAggregator"
-  > {
+export interface ProcessPromptDeps extends Pick<
+  AppContainer,
+  | "assistantRunState"
+  | "attachManager"
+  | "externalUserInputSuppressionManager"
+  | "foregroundSessionState"
+  | "interactionManager"
+  | "keyboardManager"
+  | "permissionManager"
+  | "pinnedMessageManager"
+  | "questionManager"
+  | "resetAggregator"
+  | "resetInteractions"
+  | "summaryAggregator"
+> {
   bot: Bot<Context>;
   ensureEventSubscription: (directory: string) => Promise<void>;
   downloadFile?: (
@@ -593,15 +589,15 @@ export async function startInboxPromptRun(
 }
 
 /**
- * Sends a prompt into the inbox of the busy current session on OpenCode V2, where it waits
- * for the running turn (steer) or for its end (queue). Returns where it waits, or null
- * when it was not sent; the user has been told why.
+ * Sends a prompt into the inbox of the busy current session, where it waits for the
+ * running turn (steer) or for its end (queue). Returns where it waits, or null when it
+ * was not sent; the user has been told why.
  */
 export async function admitPromptToInbox(
   ctx: Context,
   input: IncomingPrompt,
   deps: ProcessPromptDeps,
-  delivery: V2InboxDelivery,
+  delivery: ReasonixInboxDelivery,
 ): Promise<{ sessionId: string; inboxId: string } | null> {
   const currentSession = getCurrentSession();
   if (!currentSession) {
@@ -644,15 +640,15 @@ export async function admitPromptToInbox(
 /** Sends a prepared prompt into the session inbox; returns its inbox id, or null (logged). */
 async function sendToSessionInbox(
   promptOptions: PromptRequestOptions,
-  delivery: V2InboxDelivery,
+  delivery: ReasonixInboxDelivery,
   logContext: Record<string, string | number>,
 ): Promise<string | null> {
-  const { data, error } = await opencodeV2Client.session.promptAsync({
+  const { data, error } = await reasonixClient.session.promptAsync({
     ...promptOptions,
     delivery,
   });
   if (error || !data) {
-    logger.error("[Bot] OpenCode refused the inbox prompt", logContext);
+    logger.error("[Bot] Reasonix refused the inbox prompt", logContext);
     logger.error("[Bot] Inbox prompt error details:", formatErrorDetails(error, 6000));
     return null;
   }
@@ -692,7 +688,7 @@ export async function admitHandedOverPromptToInbox(
   input: IncomingPrompt,
   session: { id: string; directory: string },
   selection: HandoverSelection,
-  delivery: V2InboxDelivery,
+  delivery: ReasonixInboxDelivery,
   deps: HandedOverPromptDeps,
 ): Promise<string | null> {
   try {
@@ -706,7 +702,10 @@ export async function admitHandedOverPromptToInbox(
     );
     return await sendToSessionInbox(promptOptions, delivery, { sessionId: session.id });
   } catch (err) {
-    logger.error(`[Bot] Failed to send handed-over prompt to the inbox: session=${session.id}`, err);
+    logger.error(
+      `[Bot] Failed to send handed-over prompt to the inbox: session=${session.id}`,
+      err,
+    );
     return null;
   }
 }

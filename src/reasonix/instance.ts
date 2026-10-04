@@ -190,6 +190,23 @@ export function getRunningInstances(): ReasonixInstance[] {
   return [...instances.values()];
 }
 
+/**
+ * Stops the serve instances and lets them start again on next use, which is how
+ * Reasonix takes up a changed configuration: it reads its environment when the
+ * process starts and offers no way to reload it in place.
+ */
+export async function restartAllInstances(): Promise<number> {
+  const all = [...instances.values()];
+  if (all.length === 0) {
+    logger.info("[ReasonixInstance] No serve instance was running; nothing to restart");
+    return 0;
+  }
+  instances.clear();
+  await Promise.all(all.map(stopInstance));
+  logger.info(`[ReasonixInstance] Restarted ${all.length} serve instance(s) on next use`);
+  return all.length;
+}
+
 async function stopInstance(instance: ReasonixInstance): Promise<void> {
   const child = instance.process;
   if (!child || child.exitCode !== null) {

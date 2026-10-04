@@ -3,14 +3,14 @@ import type { CommandContext, Context } from "grammy";
 import { t } from "../../../src/i18n/index.js";
 
 const mocked = vi.hoisted(() => ({
-  reloadOpencodeConfig: vi.fn(),
+  reloadReasonixConfig: vi.fn(),
   refreshModelViews: vi.fn(),
   refreshModelViewsAfterLateCatalogSettle: vi.fn(),
   editBotText: vi.fn(),
 }));
 
 vi.mock("../../../src/app/services/config-reload-service.js", () => ({
-  reloadOpencodeConfig: mocked.reloadOpencodeConfig,
+  reloadReasonixConfig: mocked.reloadReasonixConfig,
 }));
 
 vi.mock("../../../src/bot/services/model-views.js", () => ({
@@ -45,7 +45,7 @@ describe("bot/commands/reload-command", () => {
   });
 
   it("edits the reloading message into success", async () => {
-    mocked.reloadOpencodeConfig.mockResolvedValue({ kind: "success", modelChanged: false });
+    mocked.reloadReasonixConfig.mockResolvedValue({ kind: "success", modelChanged: false });
     const ctx = createContext();
 
     await runReload(ctx);
@@ -62,7 +62,7 @@ describe("bot/commands/reload-command", () => {
   });
 
   it("redraws the model views when the reload replaced the selected model", async () => {
-    mocked.reloadOpencodeConfig.mockResolvedValue({ kind: "success", modelChanged: true });
+    mocked.reloadReasonixConfig.mockResolvedValue({ kind: "success", modelChanged: true });
 
     await runReload(createContext());
 
@@ -73,7 +73,7 @@ describe("bot/commands/reload-command", () => {
   });
 
   it("shows the server's error text on failure", async () => {
-    mocked.reloadOpencodeConfig.mockResolvedValue({ kind: "failed", error: "Invalid config" });
+    mocked.reloadReasonixConfig.mockResolvedValue({ kind: "failed", error: "Invalid config" });
 
     await runReload(createContext());
 
@@ -86,14 +86,14 @@ describe("bot/commands/reload-command", () => {
   });
 
   it("shows the bare failure line without error text or on a timeout", async () => {
-    mocked.reloadOpencodeConfig.mockResolvedValueOnce({ kind: "failed", error: null });
+    mocked.reloadReasonixConfig.mockResolvedValueOnce({ kind: "failed", error: null });
     await runReload(createContext());
     expect(mocked.editBotText).toHaveBeenLastCalledWith(
       expect.objectContaining({ text: t("reload.failed") }),
     );
 
     mocked.editBotText.mockClear();
-    mocked.reloadOpencodeConfig.mockResolvedValueOnce({ kind: "timeout" });
+    mocked.reloadReasonixConfig.mockResolvedValueOnce({ kind: "timeout" });
     await runReload(createContext());
     expect(mocked.editBotText).toHaveBeenLastCalledWith(
       expect.objectContaining({ text: t("reload.failed") }),
@@ -101,7 +101,7 @@ describe("bot/commands/reload-command", () => {
   });
 
   it("ends in the failure line when the reload throws", async () => {
-    mocked.reloadOpencodeConfig.mockRejectedValue(new Error("boom"));
+    mocked.reloadReasonixConfig.mockRejectedValue(new Error("boom"));
 
     await runReload(createContext());
 
@@ -111,7 +111,7 @@ describe("bot/commands/reload-command", () => {
   });
 
   it("edits each status message when two reloads share one outcome", async () => {
-    mocked.reloadOpencodeConfig.mockResolvedValue({ kind: "success", modelChanged: false });
+    mocked.reloadReasonixConfig.mockResolvedValue({ kind: "success", modelChanged: false });
 
     await reloadCommand(createContext(10), createTestAppContainer());
     await reloadCommand(createContext(11), createTestAppContainer());

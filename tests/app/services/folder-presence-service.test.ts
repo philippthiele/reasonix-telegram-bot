@@ -1,136 +1,135 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import fs from "node:fs/promises";
+import os from "node:os";
+import path from "node:path";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
   checkFolderPresence,
   collectFromPresentFolders,
+  findMissingFolders,
 } from "../../../src/app/services/folder-presence-service.js";
-
-const mocked = vi.hoisted(() => ({
-  serverVersion: "v2" as "v1" | "v2",
-  fileListMock: vi.fn(),
-  // Folders answering their own listing with a 500, and what each listing folder contains.
-  failing: new Set<string>(),
-  listings: new Map<string, string[]>(),
-}));
-
-vi.mock("../../../src/opencode/client.js", () => ({
-  get opencodeServerVersion() {
-    return mocked.serverVersion;
-  },
-  opencodeV2Client: { file: { list: mocked.fileListMock } },
-}));
 
 vi.mock("../../../src/utils/logger.js", () => ({
   logger: { debug: vi.fn(), info: vi.fn(), warn: vi.fn(), error: vi.fn() },
 }));
 
-function serverError(status: number): Error {
-  return Object.assign(new Error(String(status)), {
-    name: "ClientError",
-    reason: "UnexpectedStatus",
-    cause: { status },
-  });
+let root: string;
+
+/** A real folder under a temp root, so the check is not a mock of itself. */
+function folder(name: string): string {
+  return path.join(root, name);
 }
 
 describe("app/services/folder-presence-service", () => {
-  beforeEach(() => {
-    mocked.serverVersion = "v2";
-    mocked.failing = new Set();
-    mocked.listings = new Map();
-    mocked.fileListMock
-      .mockReset()
-      .mockImplementation(async ({ path }: { path: string }) =>
-        mocked.failing.has(path)
-          ? { data: undefined, error: serverError(500) }
-          : { data: mocked.listings.get(path) ?? [], error: undefined },
-      );
+  beforeEach(async () => {
+    root = await fs.mkdtemp(path.join(os.tmpdir(), "folder-presence-"));
+    await fs.mkdir(folder("present"));
+    await fs.mkdir(folder("nested/deep"), { recursive: true });
+  });
+
+  afterEach(async () => {
+    await fs.rm(root, { recursive: true, force: true });
   });
 
   describe("checkFolderPresence", () => {
-    it("is present when the server lists the folder", async () => {
-      expect(await checkFolderPresence("/repo")).toBe("present");
+    it("finds a folder that exists", async () => {
+      expect(await checkFolderPresence(folder("present"))).toBe("present");
     });
 
-    it("is missing when the folder fails with a 500 and its parent has no such entry", async () => {
-      mocked.failing.add("/projects/app");
-      mocked.listings.set("/projects", ["other/"]);
-
-      expect(await checkFolderPresence("/projects/app")).toBe("missing");
+    it("finds a folder several levels down", async () => {
+      expect(await checkFolderPresence(folder("nested/deep"))).toBe("present");
     });
 
-    it("stays unknown when the parent still lists a folder that failed to answer", async () => {
-      mocked.failing.add("D:\\Projects\\App");
-      mocked.listings.set("D:\\Projects", ["..\\app\\"]);
+    it("reports a folder that was removed as missing", async () => {
+      const gone = folder("gone");
+      await fs.mkdir(gone);
+      await fs.rm(gone, { recursive: true });
 
-      expect(await checkFolderPresence("D:\\Projects\\App")).toBe("unknown");
+      expect(await checkFolderPresence(gone)).toBe("missing");
     });
 
-    it("stays unknown on any failure other than a 500", async () => {
-      mocked.fileListMock.mockResolvedValue({ data: undefined, error: serverError(503) });
+    it("reports a path under a file as missing", async () => {
+      await fs.writeFile(folder("a-file"), "not a folder");
 
-      expect(await checkFolderPresence("/repo")).toBe("unknown");
-      expect(mocked.fileListMock).toHaveBeenCalledTimes(1);
+      expect(await checkFolderPresence(path.join(folder("a-file"), "under"))).toBe("missing");
     });
 
-    it("stays unknown when the parent listing fails for another reason", async () => {
-      mocked.fileListMock.mockImplementation(async ({ path }: { path: string }) => ({
-        data: undefined,
-        error: path === "/projects/app" ? serverError(500) : new Error("fetch failed"),
-      }));
+    it("follows a symlink into a folder that exists", async () => {
+      const link = folder("link");
+      await fs.symlink(folder("present"), link);
 
-      expect(await checkFolderPresence("/projects/app")).toBe("unknown");
+      expect(await checkFolderPresence(link)).toBe("present");
     });
 
-    it("walks up past a deleted parent and looks there for the next segment", async () => {
-      mocked.failing = new Set(["/a/b/c", "/a/b"]);
-      mocked.listings.set("/a", ["c/"]);
+    it("reports a symlink whose target is gone as missing", async () => {
+      const target = folder("target");
+      await fs.mkdir(target);
+      const link = folder("dangling");
+      await fs.symlink(target, link);
+      await fs.rm(target, { recursive: true });
 
-      expect(await checkFolderPresence("/a/b/c")).toBe("missing");
+      expect(await checkFolderPresence(link)).toBe("missing");
     });
 
-    it("stays unknown when the nearest listing ancestor still has the next segment", async () => {
-      mocked.failing = new Set(["/a/b/c", "/a/b"]);
-      mocked.listings.set("/a", ["b/"]);
+    it("stays unknown for a file, since a project folder is not one", async () => {
+      await fs.writeFile(folder("a-file"), "not a folder");
 
-      expect(await checkFolderPresence("/a/b/c")).toBe("unknown");
+      expect(await checkFolderPresence(folder("a-file"))).toBe("unknown");
     });
 
-    it("stays unknown when nothing up to the root lists", async () => {
-      mocked.failing = new Set(["/a", "/"]);
-
-      expect(await checkFolderPresence("/a")).toBe("unknown");
-    });
-
-    it("never asks about the global project", async () => {
+    it("never reports the global project as missing", async () => {
       expect(await checkFolderPresence("/")).toBe("present");
-      expect(mocked.fileListMock).not.toHaveBeenCalled();
+    });
+  });
+
+  describe("findMissingFolders", () => {
+    it("asks about each folder once and returns the gone ones", async () => {
+      const found = await findMissingFolders([
+        folder("present"),
+        folder("gone"),
+        folder("present"),
+      ]);
+
+      expect([...found]).toEqual([folder("gone")]);
     });
 
-    it("never asks a V1 server", async () => {
-      mocked.serverVersion = "v1";
+    it("reports nothing missing when every folder is there", async () => {
+      const found = await findMissingFolders([folder("present"), folder("nested/deep")]);
 
-      expect(await checkFolderPresence("/repo")).toBe("unknown");
-      expect(mocked.fileListMock).not.toHaveBeenCalled();
+      expect(found.size).toBe(0);
     });
   });
 
   describe("collectFromPresentFolders", () => {
-    it("asks for more until enough items remain", async () => {
-      mocked.failing.add("/gone");
-      const items = ["/gone", "/gone", "/one", "/two", "/three"];
-      const fetchItems = vi.fn(async (limit: number) => items.slice(0, limit));
+    it("drops items whose folder is gone", async () => {
+      const fetchItems = vi.fn(async () => [folder("gone"), folder("present")]);
 
-      const visible = await collectFromPresentFolders(fetchItems, (item) => item, 3);
-
-      expect(visible).toEqual(["/one", "/two", "/three"]);
-      expect(fetchItems.mock.calls.map(([limit]) => limit)).toEqual([3, 6]);
+      expect(await collectFromPresentFolders(fetchItems, (item) => item, 2)).toEqual([
+        folder("present"),
+      ]);
+      // One more read, since the first page held too few usable items, and then
+      // the source answered with fewer than it was asked for.
+      expect(fetchItems).toHaveBeenCalledTimes(2);
     });
 
-    it("stops when the source has no more", async () => {
-      mocked.failing.add("/gone");
-      const fetchItems = vi.fn(async () => ["/gone", "/one"]);
+    it("asks for more when too many items were in folders that are gone", async () => {
+      const pages = [
+        [folder("gone"), folder("gone-2")],
+        [folder("gone"), folder("present")],
+      ];
+      const fetchItems = vi.fn(async () => pages[fetchItems.mock.calls.length - 1] ?? []);
 
-      expect(await collectFromPresentFolders(fetchItems, (item) => item, 5)).toEqual(["/one"]);
-      expect(fetchItems).toHaveBeenCalledTimes(1);
+      expect(await collectFromPresentFolders(fetchItems, (item) => item, 2)).toEqual([
+        folder("present"),
+      ]);
+      expect(fetchItems).toHaveBeenCalledTimes(2);
+    });
+
+    it("returns what the source had once asking more cannot help", async () => {
+      const fetchItems = vi.fn(async () => [folder("present")]);
+
+      expect(await collectFromPresentFolders(fetchItems, (item) => item, 5)).toEqual([
+        folder("present"),
+      ]);
     });
   });
 });
