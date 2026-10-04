@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+# Blocks a push that would publish a credential.
+set -euo pipefail
+cd "$(git rev-parse --show-toplevel)"
+node scripts/check-secrets.mjs

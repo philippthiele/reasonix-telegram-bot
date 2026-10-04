@@ -1,0 +1,26 @@
+reasonix-telegram-bot
+Copyright (c) 2026 Philipp Thiele
+
+This project includes work derived from opencode-telegram-bot:
+https://github.com/grinev/opencode-telegram-bot
+Copyright (c) 2026 Ruslan Grinev, MIT License.
+
+Upstream origin: v0.26.3, commit cd12121.
+
+Derived portions (MIT, (c) 2026 Ruslan Grinev):
+  - The Telegram bot layer: grammY wiring, middleware, command routing,
+    callback handling, inline keyboards and menus.
+  - Message rendering, streaming/pinned-message handling and formatting.
+  - The i18n string catalogues and the CLI entry point shape.
+  - Test harness structure and tooling configuration.
+
+New in this repository:
+  - src/reasonix/: the agent backend. An implementation of the client surface
+    the bot consumes, on top of the Reasonix `reasonix serve` HTTP+SSE API.
+    Contains no upstream code.
+  - The per-project serve instance registry.
+  - Support for the Reasonix session lease model (watching vs driving a
+    session that a local Reasonix runtime owns).
+
+The upstream project remains the reference for the bot layer's behaviour and
+is the place to send bug reports about that layer.
