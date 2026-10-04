@@ -263,3 +263,28 @@ export interface ReasonixCliSessionList {
     recovered?: boolean;
   }>;
 }
+
+/** The item `POST /inbox/items` reports a queued prompt under. */
+export interface ReasonixInboxItem {
+  itemId?: string;
+  disposition?: "queued_followup" | string;
+  position?: number;
+  paused?: boolean;
+}
+
+/** `GET /inbox`: the follow-up queue of the session the runtime is on. */
+export interface ReasonixInboxState {
+  schemaVersion?: number;
+  revision?: number;
+  paused?: boolean;
+  sessionPath?: string;
+  items?: Array<{
+    id?: string;
+    sessionId?: string;
+    intent?: "followup" | string;
+    state?: "queued" | "running" | string;
+    preview?: string;
+    createdAt?: string;
+  }> | null;
+  capacity?: { items?: number; maxItems?: number };
+}

@@ -6,9 +6,39 @@ import {
   toPermission,
   toQuestion,
   toSession,
+  toSessionAddress,
   toTodos,
   toToolState,
 } from "../../src/reasonix/mappers.js";
+
+describe("toSessionAddress", () => {
+  it("addresses a session held in memory by its id", () => {
+    // `/sessions` lists an in-memory session with an empty path, but Reasonix
+    // still expects `session-id:<id>` on every request that names a session.
+    expect(toSessionAddress({ sessionId: "abc123", path: "" })).toEqual({
+      id: "abc123",
+      path: "session-id:abc123",
+    });
+  });
+
+  it("keeps the transcript path of a session already on disk", () => {
+    expect(
+      toSessionAddress({ sessionId: "abc123", path: "/home/dev/p/sessions/abc.jsonl" }),
+    ).toEqual({
+      id: "abc123",
+      path: "/home/dev/p/sessions/abc.jsonl",
+    });
+  });
+
+  it("reads the id out of the transcript name when there is none", () => {
+    expect(
+      toSessionAddress({ path: "/home/dev/p/sessions/20260811-132701-session.jsonl" }),
+    ).toEqual({
+      id: "20260811-132701-session.jsonl",
+      path: "/home/dev/p/sessions/20260811-132701-session.jsonl",
+    });
+  });
+});
 
 describe("toSession", () => {
   it("uses the instance root as the session's directory", () => {

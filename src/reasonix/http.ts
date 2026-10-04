@@ -34,6 +34,7 @@ export interface ReasonixRequestOptions {
   body?: unknown;
   signal?: AbortSignal;
   timeoutMs?: number;
+  method?: "GET" | "POST" | "PATCH" | "PUT" | "DELETE";
 }
 
 const DEFAULT_TIMEOUT_MS = 60_000;
@@ -105,7 +106,7 @@ export async function request<T>(
 
   try {
     const response = await fetch(url, {
-      method: options.body === undefined ? "GET" : "POST",
+      method: options.method ?? (options.body === undefined ? "GET" : "POST"),
       headers: {
         authorization: `Bearer ${token}`,
         accept: "application/json",

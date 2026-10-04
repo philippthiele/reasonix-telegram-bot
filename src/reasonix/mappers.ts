@@ -113,12 +113,23 @@ export function toTodos(rows: ReasonixTodo[] | undefined): Todo[] {
 }
 
 /**
+ * How Reasonix names a session: a transcript path once it is on disk, and the
+ * `session-id:` form while it is only held in memory. A session the listing
+ * reports with an empty path has no transcript yet, and Reasonix still expects
+ * to be addressed by its id.
+ */
+export function toSessionAddress(row: ReasonixSessionRow): { id: string; path: string } {
+  const id = row.sessionId ?? row.path?.split("/").pop() ?? "";
+  return { id, path: row.path && row.path.length > 0 ? row.path : `session-id:${id}` };
+}
+
+/**
  * A session of a serve instance. A file-backed session lists its transcript
  * path; one held in memory has none, and then the instance's own root is the
  * directory it works in.
  */
 export function toSession(row: ReasonixSessionRow, root: string): Session {
-  const id = row.sessionId ?? row.path?.split("/").pop() ?? "";
+  const { id } = toSessionAddress(row);
   const updated = row.mtimeMilli ?? Date.now();
   const directory = root;
   return {

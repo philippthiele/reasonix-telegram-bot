@@ -10,10 +10,13 @@ import {
   toModel,
   toProvider,
   toSession,
+  toSessionAddress,
   toTodos,
 } from "./mappers.js";
 import type {
   ReasonixCommand,
+  ReasonixInboxItem,
+  ReasonixInboxState,
   ReasonixHistoryMessage,
   ReasonixModelsResponse,
   ReasonixPermissionSnapshot,
@@ -23,12 +26,29 @@ import type {
 
 export type Result<T> = { data: T; error: undefined } | { data: undefined; error: unknown };
 
+// Reasonix reports a new session the moment it exists, so one look is normally
+// enough; the wait only covers an answer that arrives out of order.
+const CREATE_POLL_ATTEMPTS = 5;
+const CREATE_POLL_INTERVAL_MS = 200;
+
 /** A session as Reasonix addresses it: by id while in memory, by transcript path once on disk. */
 export interface ReasonixSession {
   id: string;
   path: string;
   title: string;
   workspaceRoot: string;
+}
+
+/**
+ * The instance was running a turn and cannot switch its attention away. A
+ * serve process works on one session at a time, so a second conversation in the
+ * same folder has to wait for the first to stop.
+ */
+export class ReasonixBusyError extends Error {
+  constructor(readonly root: string) {
+    super(`Reasonix is still working in ${root}`);
+    this.name = "ReasonixBusyError";
+  }
 }
 
 /** What the bot asks Reasonix to confirm, before it is answered. */
@@ -91,6 +111,10 @@ export class ReasonixClient {
     return request<T>(instance.baseUrl, instance.token, endpoint, { body: body ?? {} });
   }
 
+  private delete<T>(instance: ReasonixInstance, endpoint: string): Promise<T | undefined> {
+    return request<T>(instance.baseUrl, instance.token, endpoint, { method: "DELETE" });
+  }
+
   readonly session = {
     list: async (params?: { directory?: string }): Promise<Result<unknown[]>> =>
       this.call(params?.directory, async (instance) => {
@@ -116,25 +140,119 @@ export class ReasonixClient {
       }),
 
     /**
-     * Starts a session in this instance's workspace. Reasonix reports the new
-     * session as the instance's current one rather than in the answer, so the id
-     * is read back from the runtime state.
+     * Starts a session in this instance's workspace. The answer is empty, and the
+     * runtime only moves its attention to the new session once the old one is
+     * idle, so the id is the one session that appeared.
      */
     create: async (params?: { directory?: string }): Promise<Result<{ id: string }>> =>
       this.call(params?.directory, async (instance) => {
-        await this.post(instance, "/new", {});
-        const states = await this.get<ReasonixRuntimeStatesResponse>(instance, "/runtime-states");
-        const current = (states?.sessions ?? []).find((entry) => entry?.current);
-        const id = current?.state?.sessionId ?? current?.sessionPath ?? "";
-        if (!id) {
+        const before = new Set(await this.sessionIds(instance));
+        try {
+          await this.post(instance, "/new", {});
+        } catch (error) {
+          if (isSwitchRefusal(error)) {
+            throw new ReasonixBusyError(instance.root);
+          }
+          throw error;
+        }
+        for (let attempt = 0; attempt < CREATE_POLL_ATTEMPTS; attempt += 1) {
+          const fresh = (await this.sessionIds(instance)).find((id) => !before.has(id));
+          if (fresh) {
+            return { id: fresh };
+          }
+          await sleep(CREATE_POLL_INTERVAL_MS);
+        }
+        throw new ReasonixRequestError("Reasonix did not report the new session", 500, "/new");
+      }),
+
+    /**
+     * Sends a turn into the session inbox and answers the id it waits under.
+     * Reasonix offers no steering of a running turn, so a prompt meant to steer
+     * is submitted when the session is free and queued when it is not.
+     */
+    promptAsync: async (params: {
+      sessionID: string;
+      parts?: Array<{ type: string; text?: string }>;
+      directory?: string;
+      delivery?: "steer" | "queue";
+    }): Promise<Result<{ inboxID: string }>> =>
+      this.call(params.directory, async (instance) => {
+        const text = promptText(params.parts);
+        if (text.trim().length === 0) {
+          throw new ReasonixRequestError("Reasonix prompts carry text only", 400, "/inbox/items");
+        }
+        const session = await this.resolve(instance, params.sessionID);
+
+        if (params.delivery !== "queue") {
+          try {
+            await this.post(instance, "/submit", {
+              submissionId: `tg-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+              input: text,
+              path: session.path,
+            });
+            return { inboxID: session.id };
+          } catch (error) {
+            if (!(error instanceof ReasonixRequestError) || error.status !== 409) {
+              throw error;
+            }
+          }
+        }
+
+        const item = await this.post<ReasonixInboxItem>(instance, "/inbox/items", {
+          input: text,
+          path: session.path,
+        });
+        if (!item?.itemId) {
           throw new ReasonixRequestError(
-            "Reasonix did not report the new session",
+            "Reasonix did not report the queued prompt",
             500,
-            "/runtime-states",
+            "/inbox/items",
           );
         }
-        return { id };
+        return { inboxID: item.itemId };
       }),
+
+    /** The follow-up queue of a session. */
+    inbox: {
+      /**
+       * Ids of the prompts still waiting. Reasonix reports the queue of the
+       * session its runtime is on, so any other session has none waiting.
+       */
+      list: async (params: { sessionID: string; directory?: string }): Promise<Result<string[]>> =>
+        this.call(params.directory, async (instance) => {
+          const session = await this.resolve(instance, params.sessionID);
+          const state = await this.get<ReasonixInboxState>(instance, "/inbox");
+          if (state?.sessionPath !== session.path) {
+            return [];
+          }
+          return (state.items ?? []).filter((item) => item?.id).map((item) => item.id as string);
+        }),
+
+      /**
+       * Withdraws a waiting prompt. One that Reasonix already picked up cannot
+       * be taken back, and counts as withdrawn all the same.
+       */
+      cancel: async (params: {
+        sessionID: string;
+        inboxID: string;
+        directory?: string;
+      }): Promise<Result<true>> =>
+        this.call(params.directory, async (instance) => {
+          await this.resolve(instance, params.sessionID);
+          try {
+            await this.delete(instance, `/inbox/items/${params.inboxID}`);
+          } catch (error) {
+            if (
+              error instanceof ReasonixRequestError &&
+              (error.status === 409 || error.status === 404)
+            ) {
+              return true as const;
+            }
+            throw error;
+          }
+          return true as const;
+        }),
+    },
 
     /**
      * Sends a turn. Reasonix streams the answer, so the only answer here is the
@@ -147,10 +265,7 @@ export class ReasonixClient {
       directory?: string;
     }): Promise<Result<{ submissionId: string }>> =>
       this.call(params.directory, async (instance) => {
-        const text = (params.parts ?? [])
-          .filter((part) => part.type === "text" && typeof part.text === "string")
-          .map((part) => part.text)
-          .join("\n");
+        const text = promptText(params.parts);
 
         if (text.trim().length === 0) {
           throw new ReasonixRequestError("Reasonix prompts carry text only", 400, "/submit");
@@ -379,6 +494,11 @@ export class ReasonixClient {
     },
   };
 
+  private async sessionIds(instance: ReasonixInstance): Promise<string[]> {
+    const rows = await this.get<ReasonixSessionRow[]>(instance, "/sessions");
+    return (rows ?? []).map(sessionIdOf);
+  }
+
   /**
    * Finds the session the bot knows by id and returns the transcript path
    * Reasonix addresses it by. A session of this instance is in memory and has no
@@ -390,10 +510,11 @@ export class ReasonixClient {
     if (!row) {
       throw new ReasonixRequestError(`session ${sessionId} not found`, 404, "/sessions");
     }
+    const { id, path } = toSessionAddress(row);
     return {
-      id: sessionIdOf(row),
-      path: row.path ?? sessionId,
-      title: row.title ?? row.name ?? row.preview ?? sessionIdOf(row).slice(0, 8),
+      id,
+      path,
+      title: row.title ?? row.name ?? row.preview ?? id.slice(0, 8),
       workspaceRoot: instance.root,
     };
   }
@@ -452,6 +573,32 @@ export class ReasonixClient {
       return false;
     }
   }
+}
+
+/**
+ * Whether Reasonix refused to move its attention because the session it is on
+ * is still running. The answer is a 500 whose body names the failed switch.
+ */
+function isSwitchRefusal(error: unknown): boolean {
+  return (
+    error instanceof ReasonixRequestError &&
+    error.status === 500 &&
+    typeof error.body === "string" &&
+    error.body.includes("switch session")
+  );
+}
+
+/** The text a prompt carries; Reasonix takes no other part kind. */
+const sleep = (ms: number): Promise<void> =>
+  new Promise((done) => {
+    setTimeout(done, ms);
+  });
+
+function promptText(parts: Array<{ type: string; text?: string }> | undefined): string {
+  return (parts ?? [])
+    .filter((part) => part.type === "text" && typeof part.text === "string")
+    .map((part) => part.text)
+    .join("\n");
 }
 
 function findState(states: ReasonixRuntimeStatesResponse | undefined, session: ReasonixSession) {
