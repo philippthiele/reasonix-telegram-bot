@@ -9,6 +9,7 @@ const mocked = vi.hoisted(() => ({
   getModelAvailabilityMock: vi.fn(),
   fetchCurrentModelMock: vi.fn(),
   searchModelsMock: vi.fn(),
+  applyModelToReasonixMock: vi.fn(),
   interactionManagerGetSnapshotMock: vi.fn(),
   interactionManagerStartMock: vi.fn(),
   interactionManagerTransitionMock: vi.fn(),
@@ -37,6 +38,7 @@ vi.mock("../../../src/app/services/model-selection-service.js", () => ({
   searchModels: mocked.searchModelsMock,
   selectModel: mocked.selectModelMock,
   fetchCurrentModel: mocked.fetchCurrentModelMock,
+  applyModelToReasonix: mocked.applyModelToReasonixMock,
 }));
 
 vi.mock("../../../src/app/services/agent-selection-service.js", () => ({

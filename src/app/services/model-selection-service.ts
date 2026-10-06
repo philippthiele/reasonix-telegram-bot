@@ -3,6 +3,7 @@ import { config } from "../../config.js";
 import { reasonixClient } from "../../reasonix/client.js";
 import { isServerUnavailableError } from "../../utils/reasonix-error.js";
 import { logger } from "../../utils/logger.js";
+import { getCurrentSession } from "./session-service.js";
 import type {
   ModelInfo,
   FavoriteModel,
@@ -656,6 +657,37 @@ export function fetchCurrentModel(): ModelInfo {
 export function selectModel(modelInfo: ModelInfo): void {
   logger.info(`[ModelManager] Selected model: ${modelInfo.providerID}/${modelInfo.modelID}`);
   setCurrentModel(modelInfo);
+}
+
+/**
+ * Mirror a model selection onto Reasonix. The server keeps running the model it
+ * holds until its own `/model` command switches it, so the bot submits that
+ * command the same way the Reasonix clients do. A chat with no session yet has
+ * nothing to switch; the session it creates next inherits the server's model.
+ */
+export async function applyModelToReasonix(modelInfo: ModelInfo): Promise<void> {
+  const session = getCurrentSession();
+  if (!session || !modelInfo.providerID || !modelInfo.modelID) {
+    return;
+  }
+
+  const { error } = await reasonixClient.session.promptAsync({
+    sessionID: session.id,
+    directory: session.directory,
+    parts: [{ type: "text", text: `/model ${modelInfo.providerID}/${modelInfo.modelID}` }],
+  });
+
+  if (error) {
+    logger.warn(
+      `[ModelManager] Could not switch Reasonix to ${modelInfo.providerID}/${modelInfo.modelID}:`,
+      error,
+    );
+    return;
+  }
+
+  logger.info(
+    `[ModelManager] Asked Reasonix to switch to ${modelInfo.providerID}/${modelInfo.modelID}`,
+  );
 }
 
 /**

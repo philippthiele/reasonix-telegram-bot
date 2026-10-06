@@ -191,6 +191,10 @@ Model picker behavior:
   list per provider, with a back button on each screen (page size: `MODELS_LIST_LIMIT`)
 - Picking a model opens the variant picker right after the confirmation when the model offers
   more than one selectable variant; a model with only `Default` ends at the confirmation
+- Picking a model also switches Reasonix itself, so the running agent uses the model shown in
+  the dashboard: the bot sends Reasonix's own `/model <provider>/<model>` command to the
+  current session, and sessions the server creates afterwards inherit it. A chat without a
+  session yet has nothing to switch
 
 Agent picker behavior:
 

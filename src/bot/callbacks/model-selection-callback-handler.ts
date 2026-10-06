@@ -2,6 +2,7 @@ import { Context, InlineKeyboard } from "grammy";
 import type { AppContainer } from "../../app/bootstrap/app-container.js";
 import { getStoredAgent, resolveProjectAgent } from "../../app/services/agent-selection-service.js";
 import {
+  applyModelToReasonix,
   fetchCurrentModel,
   getModelAvailability,
   getModelSelectionLists,
@@ -438,6 +439,7 @@ async function applyModelSelectionAndNotify(
 
   selectModel(modelInfo);
   deps.keyboardManager.updateModel(modelInfo);
+  await applyModelToReasonix(modelInfo);
   await deps.pinnedMessageManager.refreshContextLimit();
   await deps.pinnedMessageManager.refresh();
 

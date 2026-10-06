@@ -3,6 +3,8 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 const {
   configMock,
   providersMock,
+  promptAsyncMock,
+  getCurrentSessionMock,
   getCurrentModelMock,
   setCurrentModelMock,
   setCurrentModelState,
@@ -32,6 +34,8 @@ const {
       },
     },
     providersMock: vi.fn(),
+    promptAsyncMock: vi.fn(),
+    getCurrentSessionMock: vi.fn(),
     getCurrentModelMock,
     setCurrentModelMock,
     setCurrentModelState: (modelInfo?: {
@@ -63,7 +67,14 @@ vi.mock("../../../src/reasonix/client.js", () => ({
     config: {
       providers: providersMock,
     },
+    session: {
+      promptAsync: promptAsyncMock,
+    },
   },
+}));
+
+vi.mock("../../../src/app/services/session-service.js", () => ({
+  getCurrentSession: getCurrentSessionMock,
 }));
 
 vi.mock("../../../src/app/stores/settings-store.js", () => ({
@@ -82,6 +93,7 @@ vi.mock("../../../src/utils/logger.js", () => ({
 
 import {
   __resetModelCatalogCacheForTests,
+  applyModelToReasonix,
   getModelAvailability,
   getModelSelectionLists,
   getMissingExpectedProviders,
@@ -958,5 +970,70 @@ describe("app/services/model-selection-service", () => {
         ).resolves.toEqual({ providerID: "openai", modelID: "gpt-4o" });
       });
     });
+  });
+});
+
+describe("app/services/model-selection-service applyModelToReasonix", () => {
+  beforeEach(() => {
+    promptAsyncMock.mockReset();
+    getCurrentSessionMock.mockReset();
+    loggerInfoMock.mockReset();
+    loggerWarnMock.mockReset();
+  });
+
+  it("asks Reasonix to switch the current session to the selected model", async () => {
+    getCurrentSessionMock.mockReturnValue({
+      id: "session-1",
+      title: "Session",
+      directory: "/repo",
+    });
+    promptAsyncMock.mockResolvedValue({ data: { inboxID: "session-1" }, error: undefined });
+
+    await applyModelToReasonix({
+      providerID: "deepseek",
+      modelID: "deepseek-v4-pro",
+      variant: "default",
+    });
+
+    expect(promptAsyncMock).toHaveBeenCalledWith({
+      sessionID: "session-1",
+      directory: "/repo",
+      parts: [{ type: "text", text: "/model deepseek/deepseek-v4-pro" }],
+    });
+  });
+
+  it("does nothing when no session exists yet", async () => {
+    getCurrentSessionMock.mockReturnValue(null);
+
+    await applyModelToReasonix({
+      providerID: "deepseek",
+      modelID: "deepseek-v4-pro",
+      variant: "default",
+    });
+
+    expect(promptAsyncMock).not.toHaveBeenCalled();
+  });
+
+  it("does nothing when the model is empty", async () => {
+    getCurrentSessionMock.mockReturnValue({ id: "session-1", directory: "/repo", title: "t" });
+
+    await applyModelToReasonix({ providerID: "", modelID: "", variant: "default" });
+
+    expect(promptAsyncMock).not.toHaveBeenCalled();
+  });
+
+  it("logs but does not throw when Reasonix rejects the command", async () => {
+    getCurrentSessionMock.mockReturnValue({ id: "session-1", directory: "/repo", title: "t" });
+    promptAsyncMock.mockResolvedValue({ data: undefined, error: new Error("busy") });
+
+    await expect(
+      applyModelToReasonix({
+        providerID: "deepseek",
+        modelID: "deepseek-v4-pro",
+        variant: "default",
+      }),
+    ).resolves.toBeUndefined();
+
+    expect(loggerWarnMock).toHaveBeenCalled();
   });
 });
