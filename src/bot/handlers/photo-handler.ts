@@ -33,7 +33,7 @@ export async function handlePhotoMessage(ctx: Context, deps: PhotoHandlerDeps): 
   const input = createIncomingPrompt(caption, {
     photos: [{ fileId: largestPhoto.file_id, filename: "photo.jpg", source: "standalone" }],
   });
-  if (await rejectQueuedMediaBeforePreparation(ctx, largestPhoto.file_size)) {
+  if (await rejectQueuedMediaBeforePreparation(ctx)) {
     return;
   }
   if (
@@ -42,7 +42,6 @@ export async function handlePhotoMessage(ctx: Context, deps: PhotoHandlerDeps): 
       {
         ...input,
         displayText: caption.trim() || "[Photo]",
-        ...(largestPhoto.file_size === undefined ? {} : { mediaBytes: largestPhoto.file_size }),
       },
       ticket,
     )

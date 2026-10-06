@@ -17,7 +17,7 @@ export type InteractionGuardDecisionDeps = Pick<
   "attachManager" | "foregroundSessionState" | "interactionManager"
 >;
 
-const BUSY_ALLOWED_COMMANDS = ["/abort", "/detach", "/status", "/help", "/opencode_stop"] as const;
+const BUSY_ALLOWED_COMMANDS = ["/abort", "/detach", "/status", "/help", "/reasonix_stop"] as const;
 const BUSY_ALLOWED_COMMAND_SET = new Set<string>(BUSY_ALLOWED_COMMANDS);
 
 function isBusyAllowedCommand(command: string | undefined, localCommandRegistry?: LocalCommandRegistry): boolean {
@@ -146,14 +146,6 @@ function createBusyBlockDecision(
   };
 }
 
-function isAllowedRenameCancelCallback(ctx: Context, state: InteractionState): boolean {
-  return (
-    state.kind === "rename" &&
-    state.expectedInput === "text" &&
-    ctx.callbackQuery?.data === "rename:cancel"
-  );
-}
-
 function isAllowedTaskCallback(ctx: Context, state: InteractionState): boolean {
   return (
     state.kind === "task" &&
@@ -241,10 +233,6 @@ export function resolveInteractionGuardDecision(
     }
 
     return createBlockDecision(inputType, state, "expected_text", command);
-  }
-
-  if (inputType === "callback" && isAllowedRenameCancelCallback(ctx, state)) {
-    return createAllowDecision(inputType, state, command);
   }
 
   if (inputType === "callback" && isAllowedTaskCallback(ctx, state)) {

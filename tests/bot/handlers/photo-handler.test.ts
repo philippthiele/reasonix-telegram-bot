@@ -3,6 +3,24 @@ import type { Context } from "grammy";
 
 const flushPendingPromptMock = vi.hoisted(() => vi.fn());
 
+const mocked = vi.hoisted(() => ({
+  promptAsync: vi.fn(),
+  getCurrentSession: vi.fn(),
+  getMissingFolderNotice: vi.fn(),
+}));
+
+vi.mock("../../../src/reasonix/client.js", () => ({
+  reasonixClient: { session: { promptAsync: mocked.promptAsync } },
+}));
+
+vi.mock("../../../src/app/services/session-service.js", () => ({
+  getCurrentSession: mocked.getCurrentSession,
+}));
+
+vi.mock("../../../src/app/services/missing-folder-notice-service.js", () => ({
+  getMissingFolderNotice: mocked.getMissingFolderNotice,
+}));
+
 vi.mock("../../../src/bot/handlers/message-merger.js", () => ({
   flushPendingPrompt: flushPendingPromptMock,
   __resetMessageMergerForTests: vi.fn(),
@@ -72,10 +90,21 @@ describe("bot/handlers/photo-handler", () => {
     vi.restoreAllMocks();
     flushPendingPromptMock.mockClear();
     promptQueue.__resetForTests();
+    mocked.promptAsync.mockReset().mockResolvedValue({
+      data: { inboxID: "inbox-1" },
+      error: undefined,
+    });
+    mocked.getCurrentSession.mockReset().mockReturnValue(null);
+    mocked.getMissingFolderNotice.mockReset().mockResolvedValue(null);
   });
 
-  it("queues a photo without downloading it while the agent is busy", async () => {
+  it("sends a photo to the inbox while the agent is busy", async () => {
     vi.spyOn(settingsStore, "getPromptQueueMode").mockReturnValue("queue");
+    mocked.getCurrentSession.mockReturnValue({
+      id: "session-1",
+      title: "Session",
+      directory: "/repo",
+    });
     container.foregroundSessionState.markBusy("session-1", "/repo");
     const { ctx } = createPhotoContext("release screenshot");
     const { deps, processPromptMock } = createDeps();
@@ -83,14 +112,13 @@ describe("bot/handlers/photo-handler", () => {
     await handlePhotoMessage(ctx, deps);
 
     expect(processPromptMock).not.toHaveBeenCalled();
+    // The inbox holds the prompt, so the mirror keeps only what the chat shows.
     expect(promptQueue.list()).toEqual([
-      expect.objectContaining({
-        text: "release screenshot",
-        displayText: "release screenshot",
-        photos: [expect.objectContaining({ filename: "photo.jpg", fileId: "large-photo" })],
-        mediaBytes: 512,
-      }),
+      expect.objectContaining({ displayText: "release screenshot", text: "" }),
     ]);
+    expect(mocked.promptAsync).toHaveBeenCalledWith(
+      expect.objectContaining({ sessionID: "session-1" }),
+    );
   });
 
   it("passes the largest photo to the shared prompt pipeline", async () => {

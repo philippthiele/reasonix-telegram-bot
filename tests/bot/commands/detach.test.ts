@@ -119,7 +119,7 @@ describe("bot/commands/detach", () => {
     );
   });
 
-  it("detaches selected session locally without stopping the OpenCode session", async () => {
+  it("detaches selected session locally without stopping the Reasonix session", async () => {
     const ctx = createContext();
 
     await detachCommand(ctx as never, createDeps());
@@ -162,7 +162,7 @@ describe("bot/commands/detach", () => {
     );
   });
 
-  it("names the session with the title OpenCode has for it before detaching", async () => {
+  it("names the session with the title Reasonix has for it before detaching", async () => {
     mocked.currentSession = { id: "session-1", title: "", directory: "D:/repo" };
     mocked.fetchSessionTitleMock.mockResolvedValue("Generated title");
     const ctx = createContext();
@@ -183,7 +183,7 @@ describe("bot/commands/detach", () => {
     );
   });
 
-  it("names a session OpenCode has not named yet as a new session", async () => {
+  it("names a session Reasonix has not named yet as a new session", async () => {
     mocked.fetchSessionTitleMock.mockResolvedValue("");
     const ctx = createContext();
 

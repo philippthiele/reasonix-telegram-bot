@@ -21,7 +21,7 @@ export const DEFAULT_ALLOWED_INTERACTION_COMMANDS = [
   "/status",
   "/abort",
   "/detach",
-  "/opencode_stop",
+  "/reasonix_stop",
 ] as const;
 
 function normalizeCommand(command: string): string | null {
@@ -74,7 +74,6 @@ function isAgentRequestKind(kind: InteractionState["kind"]): boolean {
 export type InteractionErrorScope =
   | "question"
   | "permission"
-  | "rename"
   | "taskCreation"
   | "interaction"
   | "none";
@@ -85,7 +84,6 @@ const SCOPE_TO_INTERACTION_KIND: Record<
 > = {
   question: "question",
   permission: "permission",
-  rename: "rename",
   taskCreation: "task",
 };
 

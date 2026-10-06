@@ -5,7 +5,7 @@ import type { ScheduledTask } from "./scheduled-task.js";
 
 export type ResponseStreamingMode = "edit" | "draft";
 
-export type PromptQueueMode = "off" | "queue" | "steer";
+export type PromptQueueMode = "off" | "queue" | "";
 
 export interface ScheduledTaskSessionIgnoreInfo {
   sessionId: string;

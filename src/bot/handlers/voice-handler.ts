@@ -229,7 +229,7 @@ export async function handleVoiceMessage(ctx: Context, deps: VoiceMessageDeps): 
 
     // Show the recognized text by editing the status message.
     // IMPORTANT: even if this edit fails (e.g. Telegram message length limits),
-    // we still send the recognized text to OpenCode as a prompt.
+    // we still send the recognized text to Reasonix as a prompt.
     try {
       const notification = buildQuotedNotification(t("stt.recognized"), recognizedText, {
         blankLineAfterTitle: false,

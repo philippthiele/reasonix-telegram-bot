@@ -11,7 +11,7 @@ import type { Question, QuestionSettledOutcome } from "../types/question.js";
 import type { PermissionReply, PermissionRequest } from "../types/permission.js";
 import type { FileChange } from "../types/summary.js";
 import { logger } from "../../utils/logger.js";
-import { extractErrorMessage } from "../../utils/opencode-error.js";
+import { extractErrorMessage } from "../../utils/reasonix-error.js";
 import { isRecord } from "../../utils/type-guards.js";
 import { getCurrentProject } from "../stores/settings-store.js";
 
@@ -182,7 +182,7 @@ export interface SessionRetryInfo {
 type SessionRetryCallback = (retryInfo: SessionRetryInfo) => void;
 
 export interface SessionIdleInfo {
-  /** OpenCode V2 stopped the execution instead of finishing it. */
+  /** Reasonix stopped the execution instead of finishing it. */
   interrupted: boolean;
 }
 
@@ -268,7 +268,7 @@ function isUpstreamEmptyResponseText(text: string, isFinal: boolean): boolean {
   return isFinal ? trimmed.includes(UPSTREAM_EMPTY_RESPONSE_KEY) : true;
 }
 
-/** The V2 adapter marks the idle of an execution that was interrupted rather than finished. */
+/** Reasonix marks the idle of an execution that was interrupted rather than finished. */
 function isInterruptedIdle(properties: object): boolean {
   return "interrupted" in properties && properties.interrupted === true;
 }
@@ -356,7 +356,7 @@ export class SummaryAggregator {
   private thinkingFinishedForMessages: Set<string> = new Set();
   private deliveredExternalUserMessageIds: Set<string> = new Set();
   private knownTextPartIds: Map<string, Set<string>> = new Map();
-  // Parts OpenCode injected itself, tracked by id because `message.part.delta` events may
+  // Parts Reasonix injected itself, tracked by id because `message.part.delta` events may
   // carry only the id and would otherwise stream their content past the synthetic filter.
   private syntheticPartIds: Map<string, Set<string>> = new Map();
   private bot: Bot | null = null;
@@ -1542,7 +1542,7 @@ export class SummaryAggregator {
     const messageID = part.messageID;
     const messageInfo = this.messages.get(messageID);
 
-    // OpenCode injects synthetic text parts of its own: expanded file attachments,
+    // Reasonix injects synthetic text parts of its own: expanded file attachments,
     // MCP resource dumps, plan-mode hints. They are context for the model, never content
     // for the user - rendering them would echo a whole attached file back into the chat.
     if (part.type === "text" && "synthetic" in part && part.synthetic === true) {

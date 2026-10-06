@@ -1,4 +1,4 @@
-import { opencodeClient } from "../../opencode/client.js";
+import { reasonixClient } from "../../reasonix/client.js";
 
 export interface SkillCatalogItem {
   name: string;
@@ -10,7 +10,7 @@ function normalizeDirectoryForCommandApi(directory: string): string {
 }
 
 export async function loadSkillsCatalog(projectDirectory: string): Promise<SkillCatalogItem[]> {
-  const { data, error } = await opencodeClient.command.list({
+  const { data, error } = await reasonixClient.command.list({
     directory: normalizeDirectoryForCommandApi(projectDirectory),
   });
 

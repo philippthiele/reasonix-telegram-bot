@@ -94,7 +94,7 @@ export class QuestionManager {
   }
 
   /**
-   * The poll's answers are being sent from Telegram: OpenCode's own reply event is ours.
+   * The poll's answers are being sent from Telegram: Reasonix's own reply event is ours.
    * A custom-text wait ends here, so text typed afterwards is never taken as an answer.
    */
   startAnswer(): void {
@@ -112,7 +112,7 @@ export class QuestionManager {
   }
 
   /**
-   * The answers did not reach OpenCode: the poll stays answerable. A custom answer of a
+   * The answers did not reach Reasonix: the poll stays answerable. A custom answer of a
    * single-select question is dropped, so it is typed again after a new Custom answer tap.
    */
   failAnswer(): void {
@@ -129,7 +129,7 @@ export class QuestionManager {
   }
 
   /**
-   * Cancel was tapped: the dismissal is being sent to OpenCode. A custom-text wait ends
+   * Cancel was tapped: the dismissal is being sent to Reasonix. A custom-text wait ends
    * here, so text typed afterwards is never taken as an answer.
    */
   startDismissal(): void {
@@ -146,7 +146,7 @@ export class QuestionManager {
     return this.state?.dismissing ?? false;
   }
 
-  /** The dismissal did not reach OpenCode: the poll stays answerable. */
+  /** The dismissal did not reach Reasonix: the poll stays answerable. */
   failDismissal(): void {
     const state = this.state;
     if (state) {
@@ -156,7 +156,7 @@ export class QuestionManager {
     }
   }
 
-  /** OpenCode reported the question settled while the answers or the dismissal were on their way. */
+  /** Reasonix reported the question settled while the answers or the dismissal were on their way. */
   noteSettledWhileSending(outcome: QuestionSettledOutcome): void {
     const state = this.state;
     if (
@@ -355,9 +355,14 @@ export class QuestionManager {
   }
 
   /**
-   * The answer items sent to OpenCode for one question. A choice that carries a value is
+   * The answer items sent to Reasonix for one question. A choice that carries a value is
    * sent as that value; one without is sent as its display line, like `getAnswerItems`.
    */
+  /** The id Reasonix correlates an answer for this question back by. */
+  getQuestionId(questionIndex: number): string {
+    return this.state?.questions[questionIndex]?.id ?? String(questionIndex);
+  }
+
   getReplyItems(questionIndex: number): string[] {
     const question = this.state?.questions[questionIndex];
     if (!question) {

@@ -21,17 +21,15 @@ export const tr: I18nDictionary = {
   "cmd.description.tasklist": "Zamanlanmış görevleri listele",
   "cmd.description.commands": "Özel komutlar",
   "cmd.description.skills": "Yetenek kataloğu",
-  "cmd.description.mcps": "MCP sunucuları",
-  "cmd.description.opencode_start": "OpenCode sunucusunu başlat",
-  "cmd.description.opencode_stop": "OpenCode sunucusunu durdur",
-  "cmd.description.reload": "Reload OpenCode configuration",
+  "cmd.description.reasonix_start": "Reasonix sunucusunu başlat",
+  "cmd.description.reasonix_stop": "Reasonix sunucusunu durdur",
+  "cmd.description.reload": "Reload Reasonix configuration",
   "cmd.description.ls": "Dizin içeriğini listele",
   "cmd.description.help": "Yardım",
 
   "callback.unknown_command": "Bilinmeyen komut",
   "callback.processing_error": "İşleme hatası",
 
-  "error.load_agents": "❌ Ajan listesi yüklenemedi",
   "error.load_models": "❌ Model listesi yüklenemedi",
   "error.load_variants": "❌ Varyant listesi yüklenemedi",
   "error.context_button": "❌ Bağlam düğmesi işlenemedi",
@@ -64,11 +62,9 @@ export const tr: I18nDictionary = {
   "common.unknown_error": "bilinmeyen hata",
 
   "start.welcome":
-    "👋 OpenCode Telegram Bot'a hoş geldiniz!\n\nKomutları kullanın:\n/projects — proje seç\n/sessions — oturum listesi\n/new — yeni oturum\n/commands — özel komutlar\n/skills — yetenek kataloğu\n/task — zamanlanmış görev\n/tasklist — zamanlanmış görevler\n/status — durum\n/help — yardım\n\nAjanı, modeli ve varyantı seçmek için alttaki düğmeleri kullanın.",
+    "👋 Reasonix Telegram Bot'a hoş geldiniz!\n\nKomutları kullanın:\n/projects — proje seç\n/sessions — oturum listesi\n/new — yeni oturum\n/commands — özel komutlar\n/skills — yetenek kataloğu\n/task — zamanlanmış görev\n/tasklist — zamanlanmış görevler\n/status — durum\n/help — yardım\n\nAjanı, modeli ve varyantı seçmek için alttaki düğmeleri kullanın.",
   "help.keyboard_hint":
     "💡 Ajan, model, varyant ve bağlam işlemleri için alttaki klavye düğmelerini kullanın.",
-  "help.text":
-    "📖 **Yardım**\n\n/status - Sunucu durumunu kontrol et\n/sessions - Oturum listesi\n/new - Yeni oturum oluştur\n/help - Yardım",
 
   "bot.thinking": "💭 Düşünüyor...",
   "progress.compact.activity": "{header}\n{activity}",
@@ -76,7 +72,6 @@ export const tr: I18nDictionary = {
   "progress.compact.finished_header": "✅ Çalışma tamamlandı",
   "progress.compact.thinking": "💭 Düşünüyor...",
   "progress.compact.responding": "✍️ Yanıt yazılıyor...",
-  "progress.compact.waiting_question": "❓ Yanıtınız bekleniyor...",
   "progress.compact.waiting_permission": "🔐 İzin bekleniyor...",
   "progress.compact.retrying": "🔁 Yeniden deneniyor...",
   "progress.compact.task": "🤖 Görev çalışıyor",
@@ -90,12 +85,12 @@ export const tr: I18nDictionary = {
     "⏳ Ajan zaten bir görev yürütüyor. Tamamlanmasını bekleyin veya geçerli çalışmayı kesmek için /abort kullanın.",
   "bot.session_reset_project_mismatch":
     "⚠️ Etkin oturum seçili projeyle eşleşmediği için sıfırlandı. Birini seçmek için /sessions veya yeni oturum oluşturmak için /new kullanın.",
-  "bot.prompt_send_error": "İstek OpenCode'a gönderilemedi.",
+  "bot.prompt_send_error": "İstek Reasonix'a gönderilemedi.",
   "bot.project_folder_missing":
     "🚫 The project folder no longer exists: {path}. Choose another project in /projects.",
   "bot.project_folder_missing_worktree":
     "🚫 The project folder no longer exists: {path}. Choose another worktree in /worktree.",
-  "bot.session_error": "🔴 OpenCode bir hata döndürdü: {message}",
+  "bot.session_error": "🔴 Reasonix bir hata döndürdü: {message}",
   "bot.assistant_reply_undelivered":
     "⚠️ The last assistant reply could not be delivered. Send your message again if you still need it.",
   "bot.stale_messages_skipped":
@@ -111,41 +106,29 @@ export const tr: I18nDictionary = {
   "bot.unknown_command":
     "⚠️ Bilinmeyen komut: {command}. Kullanılabilir komutları görmek için /help kullanın.",
   "bot.photo_downloading": "⏳ Fotoğraf indiriliyor...",
-  "bot.photo_too_large": "⚠️ Fotoğraf çok büyük (en fazla {maxSizeMb}MB)",
   "bot.photo_model_no_image":
     "⚠️ Geçerli model görsel girdisini desteklemiyor. Yalnızca metin gönderiliyor.",
   "bot.photo_download_error": "🔴 Fotoğraf indirilemedi",
-  "bot.photo_no_caption":
-    "💡 İpucu: Bu fotoğrafla ne yapmak istediğinizi anlatan bir açıklama ekleyin.",
   "bot.file_downloading": "⏳ Dosya indiriliyor...",
   "bot.files_downloading": "⏳ Dosyalar indiriliyor...",
-  "bot.file_too_large": "⚠️ Dosya çok büyük (en fazla {maxSizeMb}MB)",
   "bot.file_download_error": "🔴 Dosya indirilemedi",
   "bot.file_type_unsupported":
     "⚠️ Bu dosya türü desteklenmiyor. Bir görsel, belge (PDF, DOCX, PPTX) veya metin/kod dosyası gönderin.",
   "bot.rich_message_media_skipped": "⚠️ Desteklenmeyen {count} medya parçası atlandı.",
   "bot.message_type_unsupported": "⚠️ Bu mesaj türü desteklenmiyor.",
   "bot.media_group_not_processed":
-    "⚠️ Bu albümdeki bir veya daha fazla dosya işlenemiyor. OpenCode'a hiçbir şey gönderilmedi.",
+    "⚠️ Bu albümdeki bir veya daha fazla dosya işlenemiyor. Reasonix'a hiçbir şey gönderilmedi.",
   "bot.media_group_download_error":
-    "🔴 Dosyalardan biri indirilemedi. OpenCode'a hiçbir şey gönderilmedi.",
+    "🔴 Dosyalardan biri indirilemedi. Reasonix'a hiçbir şey gönderilmedi.",
   "bot.model_no_pdf": "⚠️ Geçerli model PDF girdisini desteklemiyor. Yalnızca metin gönderiliyor.",
   "bot.document_extraction_error": "🔴 Belge metni çıkarılamadı.",
   "bot.text_file_too_large": "⚠️ Metin dosyası çok büyük (en fazla {maxSizeKb}KB)",
 
-  "status.header_running": "🟢 OpenCode Sunucusu çalışıyor",
-  "status.health.healthy": "Sağlıklı",
-  "status.health.unhealthy": "Sağlıksız",
-  "status.line.health": "Durum: {health}",
-  "status.line.version": "OpenCode sürümü: {version}",
+  "status.header_running": "🟢 Reasonix Sunucusu çalışıyor",
+  "status.line.version": "Reasonix sürümü: {version}",
   "status.line.bot_version": "Bot sürümü: {version}",
-  "status.line.managed_yes": "Bot tarafından başlatıldı: Evet",
-  "status.line.managed_no": "Bot tarafından başlatıldı: Hayır",
-  "status.line.pid": "PID: {pid}",
-  "status.line.uptime_sec": "Çalışma süresi: {seconds} sn",
   "status.line.mode": "Ajan: {mode}",
   "status.line.model": "Model: {model}",
-  "status.line.tts": "Sesli yanıtlar: {tts}",
   "status.tts.off": "Kapalı",
   "status.tts.all": "Tümü",
   "status.tts.auto": "Otomatik",
@@ -157,8 +140,8 @@ export const tr: I18nDictionary = {
   "status.session_selected": "Geçerli oturum: {title}",
   "status.session_not_selected": "Geçerli oturum: seçilmedi",
   "status.session_hint": "Seçmek için /sessions veya oluşturmak için /new kullanın",
-  "status.header_unavailable": "🔴 OpenCode Sunucusu kullanılamıyor",
-  "status.unavailable_hint": "Sunucuyu başlatmak için /opencode_start kullanın.",
+  "status.header_unavailable": "🔴 Reasonix Sunucusu kullanılamıyor",
+  "status.unavailable_hint": "Sunucuyu başlatmak için /reasonix_start kullanın.",
 
   "tts.off": "🔇 Sesli yanıtlar kapatıldı.",
   "tts.all": "🔊 Sesli yanıtlar tüm mesajlar için açıldı.",
@@ -181,19 +164,18 @@ export const tr: I18nDictionary = {
   "settings.prompt_queue.label": "Mesaj kuyruğu",
   "settings.value.on": "Açık",
   "settings.value.off": "Kapalı",
-  "settings.prompt_queue.queue": "Queue",
-  "settings.prompt_queue.steer": "Steer",
+  "settings.prompt_queue.queue": "Kuyruk",
   "settings.saved": "✅ Ayar kaydedildi.",
 
   "projects.empty":
-    "📭 Proje bulunamadı.\n\nOpenCode'da bir dizin açın ve en az bir oturum oluşturun, ardından burada görünecektir.",
+    "📭 Proje bulunamadı.\n\nReasonix'da bir dizin açın ve en az bir oturum oluşturun, ardından burada görünecektir.",
   "projects.select": "Bir proje seçin:",
   "projects.select_with_current": "Bir proje seçin:\n\nGeçerli: 🏗 {project}",
   "projects.page_indicator": "Sayfa {current}/{total}",
   "projects.prev_page": "⬅️ Önceki",
   "projects.next_page": "Sonraki ➡️",
   "projects.fetch_error":
-    "🔴 OpenCode Sunucusu kullanılamıyor veya projeler yüklenirken bir hata oluştu.",
+    "🔴 Reasonix Sunucusu kullanılamıyor veya projeler yüklenirken bir hata oluştu.",
   "projects.page_load_error": "Bu sayfa yüklenemiyor. Lütfen tekrar deneyin.",
   "projects.selected":
     "✅ Proje seçildi: {project}\n\n📋 Oturum sıfırlandı. Bu proje için /sessions veya /new kullanın.",
@@ -204,7 +186,7 @@ export const tr: I18nDictionary = {
   "sessions.select": "Bir oturum seçin:",
   "sessions.select_page": "Bir oturum seçin (sayfa {page}):",
   "sessions.fetch_error":
-    "🔴 OpenCode Sunucusu kullanılamıyor veya oturumlar yüklenirken bir hata oluştu.",
+    "🔴 Reasonix Sunucusu kullanılamıyor veya oturumlar yüklenirken bir hata oluştu.",
   "sessions.select_project_first": "🔴 Proje seçilmedi. /projects kullanın.",
   "sessions.page_empty_callback": "Bu sayfada oturum yok",
   "sessions.page_load_error_callback": "Bu sayfa yüklenemiyor. Lütfen tekrar deneyin.",
@@ -226,7 +208,7 @@ export const tr: I18nDictionary = {
   "messages.select": "Bir mesaj seçin:",
   "messages.select_page": "Bir mesaj seçin (sayfa {page}):",
   "messages.fetch_error":
-    "🔴 OpenCode Sunucusu kullanılamıyor veya mesajlar yüklenirken bir hata oluştu.",
+    "🔴 Reasonix Sunucusu kullanılamıyor veya mesajlar yüklenirken bir hata oluştu.",
   "messages.inactive_callback": "Bu mesaj menüsü etkin değil",
   "messages.page_empty_callback": "Bu sayfada mesaj yok",
   "messages.button.prev_page": "⬅️ Önceki",
@@ -240,29 +222,16 @@ export const tr: I18nDictionary = {
   "messages.fork_success": "🔀 Şu mesajdan fork oluşturuldu:\n\n{text}",
   "messages.fork_error": "❌ Fork oluşturulamadı. Lütfen tekrar deneyin.",
 
-  "attach.project_not_selected": "🏗 Proje seçilmedi.\n\nÖnce /projects ile bir proje seçin.",
-  "attach.session_not_selected": "💬 Oturum seçilmedi.\n\nÖnce /sessions ile bir oturum seçin.",
-  "attach.session_project_mismatch":
-    "⚠️ Seçili oturum geçerli projeyle eşleşmiyor. Oturumu /sessions ile yeniden seçin.",
-  "attach.connected": "✅ Oturuma bağlanıldı: {title}",
-  "attach.already_connected": "ℹ️ Oturuma zaten bağlı: {title}",
-  "attach.status.idle_message": "Durum: boşta. Yeni olaylar bekleniyor.",
-  "attach.status.busy_message": "Durum: meşgul. Yeni istemler geçici olarak engellendi.",
-  "attach.restored_question": "Bu oturum için bekleyen bir soru geri yüklendi.",
-  "attach.restored_permissions": "Bekleyen izin istekleri geri yüklendi: {count}.",
-  "attach.disconnect_hint": "Bağlantıyı kesmek için başka bir oturuma veya projeye geçin.",
-  "attach.error": "🔴 Geçerli oturuma bağlanılamadı.",
-
   "detach.project_not_selected": "🏗 Proje seçilmedi.\n\nÖnce /projects ile bir proje seçin.",
   "detach.no_active_session": "ℹ️ Bot zaten hiçbir oturuma bağlı değil.",
   "detach.success":
-    "✅ Oturumdan ayrılındı: {title}\n\nOpenCode oturumu durdurulmadı. Hâlâ çalışıyorsa ayrı olarak devam edecek. Daha sonra kontrol etmek için /sessions ile yeniden seçin.",
+    "✅ Oturumdan ayrılındı: {title}\n\nReasonix oturumu durdurulmadı. Hâlâ çalışıyorsa ayrı olarak devam edecek. Daha sonra kontrol etmek için /sessions ile yeniden seçin.",
   "detach.error": "🔴 Geçerli oturumdan ayrılınamadı.",
 
   "new.project_not_selected": "🏗 Proje seçilmedi.\n\nÖnce /projects ile bir proje seçin.",
   "new.created": "✅ Yeni oturum oluşturuldu: {title}",
   "new.create_error":
-    "🔴 OpenCode Sunucusu kullanılamıyor veya oturum oluşturulurken bir hata oluştu.",
+    "🔴 Reasonix Sunucusu kullanılamıyor veya oturum oluşturulurken bir hata oluştu.",
 
   "stop.no_active_session":
     "🛑 Ajan başlatılmadı\n\n/new ile bir oturum oluşturun veya /sessions ile birini seçin.",
@@ -280,58 +249,31 @@ export const tr: I18nDictionary = {
     "⚠️ Olay akışı yerel olarak durduruldu, ancak sunucu tarafında iptal başarısız oldu.",
   "stop.error": "🔴 İşlem durdurulamadı.\n\nOlay akışı durduruldu, /abort komutunu tekrar deneyin.",
 
-  "opencode_start.already_running_managed":
-    "⚠️ OpenCode Sunucusu zaten çalışıyor\n\nPID: {pid}\nÇalışma süresi: {seconds} saniye",
-  "opencode_start.already_running_external":
-    "✅ OpenCode Sunucusu zaten harici bir süreç olarak çalışıyor\n\nSürüm: {version}\n\nBu sunucu bot tarafından başlatılmadı, bu yüzden /opencode-stop onu durduramaz.",
-  "opencode_start.already_running": "✅ OpenCode Sunucusu zaten çalışıyor\n\nSürüm: {version}",
-  "opencode_start.remote_configured":
-    "⚠️ /opencode_start yalnızca yerel bir OpenCode Sunucusu ile çalışır.",
-  "opencode_start.starting": "🔄 OpenCode Sunucusu başlatılıyor...",
-  "opencode_start.start_error":
-    "🔴 OpenCode Sunucusu başlatılamadı\n\nHata: {error}\n\nOpenCode CLI'nin kurulu ve PATH içinde erişilebilir olduğunu kontrol edin:\nopencode --version\nnpm install -g @opencode-ai/cli",
-  "opencode_start.started_not_ready":
-    "⚠️ OpenCode Sunucusu başlatıldı, ancak yanıt vermiyor\n\nPID: {pid}\n\nSunucu hâlâ başlıyor olabilir. Birkaç saniye içinde /status deneyin.",
-  "opencode_start.success":
-    "✅ OpenCode Sunucusu başarıyla başlatıldı\n\nPID: {pid}\nSürüm: {version}",
-  "opencode_start.error":
-    "🔴 Sunucu başlatılırken bir hata oluştu.\n\nAyrıntılar için uygulama günlüklerini kontrol edin.",
-  "opencode_stop.external_running":
-    "⚠️ OpenCode Sunucusu harici bir süreç olarak çalışıyor\n\nBu sunucu /opencode-start ile başlatılmadı.\nElle durdurun veya durumu kontrol etmek için /status kullanın.",
-  "opencode_stop.remote_configured":
-    "⚠️ /opencode_stop yalnızca yerel bir OpenCode Sunucusu ile çalışır.",
-  "opencode_stop.not_running": "⚠️ OpenCode Sunucusu çalışmıyor",
-  "opencode_stop.pid_not_found":
-    "⚠️ OpenCode Sunucusu {port} bağlantı noktasında yanıt veriyor, ancak durdurulacak yerel bir süreç bulunamadı.",
-  "opencode_stop.stopping": "🛑 OpenCode Sunucusu durduruluyor...\n\nPID: {pid}",
-  "opencode_stop.stop_error": "🔴 OpenCode Sunucusu durdurulamadı\n\nHata: {error}",
-  "opencode_stop.still_running": "Durdurma isteğinden sonra sunucu hâlâ yanıt veriyor.",
-  "opencode_stop.success": "✅ OpenCode Sunucusu başarıyla durduruldu",
-  "opencode_stop.error":
-    "🔴 Sunucu durdurulurken bir hata oluştu.\n\nAyrıntılar için uygulama günlüklerini kontrol edin.",
-  "reload.reloading": "🔄 Reloading OpenCode configuration...",
-  "reload.success": "✅ OpenCode configuration reloaded",
-  "reload.failed": "🔴 Failed to reload OpenCode configuration",
-  "reload.failed_with_error": "🔴 Failed to reload OpenCode configuration\n\nError: {error}",
-
-  "agent.changed_message": "✅ Ajan değiştirildi: {name}",
-  "agent.change_error_callback": "Ajan değiştirilemedi",
-  "agent.menu.current": "Geçerli ajan: {name}\n\nAjan seçin:",
-  "agent.menu.select": "Ajan seçin:",
-  "agent.menu.empty": "⚠️ Kullanılabilir ajan yok",
-  "agent.menu.error": "🔴 Ajan listesi alınamadı",
+  "reasonix_start.already_running": "✅ Reasonix server is already running for this project",
+  "reasonix_start.starting": "🔄 Starting the Reasonix server for this project...",
+  "reasonix_start.start_error":
+    "🔴 Failed to start the Reasonix server\n\nError: {error}\n\nCheck that the Reasonix CLI is installed and on PATH:\nreasonix --version",
+  "reasonix_start.success":
+    "✅ Reasonix server started\n\nProject: {root}\nPort: {port}\nVersion: {version}",
+  "reasonix_start.error":
+    "🔴 An error occurred while starting the server.\n\nCheck application logs for details.",
+  "reasonix_stop.not_running": "⚠️ No Reasonix server started by the bot is running.",
+  "reasonix_stop.stopping": "🛑 Stopping {count} Reasonix server(s)...",
+  "reasonix_stop.success": "✅ Stopped {count} Reasonix server(s). They start again on next use.",
+  "reasonix_stop.error":
+    "🔴 An error occurred while stopping the server.\n\nCheck application logs for details.",
+  "reload.reloading": "🔄 Reloading Reasonix configuration...",
+  "reload.success": "✅ Reasonix configuration reloaded",
+  "reload.failed": "🔴 Failed to reload Reasonix configuration",
+  "reload.failed_with_error": "🔴 Failed to reload Reasonix configuration\n\nError: {error}",
 
   "model.changed_message": "✅ Model değiştirildi: {name}",
   "model.change_error_callback": "Model değiştirilemedi",
-  "model.menu.empty": "⚠️ Kullanılabilir model yok",
   "model.menu.select": "Model seçin:",
-  "model.menu.current": "Geçerli model: {name}\n\nModel seçin:",
-  "model.menu.favorites_title": "⭐ Favoriler (Modelleri OpenCode CLI'de favorilere ekleyin)",
+  "model.menu.favorites_title": "⭐ Favoriler (Modelleri Reasonix CLI'de favorilere ekleyin)",
   "model.menu.favorites_empty": "— Boş.",
   "model.menu.recent_title": "🕘 Son kullanılanlar",
   "model.menu.recent_empty": "— Boş.",
-  "model.menu.favorites_hint":
-    "ℹ️ Modelleri en üstte tutmak için OpenCode CLI'de favorilere ekleyin.",
   "model.menu.error": "🔴 Model listesi alınamadı",
   "model.search.button": "🔍 Ara",
   "model.search.prompt": "🔍 Aramak için model adını girin:",
@@ -400,7 +342,7 @@ export const tr: I18nDictionary = {
   "permission.outcome.outside_suffix": " · answered outside Telegram",
   "permission.outcome.settled_outside": "☑️ Answered outside Telegram",
   "permission.outcome.not_answered": "⏹ Not answered",
-  "permission.delivery_failed": "⚠️ The answer did not reach OpenCode — tap again",
+  "permission.delivery_failed": "⚠️ The answer did not reach Reasonix — tap again",
   "permission.name.bash": "Bash",
   "permission.name.edit": "Düzenleme",
   "permission.name.write": "Yazma",
@@ -434,20 +376,15 @@ export const tr: I18nDictionary = {
   "question.summary.question": "Soru {index}:\n{question}\n\n",
   "question.summary.answer": "Yanıt:\n{answer}\n\n",
 
-  "keyboard.agent_mode": "{emoji} {name} Agent",
   "keyboard.context": "📊 {used} / {limit} ({percent}%)",
   "keyboard.context_empty": "📊 0",
-  "keyboard.variant": "💭 {name}",
   "keyboard.variant_default": "💡 Varsayılan",
   "keyboard.queued_prompt": "❌ {index}. {text}",
   "queue.added": "📥 Kuyruğa eklendi ({count}/{max}). Geçerli görev bittiğinde gönderilecek.",
   "queue.full":
     "⚠️ Kuyruk dolu ({max}). Bir mesajı kaldırın veya geçerli görevin bitmesini bekleyin.",
-  "queue.media_limit":
-    "⚠️ Kuyruktaki medya {maxSizeMb} MiB ile sınırlıdır. Bir öğenin gönderilmesini bekleyip tekrar deneyin.",
   "queue.removed": "🗑 Mesaj kuyruktan kaldırıldı.",
   "queue.not_found": "Bu mesaj artık kuyrukta değil.",
-  "queue.steer_added": "📥 Added to the current task ({count}/{max}).",
   "queue.disabled_hint": "Mesaj kuyruğu /settings içinden açılabilir.",
   "keyboard.updated": "⌨️ Klavye güncellendi",
 
@@ -456,23 +393,13 @@ export const tr: I18nDictionary = {
   "pinned.line.project": "Proje: {project}",
   "pinned.line.worktree": "Worktree: {worktree}",
   "pinned.line.model": "Model: {model}",
-  "pinned.line.attach": "Takip: {status}",
-  "pinned.attach.status.idle": "etkin, boşta",
-  "pinned.attach.status.busy": "etkin, meşgul",
   "pinned.line.context": "Bağlam: {used} / {limit} ({percent}%)",
   "pinned.line.cost": "Maliyet: {cost} harcandı",
-  "subagent.header": "Alt ajan {agent}: {description}",
-  "subagent.line.status": "Durum: {status}",
   "subagent.line.task": "Görev: {task}",
   "subagent.line.agent": "Ajan: {agent}",
   "subagent.working": "Çalışıyor...",
-  "subagent.working_with_details": "Çalışıyor: {details}",
   "subagent.completed": "Tamamlandı",
   "subagent.failed": "Görev başarısız oldu",
-  "subagent.status.pending": "bekliyor",
-  "subagent.status.running": "çalışıyor",
-  "subagent.status.completed": "tamamlandı",
-  "subagent.status.error": "hata",
   "pinned.files.title": "Dosyalar ({count}):",
   "pinned.files.item": "  {path}{diff}",
   "pinned.files.more": "  ... ve {count} tane daha",
@@ -495,45 +422,15 @@ export const tr: I18nDictionary = {
   "runtime.wizard.ask_user_id":
     "Telegram Kullanıcı ID'nizi girin (@userinfobot'tan alabilirsiniz).\n> ",
   "runtime.wizard.user_id_invalid": "Pozitif bir tam sayı girin (> 0).\n",
-  "runtime.wizard.ask_api_url":
-    "OpenCode API URL'sini girin (isteğe bağlı).\nVarsayılanı kullanmak için Enter'a basın: {defaultUrl}\n> ",
-  "runtime.wizard.ask_server_username":
-    "OpenCode sunucu kullanıcı adını girin (isteğe bağlı).\nVarsayılanı kullanmak için Enter'a basın: {defaultUsername}\n> ",
-  "runtime.wizard.ask_server_password":
-    "OpenCode sunucu parolasını girin (isteğe bağlı).\nBoş bırakmak için Enter'a basın.\n> ",
-  "runtime.wizard.ask_server_version":
-    "Select OpenCode server version:\n1 - OpenCode V1 (1.x, npm package opencode-ai)\n2 - OpenCode V2 (2.x, npm package @opencode/cli)\nPress Enter to use default: {defaultVersion}\n> ",
-  "runtime.wizard.server_version_invalid": "Enter 1 or 2, or press Enter for default.\n",
-  "runtime.wizard.ask_server_password_required":
-    "Enter OpenCode V2 server password (required).\nShow it with: opencode service get password\n> ",
-  "runtime.wizard.server_password_required":
-    "The password is required for OpenCode V2. Please try again.\n",
-  "runtime.wizard.ask_server_password_keep":
-    "Enter OpenCode server password.\nPress Enter to keep the saved password.\n> ",
-  "runtime.wizard.api_url_invalid":
-    "Geçerli bir URL (http/https) girin veya varsayılan için Enter'a basın.\n",
-  "runtime.wizard.start": "OpenCode Telegram Bot kurulumu.\n",
+  "runtime.wizard.start": "Reasonix Telegram Bot kurulumu.\n",
   "runtime.wizard.saved": "Yapılandırma kaydedildi:\n- {envPath}\n",
   "runtime.wizard.not_configured_starting":
     "Uygulama henüz yapılandırılmadı. Sihirbaz başlatılıyor...\n",
   "runtime.wizard.tty_required":
-    "Etkileşimli sihirbaz bir TTY terminali gerektirir. `opencode-telegram config` komutunu etkileşimli bir kabukta çalıştırın.",
+    "Etkileşimli sihirbaz bir TTY terminali gerektirir. `reasonix-telegram config` komutunu etkileşimli bir kabukta çalıştırın.",
   "runtime.container.command_unavailable": "⚠️ Bu komut Docker imajında kullanılamaz.",
 
-  "rename.no_session": "⚠️ Etkin oturum yok. Önce bir oturum oluşturun veya seçin.",
-  "rename.prompt": "📝 Oturum için yeni başlık girin:\n\nGeçerli: {title}",
-  "rename.empty_title": "⚠️ Başlık boş olamaz.",
-  "rename.success": "✅ Oturumun yeni adı: {title}",
-  "rename.error": "🔴 Oturum yeniden adlandırılamadı.",
   "rename.cancelled": "❌ Yeniden adlandırma iptal edildi.",
-  "rename.inactive_callback": "Yeniden adlandırma isteği etkin değil",
-  "rename.inactive":
-    "⚠️ Yeniden adlandırma isteği etkin değil. /rename komutunu tekrar çalıştırın.",
-  "rename.blocked.expected_name":
-    "⚠️ Yeni oturum adını metin olarak girin veya yeniden adlandırma mesajındaki İptal'e dokunun.",
-  "rename.blocked.command_not_allowed":
-    "⚠️ Yeniden adlandırma yeni ad beklerken bu komut kullanılamaz.",
-  "rename.button.cancel": "❌ İptal",
 
   "task.prompt.schedule":
     "⏰ Görev zamanlamasını doğal dilde gönderin.\n\nÖrnekler:\n- her 5 dakikada bir\n- her gün 17:00'de\n- yarın 12:00'de",
@@ -583,9 +480,9 @@ export const tr: I18nDictionary = {
   "tasklist.inactive_callback": "Bu zamanlanmış görev menüsü etkin değil",
   "tasklist.load_error": "🔴 Zamanlanmış görevler yüklenemedi.",
 
-  "commands.select": "Bir OpenCode komutu seçin:",
-  "commands.empty": "📭 Bu proje için kullanılabilir OpenCode komutu yok.",
-  "commands.fetch_error": "🔴 OpenCode komutları yüklenemedi.",
+  "commands.select": "Bir Reasonix komutu seçin:",
+  "commands.empty": "📭 Bu proje için kullanılabilir Reasonix komutu yok.",
+  "commands.fetch_error": "🔴 Reasonix komutları yüklenemedi.",
   "commands.no_description": "Açıklama yok",
   "commands.button.execute": "✅ Çalıştır",
   "commands.button.cancel": "❌ İptal",
@@ -595,13 +492,11 @@ export const tr: I18nDictionary = {
   "commands.execute_callback": "Komut çalıştırılıyor...",
   "commands.executing_prefix": "⚡ Komut çalıştırılıyor:",
   "commands.arguments_empty": "⚠️ Argümanlar boş olamaz. Metin gönderin veya Çalıştır'a dokunun.",
-  "commands.execute_error": "🔴 OpenCode komutu çalıştırılamadı.",
-  "commands.select_page": "Bir OpenCode komutu seçin (sayfa {page}):",
+  "commands.execute_error": "🔴 Reasonix komutu çalıştırılamadı.",
+  "commands.select_page": "Bir Reasonix komutu seçin (sayfa {page}):",
   "commands.button.prev_page": "⬅️ Önceki",
   "commands.button.next_page": "Sonraki ➡️",
   "commands.page_empty_callback": "Bu sayfada komut yok",
-  "commands.page_load_error_callback": "Bu sayfa yüklenemiyor. Lütfen tekrar deneyin.",
-  "commands.download.no_roots": "İzin verilen tarayıcı kök dizini yapılandırılmamış.",
   "commands.download.downloading": "Dosya indiriliyor...",
   "commands.download.not_found": "Dosya bulunamadı",
   "commands.download.not_file": "Yol bir dosya değil",
@@ -610,9 +505,9 @@ export const tr: I18nDictionary = {
   "commands.download.modified": "Değiştirilme",
   "commands.download.error": "Dosya indirilemedi.",
 
-  "skills.select": "Bir OpenCode yeteneği seçin:",
-  "skills.empty": "📭 Bu proje için kullanılabilir OpenCode yeteneği yok.",
-  "skills.fetch_error": "🔴 OpenCode yetenekleri yüklenemedi.",
+  "skills.select": "Bir Reasonix yeteneği seçin:",
+  "skills.empty": "📭 Bu proje için kullanılabilir Reasonix yeteneği yok.",
+  "skills.fetch_error": "🔴 Reasonix yetenekleri yüklenemedi.",
   "skills.no_description": "Açıklama yok",
   "skills.button.execute": "✅ Çalıştır",
   "skills.button.cancel": "❌ İptal",
@@ -622,40 +517,10 @@ export const tr: I18nDictionary = {
   "skills.execute_callback": "Yetenek kullanılıyor...",
   "skills.executing_prefix": "⚡ Yetenek kullanılıyor:",
   "skills.arguments_empty": "⚠️ Argümanlar boş olamaz. Metin gönderin veya Çalıştır'a dokunun.",
-  "skills.select_page": "Bir OpenCode yeteneği seçin (sayfa {page}):",
+  "skills.select_page": "Bir Reasonix yeteneği seçin (sayfa {page}):",
   "skills.button.prev_page": "⬅️ Önceki",
   "skills.button.next_page": "Sonraki ➡️",
   "skills.page_empty_callback": "Bu sayfada yetenek yok",
-  "skills.page_load_error_callback": "Bu sayfa yüklenemiyor. Lütfen tekrar deneyin.",
-
-  "mcps.select": "MCP sunucuları:",
-  "mcps.empty": "📭 Yapılandırılmış MCP sunucusu yok.",
-  "mcps.fetch_error": "🔴 MCP sunucuları yüklenemedi.",
-  "mcps.toggle_error": "🔴 MCP sunucusunun durumu değiştirilemedi.",
-  "mcps.enabling": "Etkinleştiriliyor...",
-  "mcps.disabling": "Devre dışı bırakılıyor...",
-  "mcps.status.connected": "🟢 Bağlı",
-  "mcps.status.disabled": "🔴 Devre dışı",
-  "mcps.status.failed": "⚠️ Başarısız",
-  "mcps.status.needs_auth": "🔒 Yetkilendirme gerekli",
-  "mcps.status.needs_client_registration": "🔒 Kayıt gerekli",
-  "mcps.detail.title": "Sunucu: {name}",
-  "mcps.detail.status": "Durum: {status}",
-  "mcps.detail.error": "Hata: {error}",
-  "mcps.button.enable": "🟢 Etkinleştir",
-  "mcps.button.disable": "🔴 Devre dışı bırak",
-  "mcps.button.back": "⬅️ Geri",
-  "mcps.auth_required": "Bu sunucu yetkilendirme gerektiriyor ve bottan etkinleştirilemez.",
-
-  "cmd.description.rename": "Geçerli oturumu yeniden adlandır",
-
-  "legacy.models.fetch_error":
-    "🔴 Model listesi alınamadı. Sunucu durumunu /status ile kontrol edin.",
-  "legacy.models.empty": "📋 Kullanılabilir model yok. OpenCode'da sağlayıcıları yapılandırın.",
-  "legacy.models.header": "📋 Kullanılabilir modeller:\n\n",
-  "legacy.models.no_provider_models": "  ⚠️ Kullanılabilir model yok\n",
-  "legacy.models.env_hint": "💡 Modeli .env içinde kullanmak için:\n",
-  "legacy.models.error": "🔴 Model listesi yüklenirken bir hata oluştu.",
 
   "stt.recognizing": "🎤 Ses tanınıyor...",
   "stt.recognized": "🎤 Tanınan:",
@@ -665,7 +530,6 @@ export const tr: I18nDictionary = {
   "stt.empty_result": "🎤 Ses mesajında konuşma algılanmadı.",
 
   "cmd.description.open": "Dizinlere göz atarak proje ekle",
-  "worktree.branch_detached": "detached HEAD",
   "worktree.select_with_current": "Bir worktree seçin:",
   "worktree.project_not_selected": "🏗 Proje seçilmedi.\n\nÖnce /projects ile bir proje seçin.",
   "worktree.not_git_repo":

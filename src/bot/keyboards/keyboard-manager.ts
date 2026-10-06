@@ -122,10 +122,9 @@ export class KeyboardManager {
     if (!this.state) {
       logger.warn("[KeyboardManager] Cannot build keyboard: not initialized");
       // Return a minimal keyboard as fallback
-      return createMainKeyboard("build", { providerID: "", modelID: "" }, undefined);
+      return createMainKeyboard({ providerID: "", modelID: "" }, undefined);
     }
     return createMainKeyboard(
-      this.state.currentAgent,
       this.state.currentModel,
       this.state.contextInfo ?? undefined,
       this.state.variantName,

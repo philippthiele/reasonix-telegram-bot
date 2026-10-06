@@ -2,8 +2,8 @@ import type { Bot, Context, NextFunction } from "grammy";
 import type { AppContainer } from "../../app/bootstrap/app-container.js";
 import { config } from "../../config.js";
 import { settingsCommand } from "../commands/settings-command.js";
-import { opencodeStartCommand } from "../commands/opencode-start-command.js";
-import { opencodeStopCommand } from "../commands/opencode-stop-command.js";
+import { reasonixStartCommand } from "../commands/reasonix-start-command.js";
+import { reasonixStopCommand } from "../commands/reasonix-stop-command.js";
 import { reloadCommand } from "../commands/reload-command.js";
 import { projectsCommand } from "../commands/projects-command.js";
 import { worktreeCommand } from "../commands/worktree-command.js";
@@ -17,10 +17,8 @@ import { abortCommand } from "../commands/abort-command.js";
 import { detachCommand } from "../commands/detach-command.js";
 import { taskCommand } from "../commands/task-command.js";
 import { taskListCommand } from "../commands/tasklist-command.js";
-import { renameCommand } from "../commands/rename-command.js";
 import { commandsCommand } from "../commands/command-catalog-command.js";
 import { skillsCommand } from "../commands/skills-catalog-command.js";
-import { mcpsCommand } from "../commands/mcp-catalog-command.js";
 import { startCommand } from "../commands/start-command.js";
 import { helpCommand } from "../commands/help-command.js";
 import { statusCommand } from "../commands/status-command.js";
@@ -89,8 +87,8 @@ export function registerCommandRouter(bot: Bot<Context>, deps: CommandRouterDeps
   bot.command("help", helpCommand);
   bot.command("status", (ctx) => statusCommand(ctx, container));
   bot.command("settings", (ctx) => settingsCommand(ctx, container));
-  bot.command("opencode_start", (ctx) => opencodeStartCommand(ctx, container));
-  bot.command("opencode_stop", (ctx) => opencodeStopCommand(ctx, container));
+  bot.command("reasonix_start", (ctx) => reasonixStartCommand(ctx, container));
+  bot.command("reasonix_stop", (ctx) => reasonixStopCommand(ctx, container));
   if (isKnownCommand("reload")) {
     bot.command("reload", (ctx) => reloadCommand(ctx, container));
   }
@@ -106,10 +104,8 @@ export function registerCommandRouter(bot: Bot<Context>, deps: CommandRouterDeps
   bot.command("detach", (ctx) => detachCommand(ctx, container));
   bot.command("task", (ctx) => taskCommand(ctx, container));
   bot.command("tasklist", (ctx) => taskListCommand(ctx, container));
-  bot.command("rename", (ctx) => renameCommand(ctx, container));
   bot.command("commands", (ctx) => commandsCommand(ctx, container));
   bot.command("skills", (ctx) => skillsCommand(ctx, container));
-  bot.command("mcps", (ctx) => mcpsCommand(ctx, container));
   for (const definition of registry.definitions()) {
     bot.command(definition.command, async (ctx) => {
       const result = await registry.execute(definition.command);

@@ -2,7 +2,6 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { Context } from "grammy";
 import { abortCommand, abortCurrentOperation } from "../../../src/bot/commands/abort-command.js";
 import { promptQueue } from "../../../src/app/managers/prompt-queue-manager.js";
-import { createIncomingPrompt } from "../../../src/app/types/prompt.js";
 import { promptAttachment } from "../../../src/app/managers/prompt-attachment-manager.js";
 import type { Question } from "../../../src/app/types/question.js";
 import type { PermissionRequest } from "../../../src/app/types/permission.js";
@@ -23,6 +22,7 @@ const mocked = vi.hoisted(() => ({
   markAttachedSessionIdleMock: vi.fn(),
   clearPromptResponseModeMock: vi.fn(),
   inboxCancelMock: vi.fn(),
+  inboxListMock: vi.fn(),
   withdrawHandedOverPromptsMock: vi.fn(),
 }));
 
@@ -30,15 +30,13 @@ vi.mock("../../../src/app/services/session-service.js", () => ({
   getCurrentSession: vi.fn(() => mocked.currentSession),
 }));
 
-vi.mock("../../../src/opencode/client.js", () => ({
-  opencodeClient: {
+vi.mock("../../../src/reasonix/client.js", () => ({
+  reasonixClient: {
     session: {
       abort: mocked.abortMock,
       status: mocked.statusMock,
+      inbox: { cancel: mocked.inboxCancelMock, list: mocked.inboxListMock },
     },
-  },
-  opencodeV2Client: {
-    session: { inbox: { cancel: mocked.inboxCancelMock } },
   },
 }));
 
@@ -153,7 +151,6 @@ describe("bot/commands/abort", () => {
     expect(replyMock).toHaveBeenCalledWith(t("stop.no_active_session"));
     expect(container.questionManager.isActive()).toBe(false);
     expect(container.permissionManager.isActive()).toBe(false);
-    expect(container.renameManager.isWaitingForName()).toBe(false);
     expect(container.interactionManager.getSnapshot()).toBeNull();
     expect(container.interactionManager.getWaitingKind()).toBeNull();
     expect(mocked.abortMock).not.toHaveBeenCalled();
@@ -196,7 +193,6 @@ describe("bot/commands/abort", () => {
 
     expect(container.questionManager.isActive()).toBe(false);
     expect(container.permissionManager.isActive()).toBe(false);
-    expect(container.renameManager.isWaitingForName()).toBe(false);
     expect(container.interactionManager.getSnapshot()).toBeNull();
     expectAbortStateReleased("abort_confirmed");
     expect(shouldSuppressUserAbortSessionError("session-1", "Aborted")).toBe(true);
@@ -213,7 +209,10 @@ describe("bot/commands/abort", () => {
       data: { "session-1": { type: "idle" } },
       error: null,
     });
-    promptQueue.add(createIncomingPrompt("queued while running"));
+    promptQueue.confirmReservation(promptQueue.reserve()!, {
+      displayText: "queued while running",
+      inbox: { sessionId: "session-1", inboxId: "msg-1" },
+    });
 
     const ctx = {
       chat: { id: 777 },
@@ -226,13 +225,17 @@ describe("bot/commands/abort", () => {
     expect(promptQueue.size()).toBe(0);
   });
 
-  it("withdraws prompts waiting in the OpenCode inbox before interrupting the turn", async () => {
+  it("withdraws prompts waiting in the Reasonix inbox before interrupting the turn", async () => {
     mocked.currentSession = {
       id: "session-1",
       title: "Session",
       directory: "D:/repo",
     };
     const order: string[] = [];
+    mocked.inboxListMock.mockReset().mockResolvedValue({
+      data: ["msg-1"],
+      error: undefined,
+    });
     mocked.inboxCancelMock.mockReset().mockImplementation(async () => {
       order.push("cancel");
       return { data: true, error: undefined };
@@ -247,7 +250,7 @@ describe("bot/commands/abort", () => {
     });
     promptQueue.confirmReservation(promptQueue.reserve()!, {
       displayText: "steered",
-      inbox: { sessionId: "session-1", inboxId: "msg-1", delivery: "steer" },
+      inbox: { sessionId: "session-1", inboxId: "msg-1" },
     });
 
     const ctx = {
@@ -375,7 +378,6 @@ describe("bot/commands/abort", () => {
 
     expect(container.questionManager.isActive()).toBe(false);
     expect(container.permissionManager.isActive()).toBe(false);
-    expect(container.renameManager.isWaitingForName()).toBe(false);
     expect(container.interactionManager.getSnapshot()).toBeNull();
     expectAbortStateReleased("abort_confirmed");
   });

@@ -1,6 +1,6 @@
 import { Context } from "grammy";
 import { getStoredModel } from "../../app/services/model-selection-service.js";
-import { opencodeClient } from "../../opencode/client.js";
+import { reasonixClient } from "../../reasonix/client.js";
 import { fetchSessionTitle, getCurrentSession } from "../../app/services/session-service.js";
 import { formatSessionTitle } from "../../app/formatters/session-title-formatter.js";
 import { logger } from "../../utils/logger.js";
@@ -49,7 +49,7 @@ export async function handleCompactDetails(ctx: Context, deps: InlineMenuDeps): 
 
 /**
  * Handle compact confirmation callback
- * Calls OpenCode API to compact the session
+ * Calls Reasonix API to compact the session
  * @param ctx grammY context
  */
 export async function handleCompactConfirm(
@@ -102,7 +102,7 @@ export async function handleCompactConfirm(
     );
 
     // Call summarize API (AI compaction)
-    const { error } = await opencodeClient.session.summarize({
+    const { error } = await reasonixClient.session.summarize({
       sessionID: session.id,
       directory: session.directory,
       providerID: storedModel.providerID,

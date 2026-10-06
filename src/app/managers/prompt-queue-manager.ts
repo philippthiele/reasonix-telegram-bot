@@ -2,26 +2,21 @@ import { logger } from "../../utils/logger.js";
 import type { IncomingPrompt } from "../types/prompt.js";
 
 export const MAX_QUEUED_PROMPTS = 5;
-/** Maximum raw Telegram media bytes retained by all queued prompts. */
-export const MAX_QUEUED_MEDIA_BYTES = 20 * 1024 * 1024;
 
-/** Number of recently delivered, unmatched OpenCode inbox ids kept for late admissions. */
+/** Number of recently delivered, unmatched Reasonix inbox ids kept for late admissions. */
 const MAX_REMEMBERED_DELIVERED_INBOX_IDS = 20;
 
-/** Where a prompt waits in the OpenCode V2 session inbox. */
+/** Where a prompt waits in the Reasonix session inbox. */
 export interface QueuedPromptInbox {
   sessionId: string;
   inboxId: string;
-  delivery: "steer" | "queue";
 }
 
 export interface QueuedPrompt extends IncomingPrompt {
   id: string;
   displayText: string;
   responseMode?: "text_only" | "text_and_tts";
-  mediaBytes: number;
-  /** Set when the prompt waits in OpenCode rather than in the bot: this item only mirrors it. */
-  inbox?: QueuedPromptInbox;
+  inbox: QueuedPromptInbox;
 }
 
 export interface InboxPromptInput {
@@ -33,15 +28,13 @@ export interface InboxPromptInput {
 export interface QueuedPromptInput extends IncomingPrompt {
   displayText?: string;
   responseMode?: "text_only" | "text_and_tts";
-  /** Raw media bytes from Telegram file_size metadata, before base64 encoding. */
-  mediaBytes?: number;
 }
 
 /**
- * Prompt Queue - holds prepared user prompts received while the session is busy.
- * On OpenCode V2 the prompts wait in the session inbox instead, and the items only
- * mirror them; an admission still on its way to OpenCode holds a reservation so the
- * cap counts it and a clear can withdraw it.
+ * Prompt Queue - mirrors the prompts waiting in a Reasonix session inbox so the bot can
+ * list them, show their position and cancel them. The prompts themselves live in Reasonix;
+ * this holds no prompt content beyond the text shown in the list. An admission still on
+ * its way holds a reservation so the cap counts it and a clear can withdraw it.
  * Kept in memory only: queued messages must not survive a restart and leak into
  * a different session context.
  * Singleton pattern
@@ -49,41 +42,12 @@ export interface QueuedPromptInput extends IncomingPrompt {
 class PromptQueueManager {
   private items: QueuedPrompt[] = [];
   private nextId = 1;
-  private queuedMediaBytes = 0;
   private reservations = new Set<string>();
   /** Reservations handed over at /detach, by the session they were admitted to. */
   private handedOverReservations = new Map<string, string>();
   private deliveredInboxIds: string[] = [];
 
-  add(input: QueuedPromptInput): QueuedPrompt | null {
-    const normalizedText = input.text.trim();
-    const displayText = (input.displayText ?? (normalizedText || "[Attachment]")).trim();
-    const mediaBytes = input.mediaBytes ?? 0;
-    if (
-      (!normalizedText && input.fileParts.length === 0 && input.photos.length === 0) ||
-      !displayText ||
-      this.isFull() ||
-      !this.canAcceptMedia(mediaBytes)
-    ) {
-      return null;
-    }
-
-    const item: QueuedPrompt = {
-      id: `queued-${this.nextId++}`,
-      text: normalizedText,
-      fileParts: [...input.fileParts],
-      photos: [...input.photos],
-      displayText,
-      mediaBytes,
-      ...(input.responseMode ? { responseMode: input.responseMode } : {}),
-    };
-    this.items.push(item);
-    this.queuedMediaBytes += mediaBytes;
-    logger.debug(`[PromptQueue] Prompt queued: id=${item.id}, size=${this.items.length}`);
-    return item;
-  }
-
-  /** Holds a slot for an admission to OpenCode; null when the queue is full. */
+  /** Holds a slot for an admission to Reasonix; null when the queue is full. */
   reserve(): string | null {
     if (this.isFull()) {
       return null;
@@ -108,7 +72,6 @@ class PromptQueueManager {
       fileParts: [],
       photos: [],
       displayText: input.displayText.trim() || "[Attachment]",
-      mediaBytes: 0,
       inbox: { ...input.inbox },
       ...(input.responseMode ? { responseMode: input.responseMode } : {}),
     };
@@ -155,20 +118,10 @@ class PromptQueueManager {
     if (!removed) {
       return null;
     }
-    this.queuedMediaBytes -= removed.mediaBytes;
     logger.debug(
       `[PromptQueue] Prompt removed: id=${removed.id}, position=${index + 1}, size=${this.items.length}`,
     );
     return removed;
-  }
-
-  takeNext(): QueuedPrompt | null {
-    const item = this.items.shift() ?? null;
-    if (item) {
-      this.queuedMediaBytes -= item.mediaBytes;
-      logger.debug(`[PromptQueue] Prompt taken: id=${item.id}, size=${this.items.length}`);
-    }
-    return item;
   }
 
   size(): number {
@@ -177,14 +130,6 @@ class PromptQueueManager {
 
   isFull(): boolean {
     return this.items.length + this.reservations.size >= MAX_QUEUED_PROMPTS;
-  }
-
-  canAcceptMedia(mediaBytes: number): boolean {
-    return mediaBytes >= 0 && this.queuedMediaBytes + mediaBytes <= MAX_QUEUED_MEDIA_BYTES;
-  }
-
-  mediaSize(): number {
-    return this.queuedMediaBytes;
   }
 
   /**
@@ -203,7 +148,6 @@ class PromptQueueManager {
     const removed = this.items;
     this.items = [];
     this.reservations.clear();
-    this.queuedMediaBytes = 0;
     return removed;
   }
 
@@ -234,14 +178,12 @@ class PromptQueueManager {
     const removed = this.items;
     this.items = [];
     this.reservations.clear();
-    this.queuedMediaBytes = 0;
     return removed;
   }
 
   __resetForTests(): void {
     this.items = [];
     this.nextId = 1;
-    this.queuedMediaBytes = 0;
     this.reservations.clear();
     this.handedOverReservations.clear();
     this.deliveredInboxIds = [];
@@ -255,6 +197,6 @@ function copyQueuedPrompt(item: QueuedPrompt): QueuedPrompt {
     ...item,
     fileParts: [...item.fileParts],
     photos: [...item.photos],
-    ...(item.inbox ? { inbox: { ...item.inbox } } : {}),
+    inbox: { ...item.inbox },
   };
 }

@@ -151,7 +151,7 @@ export class PermissionManager {
   }
 
   /**
-   * Attach an equivalent OpenCode request to an already visible Telegram permission message.
+   * Attach an equivalent Reasonix request to an already visible Telegram permission message.
    */
   addEquivalentRequest(
     request: PermissionRequest,
@@ -217,7 +217,7 @@ export class PermissionManager {
   }
 
   /**
-   * Get all OpenCode request IDs grouped behind a Telegram message.
+   * Get all Reasonix request IDs grouped behind a Telegram message.
    */
   getRequestIDs(messageId: number | null): string[] {
     if (messageId === null) {
@@ -286,7 +286,7 @@ export class PermissionManager {
   }
 
   /**
-   * The answer did not get through for every request: the ones OpenCode took leave the
+   * The answer did not get through for every request: the ones Reasonix took leave the
    * prompt, the rest stay open and answerable again
    */
   failSending(messageId: number, acceptedRequestIds: string[]): PermissionPromptChange | null {
@@ -306,7 +306,7 @@ export class PermissionManager {
       (requestID) => !acceptedRequestIds.includes(requestID),
     );
     if (openIds.length === 0) {
-      // The requests that failed were settled by OpenCode's own events meanwhile.
+      // The requests that failed were settled by Reasonix's own events meanwhile.
       return this.endPrompt(messageId, { kind: "replied", reply: send.reply, outside: false });
     }
 
@@ -337,8 +337,8 @@ export class PermissionManager {
   }
 
   /**
-   * An OpenCode request was settled: it leaves its prompt, and the prompt ends once its
-   * last request is settled. `reply` is the decision OpenCode reported, when it did;
+   * An Reasonix request was settled: it leaves its prompt, and the prompt ends once its
+   * last request is settled. `reply` is the decision Reasonix reported, when it did;
    * `lost` says the request went with a server that stopped, so nobody answered it.
    */
   settleRequest(
@@ -422,7 +422,7 @@ export class PermissionManager {
   }
 
   /**
-   * Check whether an OpenCode request ID is already shown or grouped behind a message
+   * Check whether an Reasonix request ID is already shown or grouped behind a message
    */
   hasRequest(requestID: string): boolean {
     for (const requestIds of this.state?.requestIdsByMessageId.values() ?? []) {
@@ -434,7 +434,7 @@ export class PermissionManager {
   }
 
   /**
-   * Whose answer settled a prompt: the one being sent from Telegram (on V2 a reject being
+   * Whose answer settled a prompt: the one being sent from Telegram (a reject being
    * sent settles its whole session), otherwise an answer given outside Telegram
    */
   private getSettledOutcome(

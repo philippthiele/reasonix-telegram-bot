@@ -1,12 +1,12 @@
 # Concept
 
-This document defines the current product concept and boundaries for OpenCode Telegram Bot.
+This document defines the current product concept and boundaries for Reasonix Telegram Bot.
 
 ## Vision
 
-OpenCode Telegram Bot is designed as a **single OpenCode CLI window in Telegram**.
+Reasonix Telegram Bot is designed as a **single Reasonix CLI window in Telegram**.
 
-The goal is to provide a simple, reliable, mobile-friendly way to run and monitor OpenCode workflows from Telegram while keeping behavior predictable.
+The goal is to provide a simple, reliable, mobile-friendly way to run and monitor Reasonix workflows from Telegram while keeping behavior predictable.
 
 ## Core Concept
 
@@ -23,7 +23,7 @@ The following are intentionally out of scope at this stage:
 - Multi-user access model
 - Full forum-thread orchestration as a primary interaction design
 
-You can try fork of this project which supports topics and parallel execution: https://github.com/shanekunz/opencode-telegram-group-topics-bot
+You can try a fork of this project which supports topics and parallel execution: https://github.com/shanekunz/opencode-telegram-group-topics-bot
 
 ## Why This Direction
 

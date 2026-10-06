@@ -1,6 +1,6 @@
 import type { Api } from "grammy";
 import { logger } from "../../utils/logger.js";
-import { opencodeClient } from "../../opencode/client.js";
+import { reasonixClient } from "../../reasonix/client.js";
 import { getGitWorktreeContext } from "../../app/services/worktree-service.js";
 import { getCurrentSession } from "../../app/services/session-service.js";
 import {
@@ -17,7 +17,7 @@ import {
 } from "../../app/services/model-context-limit-service.js";
 import { getStoredModel } from "../../app/services/model-selection-service.js";
 import { getPatchFileChanges } from "../../app/formatters/summary-formatter.js";
-import { isExpectedOpencodeUnavailableError } from "../../utils/opencode-error.js";
+import { isExpectedServerUnavailableError } from "../../utils/reasonix-error.js";
 import { safeBackgroundTask } from "../../utils/safe-background-task.js";
 import type { FileChange, PinnedMessageState, TokensInfo } from "./pinned-message-types.js";
 import { t } from "../../i18n/index.js";
@@ -184,14 +184,14 @@ export class PinnedMessageManager {
     try {
       logger.debug(`[PinnedManager] Loading context from history for session: ${sessionId}`);
 
-      const { data: messagesData, error } = await opencodeClient.session.messages({
+      const { data: messagesData, error } = await reasonixClient.session.messages({
         sessionID: sessionId,
         directory,
       });
 
       if (error || !messagesData) {
-        if (isExpectedOpencodeUnavailableError(error)) {
-          logger.warn("[PinnedManager] OpenCode server unavailable; skipping session history load");
+        if (isExpectedServerUnavailableError(error)) {
+          logger.warn("[PinnedManager] Reasonix server unavailable; skipping session history load");
         } else {
           logger.warn("[PinnedManager] Failed to load session history:", error);
         }
@@ -253,8 +253,8 @@ export class PinnedMessageManager {
 
       await this.updatePinnedMessage();
     } catch (err) {
-      if (isExpectedOpencodeUnavailableError(err)) {
-        logger.warn("[PinnedManager] OpenCode server unavailable; skipping session history load");
+      if (isExpectedServerUnavailableError(err)) {
+        logger.warn("[PinnedManager] Reasonix server unavailable; skipping session history load");
       } else {
         logger.error("[PinnedManager] Error loading context from history:", err);
       }
@@ -430,54 +430,18 @@ export class PinnedMessageManager {
   }
 
   /**
-   * Load file diffs from API for current session.
-   * Tries session.diff() first, falls back to parsing session.messages() tool parts.
+   * Load the files the session changed. Reasonix reports no diff of its own, so
+   * the file tool parts of the transcript are the only record of what changed.
    */
   private async loadDiffsFromApi(sessionId: string): Promise<void> {
-    try {
-      const project = getCurrentProject();
-      if (!project) {
-        logger.debug("[PinnedManager] loadDiffsFromApi: no project");
-        return;
-      }
-
-      logger.debug(`[PinnedManager] loadDiffsFromApi: trying session.diff() for ${sessionId}`);
-
-      // Try session.diff() API first
-      const { data, error } = await opencodeClient.session.diff({
-        sessionID: sessionId,
-        directory: project.worktree,
-      });
-
-      logger.debug(
-        `[PinnedManager] session.diff() result: error=${!!error}, data.length=${data?.length ?? 0}`,
-      );
-
-      if (!error && data && data.length > 0) {
-        this.state.changedFiles = data
-          .filter((d): d is typeof d & { file: string } => !!d.file)
-          .map((d) => ({
-            file: d.file,
-            additions: d.additions,
-            deletions: d.deletions,
-          }));
-        logger.info(
-          `[PinnedManager] Loaded ${this.state.changedFiles.length} file diffs from session.diff()`,
-        );
-        await this.updatePinnedMessage();
-        return;
-      }
-
-      // Fallback: parse tool parts from session messages
-      logger.debug("[PinnedManager] session.diff() empty, trying loadDiffsFromMessages()");
-      await this.loadDiffsFromMessages(sessionId, project.worktree);
-    } catch (err) {
-      if (isExpectedOpencodeUnavailableError(err)) {
-        logger.debug("[PinnedManager] OpenCode server unavailable; skipping diff restore");
-      } else {
-        logger.debug("[PinnedManager] Could not load diffs from API:", err);
-      }
+    const project = getCurrentProject();
+    if (!project) {
+      logger.debug("[PinnedManager] loadDiffsFromApi: no project");
+      return;
     }
+
+    logger.debug(`[PinnedManager] loadDiffsFromApi: reading tool parts for ${sessionId}`);
+    await this.loadDiffsFromMessages(sessionId, project.worktree);
   }
 
   /**
@@ -487,14 +451,14 @@ export class PinnedMessageManager {
     try {
       logger.debug(`[PinnedManager] loadDiffsFromMessages: fetching messages for ${sessionId}`);
 
-      const { data: messagesData, error } = await opencodeClient.session.messages({
+      const { data: messagesData, error } = await reasonixClient.session.messages({
         sessionID: sessionId,
         directory,
       });
 
       if (error || !messagesData) {
-        if (isExpectedOpencodeUnavailableError(error)) {
-          logger.debug("[PinnedManager] OpenCode server unavailable; skipping diff message restore");
+        if (isExpectedServerUnavailableError(error)) {
+          logger.debug("[PinnedManager] Reasonix server unavailable; skipping diff message restore");
         } else {
           logger.debug(`[PinnedManager] loadDiffsFromMessages: error or no data`);
         }
@@ -609,8 +573,8 @@ export class PinnedMessageManager {
         logger.debug("[PinnedManager] loadDiffsFromMessages: no file changes found");
       }
     } catch (err) {
-      if (isExpectedOpencodeUnavailableError(err)) {
-        logger.debug("[PinnedManager] OpenCode server unavailable; skipping diff message restore");
+      if (isExpectedServerUnavailableError(err)) {
+        logger.debug("[PinnedManager] Reasonix server unavailable; skipping diff message restore");
       } else {
         logger.debug("[PinnedManager] Could not load diffs from messages:", err);
       }
@@ -629,7 +593,7 @@ export class PinnedMessageManager {
     }
 
     try {
-      const { data: sessionData } = await opencodeClient.session.get({
+      const { data: sessionData } = await reasonixClient.session.get({
         sessionID: session.id,
         directory: project.worktree,
       });
@@ -639,8 +603,8 @@ export class PinnedMessageManager {
         logger.debug(`[PinnedManager] Session title refreshed: ${sessionData.title}`);
       }
     } catch (err) {
-      if (isExpectedOpencodeUnavailableError(err)) {
-        logger.debug("[PinnedManager] OpenCode server unavailable; skipping session title refresh");
+      if (isExpectedServerUnavailableError(err)) {
+        logger.debug("[PinnedManager] Reasonix server unavailable; skipping session title refresh");
       } else {
         logger.debug("[PinnedManager] Could not refresh session title:", err);
       }
@@ -733,8 +697,8 @@ export class PinnedMessageManager {
       this.state.tokensLimit = this.contextLimit;
       logger.debug(`[PinnedManager] Context limit: ${this.contextLimit}`);
     } catch (err) {
-      if (isExpectedOpencodeUnavailableError(err)) {
-        logger.warn("[PinnedManager] OpenCode server unavailable; using default context limit");
+      if (isExpectedServerUnavailableError(err)) {
+        logger.warn("[PinnedManager] Reasonix server unavailable; using default context limit");
       } else {
         logger.error("[PinnedManager] Error fetching context limit:", err);
       }

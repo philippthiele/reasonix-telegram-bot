@@ -120,7 +120,7 @@ describe("bot/commands/worktree", () => {
   });
 
   it("warns instead of loading git worktrees when running in a container", async () => {
-    vi.stubEnv("OPENCODE_TELEGRAM_CONTAINER", "1");
+    vi.stubEnv("REASONIX_TELEGRAM_CONTAINER", "1");
     const ctx = createCommandContext();
     await worktreeCommand(ctx as never, createDeps());
 

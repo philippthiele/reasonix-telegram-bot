@@ -19,8 +19,8 @@ const mocked = vi.hoisted(() => ({
   questionRejectMock: vi.fn(),
 }));
 
-vi.mock("../../../src/opencode/client.js", () => ({
-  opencodeClient: {
+vi.mock("../../../src/reasonix/client.js", () => ({
+  reasonixClient: {
     question: {
       reply: mocked.questionReplyMock,
       reject: mocked.questionRejectMock,
@@ -326,7 +326,7 @@ describe("bot question menu/callbacks", () => {
     });
   });
 
-  it("dismisses the question in OpenCode on Cancel and then closes the poll", async () => {
+  it("dismisses the question in Reasonix on Cancel and then closes the poll", async () => {
     const api = createApi([300]);
 
     container.questionManager.startQuestions([QUESTION_ONE], "req-4", "session-1");
@@ -457,7 +457,7 @@ describe("bot question menu/callbacks", () => {
   it.each([
     [{ name: "NotFoundError", data: { message: "gone" } }],
     [{ _tag: "QuestionNotFoundError", requestID: "req-gone", message: "gone" }],
-  ])("closes the poll as cancelled outside when OpenCode no longer has it", async (error) => {
+  ])("closes the poll as cancelled outside when Reasonix no longer has it", async (error) => {
     const api = createApi([306]);
     mocked.questionRejectMock.mockResolvedValueOnce({ data: undefined, error });
 
@@ -475,7 +475,7 @@ describe("bot question menu/callbacks", () => {
     expect(container.questionManager.isActive()).toBe(false);
   });
 
-  it("closes the poll as answered outside when OpenCode reported an answer meanwhile", async () => {
+  it("closes the poll as answered outside when Reasonix reported an answer meanwhile", async () => {
     const api = createApi([307]);
     mocked.questionRejectMock.mockImplementationOnce(async () => {
       container.questionManager.noteSettledWhileSending("answered");
@@ -495,7 +495,7 @@ describe("bot question menu/callbacks", () => {
     );
   });
 
-  it("closes the poll as cancelled when the reply was lost but OpenCode reported the dismissal", async () => {
+  it("closes the poll as cancelled when the reply was lost but Reasonix reported the dismissal", async () => {
     const api = createApi([308]);
     mocked.questionRejectMock.mockImplementationOnce(async () => {
       container.questionManager.noteSettledWhileSending("cancelled");
@@ -685,7 +685,7 @@ describe("bot question menu/callbacks", () => {
     expect(mocked.questionReplyMock).toHaveBeenCalledWith({
       requestID: "req-multi-submit",
       directory: "D:/repo",
-      answers: [["* One: 1", "Line one\nline two"]],
+      answers: [{ questionId: "0", selected: ["* One: 1", "Line one\nline two"] }],
     });
     expect(api.sendMessage).toHaveBeenLastCalledWith(
       123,
@@ -740,7 +740,7 @@ describe("bot question menu/callbacks", () => {
     await pressButton("question:submit:0", 841, api);
 
     expect(mocked.questionReplyMock).toHaveBeenCalledWith(
-      expect.objectContaining({ answers: [["Only mine"]] }),
+      expect.objectContaining({ answers: [{ questionId: "0", selected: ["Only mine"] }] }),
     );
   });
 
@@ -777,7 +777,7 @@ describe("bot question menu/callbacks", () => {
     const api = createApi([910, 911]);
     const searchQuestion: Question = {
       header: "Web search",
-      question: "Allow OpenCode to search the web?",
+      question: "Allow Reasonix to search the web?",
       custom: false,
       options: [
         { label: "Allow search via Exa", description: "", value: "allow" },
@@ -793,7 +793,10 @@ describe("bot question menu/callbacks", () => {
     expect(mocked.questionReplyMock).toHaveBeenCalledWith({
       requestID: "req-values",
       directory: "D:/repo",
-      answers: [["allow"], ["* No: decline"]],
+      answers: [
+        { questionId: "0", selected: ["allow"] },
+        { questionId: "1", selected: ["* No: decline"] },
+      ],
     });
     expect(api.sendMessage).toHaveBeenLastCalledWith(
       123,
@@ -802,7 +805,7 @@ describe("bot question menu/callbacks", () => {
   });
 });
 
-describe("poll answers delivered to OpenCode", () => {
+describe("poll answers delivered to Reasonix", () => {
   beforeEach(() => {
     mocked.questionReplyMock.mockReset();
     mocked.questionReplyMock.mockResolvedValue({ data: true, error: undefined });
@@ -817,7 +820,7 @@ describe("poll answers delivered to OpenCode", () => {
       .map((call) => JSON.stringify(call[2]));
   }
 
-  it("keeps the last question on screen until OpenCode takes the answers", async () => {
+  it("keeps the last question on screen until Reasonix takes the answers", async () => {
     const api = createApi([900, 901]);
     let resolveReply: (value: { data: boolean; error: undefined }) => void = () => {};
     mocked.questionReplyMock.mockReturnValueOnce(
@@ -877,14 +880,17 @@ describe("poll answers delivered to OpenCode", () => {
     expect(mocked.questionReplyMock).toHaveBeenCalledTimes(2);
     expect(mocked.questionReplyMock.mock.calls[1]?.[0]).toMatchObject({
       requestID: "req-fail",
-      answers: [["* Yes: accept"], ["* Beta: second"]],
+      answers: [
+        { questionId: "0", selected: ["* Yes: accept"] },
+        { questionId: "1", selected: ["* Beta: second"] },
+      ],
     });
   });
 
   it.each([
     [{ name: "NotFoundError", data: { message: "gone" } }],
     [{ _tag: "FormAlreadySettledError", message: "Form already settled" }],
-  ])("closes the poll as answered outside when OpenCode already settled it", async (error) => {
+  ])("closes the poll as answered outside when Reasonix already settled it", async (error) => {
     const api = createApi([920]);
     mocked.questionReplyMock.mockResolvedValueOnce({ data: undefined, error });
 
@@ -899,7 +905,7 @@ describe("poll answers delivered to OpenCode", () => {
     expect(editsOf(api, 920).join()).not.toContain(t("permission.delivery_failed"));
   });
 
-  it("closes the poll as cancelled outside when OpenCode reported a cancel meanwhile", async () => {
+  it("closes the poll as cancelled outside when Reasonix reported a cancel meanwhile", async () => {
     const api = createApi([925]);
     mocked.questionReplyMock.mockImplementationOnce(async () => {
       container.questionManager.noteSettledWhileSending("cancelled");
@@ -944,7 +950,7 @@ describe("poll answers delivered to OpenCode", () => {
       expect(container.questionManager.isActive()).toBe(false);
     });
     expect(mocked.questionReplyMock.mock.calls[1]?.[0]).toMatchObject({
-      answers: [["my own again"]],
+      answers: [{ questionId: "0", selected: ["my own again"] }],
     });
   });
 

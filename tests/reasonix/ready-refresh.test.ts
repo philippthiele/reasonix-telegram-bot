@@ -10,12 +10,9 @@ const mocked = vi.hoisted(() => ({
   loggerWarnMock: vi.fn(),
 }));
 
-vi.mock("../../src/opencode/client.js", () => ({
-  opencodeClient: {
-    global: {
-      health: mocked.healthMock,
-    },
-  },
+vi.mock("../../src/reasonix/health.js", () => ({
+  checkReasonixHealth: mocked.healthMock,
+  __resetServerHealthStateForTests: vi.fn(),
 }));
 
 vi.mock("../../src/app/services/session-cache-service.js", () => ({
@@ -38,16 +35,16 @@ vi.mock("../../src/utils/logger.js", () => ({
   },
 }));
 
-import { OpencodeReadyLifecycle } from "../../src/opencode/ready-lifecycle.js";
+import { ReasonixReadyLifecycle } from "../../src/reasonix/ready-lifecycle.js";
 import {
   __resetReadyRefreshForTests,
   refreshModelCatalogAfterConfigReload,
-  refreshSessionCacheAfterOpencodeReady,
-  refreshSessionCacheIfOpencodeReady,
+  refreshSessionCacheAfterReasonixReady,
+  refreshSessionCacheIfReasonixReady,
   stopModelCatalogWait,
   watchLateModelCatalogChanges,
   type ReadyRefreshDeps,
-} from "../../src/opencode/ready-refresh.js";
+} from "../../src/reasonix/ready-refresh.js";
 import type { StoredModelReconcileResult } from "../../src/app/services/model-selection-service.js";
 
 const UNAVAILABLE: StoredModelReconcileResult = {
@@ -100,9 +97,9 @@ function watchLateSettle(
   return () => settled;
 }
 
-describe("opencode/ready-refresh", () => {
+describe("reasonix/ready-refresh", () => {
   beforeEach(() => {
-    deps = { opencodeReadyLifecycle: new OpencodeReadyLifecycle() };
+    deps = { reasonixReadyLifecycle: new ReasonixReadyLifecycle() };
     mocked.healthMock.mockReset();
     mocked.warmupSessionDirectoryCacheMock.mockReset();
     mocked.reconcileStoredModelSelectionMock.mockReset();
@@ -122,23 +119,23 @@ describe("opencode/ready-refresh", () => {
     vi.useRealTimers();
   });
 
-  it("skips refresh with a short warning when OpenCode server is unavailable", async () => {
-    mocked.healthMock.mockRejectedValueOnce(new Error("fetch failed"));
+  it("skips refresh with a short warning when the Reasonix server is unavailable", async () => {
+    mocked.healthMock.mockResolvedValueOnce({ healthy: false, error: new Error("fetch failed") });
 
-    const refreshed = await refreshSessionCacheIfOpencodeReady("startup", deps);
+    const refreshed = await refreshSessionCacheIfReasonixReady("startup", deps);
 
     expect(refreshed).toBe(false);
     expect(mocked.warmupSessionDirectoryCacheMock).not.toHaveBeenCalled();
     expect(mocked.reconcileStoredModelSelectionMock).not.toHaveBeenCalled();
     expect(mocked.loggerWarnMock).toHaveBeenCalledWith(
-      "[OpenCodeReady] OpenCode server is not running; skipping session cache refresh: reason=startup",
+      "[ReasonixReady] Reasonix server is not running; skipping session cache refresh: reason=startup",
     );
   });
 
-  it("refreshes cache when OpenCode server is healthy", async () => {
-    mocked.healthMock.mockResolvedValueOnce({ data: { healthy: true }, error: null });
+  it("refreshes cache when the Reasonix server is healthy", async () => {
+    mocked.healthMock.mockResolvedValueOnce({ healthy: true, version: "1.39.7" });
 
-    const refreshed = await refreshSessionCacheIfOpencodeReady("startup", deps);
+    const refreshed = await refreshSessionCacheIfReasonixReady("startup", deps);
 
     expect(refreshed).toBe(true);
     expect(mocked.warmupSessionDirectoryCacheMock).toHaveBeenCalledTimes(1);
@@ -148,7 +145,7 @@ describe("opencode/ready-refresh", () => {
   });
 
   it("opens the model catalog warm-up window on ready", async () => {
-    await refreshSessionCacheAfterOpencodeReady("opencode_start_success");
+    await refreshSessionCacheAfterReasonixReady("reasonix_start_success");
 
     expect(mocked.startModelCatalogWarmupMock).toHaveBeenCalledTimes(1);
   });
@@ -167,11 +164,11 @@ describe("opencode/ready-refresh", () => {
     mocked.warmupSessionDirectoryCacheMock.mockRejectedValueOnce(new Error("refresh failed"));
 
     await expect(
-      refreshSessionCacheAfterOpencodeReady("opencode_start_success"),
+      refreshSessionCacheAfterReasonixReady("reasonix_start_success"),
     ).resolves.toBeUndefined();
 
     expect(mocked.loggerWarnMock).toHaveBeenCalledWith(
-      "[OpenCodeReady] Failed to refresh session cache: reason=opencode_start_success",
+      "[ReasonixReady] Failed to refresh session cache: reason=reasonix_start_success",
       expect.any(Error),
     );
     expect(mocked.reconcileStoredModelSelectionMock).toHaveBeenCalledWith({
@@ -183,11 +180,11 @@ describe("opencode/ready-refresh", () => {
     mocked.reconcileStoredModelSelectionMock.mockRejectedValueOnce(new Error("model failed"));
 
     await expect(
-      refreshSessionCacheAfterOpencodeReady("opencode_start_success"),
+      refreshSessionCacheAfterReasonixReady("reasonix_start_success"),
     ).resolves.toBeUndefined();
 
     expect(mocked.loggerWarnMock).toHaveBeenCalledWith(
-      "[OpenCodeReady] Failed to refresh model catalog: reason=opencode_start_success",
+      "[ReasonixReady] Failed to refresh model catalog: reason=reasonix_start_success",
       expect.any(Error),
     );
   });
@@ -199,7 +196,7 @@ describe("opencode/ready-refresh", () => {
       .mockResolvedValueOnce(UNAVAILABLE)
       .mockResolvedValueOnce(COMPLETE);
 
-    const refresh = refreshSessionCacheAfterOpencodeReady("opencode_start_success");
+    const refresh = refreshSessionCacheAfterReasonixReady("reasonix_start_success");
     await vi.advanceTimersByTimeAsync(1000);
     await refresh;
 
@@ -215,7 +212,7 @@ describe("opencode/ready-refresh", () => {
     mocked.reconcileStoredModelSelectionMock.mockResolvedValue(UNAVAILABLE);
 
     let finished = false;
-    const refresh = refreshSessionCacheAfterOpencodeReady("auto_restart_interval").then(() => {
+    const refresh = refreshSessionCacheAfterReasonixReady("auto_restart_interval").then(() => {
       finished = true;
     });
 
@@ -228,7 +225,7 @@ describe("opencode/ready-refresh", () => {
     expect(finished).toBe(true);
     expect(mocked.reconcileStoredModelSelectionMock).toHaveBeenCalledTimes(7);
     expect(mocked.loggerWarnMock).toHaveBeenCalledWith(
-      "[OpenCodeReady] Model catalog still unavailable after 3000ms: reason=auto_restart_interval",
+      "[ReasonixReady] Model catalog still unavailable after 3000ms: reason=auto_restart_interval",
     );
   });
 
@@ -237,17 +234,17 @@ describe("opencode/ready-refresh", () => {
     mocked.reconcileStoredModelSelectionMock
       .mockResolvedValueOnce(UNAVAILABLE)
       .mockResolvedValue(COMPLETE);
-    const lifecycle = new OpencodeReadyLifecycle();
+    const lifecycle = new ReasonixReadyLifecycle();
     const order: string[] = [];
     lifecycle.onReady(async (reason) => {
-      await refreshSessionCacheAfterOpencodeReady(reason);
+      await refreshSessionCacheAfterReasonixReady(reason);
       order.push("refresh");
     });
     lifecycle.onReady(() => {
       order.push("restore");
     });
 
-    const notify = lifecycle.notifyReady("opencode_start_success");
+    const notify = lifecycle.notifyReady("reasonix_start_success");
     await vi.advanceTimersByTimeAsync(500);
     await notify;
 
@@ -262,7 +259,7 @@ describe("opencode/ready-refresh", () => {
       .mockResolvedValueOnce(FAVORITE_PROVIDER_MISSING)
       .mockResolvedValue(COMPLETE);
 
-    await refreshSessionCacheAfterOpencodeReady("opencode_start_success");
+    await refreshSessionCacheAfterReasonixReady("reasonix_start_success");
     expect(mocked.reconcileStoredModelSelectionMock).toHaveBeenCalledTimes(1);
 
     await vi.advanceTimersByTimeAsync(10000);
@@ -278,7 +275,7 @@ describe("opencode/ready-refresh", () => {
   it("keeps reading through the warm-up window when the first read is complete, then once after it", async () => {
     vi.useFakeTimers();
 
-    await refreshSessionCacheAfterOpencodeReady("opencode_start_success");
+    await refreshSessionCacheAfterReasonixReady("reasonix_start_success");
     const lateSettle = watchLateSettle();
     await vi.advanceTimersByTimeAsync(55000);
 
@@ -303,7 +300,7 @@ describe("opencode/ready-refresh", () => {
       .mockResolvedValueOnce(FELL_BACK)
       .mockResolvedValue(COMPLETE);
 
-    await refreshSessionCacheAfterOpencodeReady("opencode_start_success");
+    await refreshSessionCacheAfterReasonixReady("reasonix_start_success");
     const nextChange = watchLateModelCatalogChanges();
     const firstSettle = watchLateSettle(nextChange);
     await vi.advanceTimersByTimeAsync(5000);
@@ -336,7 +333,7 @@ describe("opencode/ready-refresh", () => {
       .mockResolvedValueOnce(SELECTED_MODEL_MISSING)
       .mockResolvedValue(COMPLETE);
 
-    const refresh = refreshSessionCacheAfterOpencodeReady("opencode_start_success");
+    const refresh = refreshSessionCacheAfterReasonixReady("reasonix_start_success");
     await vi.advanceTimersByTimeAsync(3000);
     await refresh;
     const nextChange = watchLateModelCatalogChanges();
@@ -364,12 +361,12 @@ describe("opencode/ready-refresh", () => {
       .mockResolvedValueOnce(SELECTED_MODEL_MISSING)
       .mockResolvedValueOnce(COMPLETE);
 
-    const refresh = refreshSessionCacheAfterOpencodeReady("auto_restart_interval");
+    const refresh = refreshSessionCacheAfterReasonixReady("auto_restart_interval");
     await vi.advanceTimersByTimeAsync(3000);
     await refresh;
 
     expect(mocked.loggerWarnMock).toHaveBeenCalledWith(
-      "[OpenCodeReady] Model catalog still incomplete after 3000ms: reason=auto_restart_interval",
+      "[ReasonixReady] Model catalog still incomplete after 3000ms: reason=auto_restart_interval",
     );
     const lateSettle = watchLateSettle();
     await vi.advanceTimersByTimeAsync(4000);
@@ -385,7 +382,7 @@ describe("opencode/ready-refresh", () => {
     vi.useFakeTimers();
     mocked.reconcileStoredModelSelectionMock.mockResolvedValue(SELECTED_MODEL_MISSING);
 
-    const refresh = refreshSessionCacheAfterOpencodeReady("auto_restart_interval");
+    const refresh = refreshSessionCacheAfterReasonixReady("auto_restart_interval");
     await vi.advanceTimersByTimeAsync(3000);
     await refresh;
     const lateSettle = watchLateSettle();
@@ -401,7 +398,7 @@ describe("opencode/ready-refresh", () => {
 
     expect(lateSettle()).toBe(true);
     expect(mocked.loggerWarnMock).toHaveBeenCalledWith(
-      "[OpenCodeReady] Model catalog warm-up ended with expected providers missing: reason=auto_restart_interval",
+      "[ReasonixReady] Model catalog warm-up ended with expected providers missing: reason=auto_restart_interval",
     );
   });
 
@@ -411,7 +408,7 @@ describe("opencode/ready-refresh", () => {
       .mockResolvedValueOnce(FAVORITE_PROVIDER_MISSING)
       .mockResolvedValue(FAVORITE_PROVIDER_MISSING);
 
-    await refreshSessionCacheAfterOpencodeReady("opencode_start_success");
+    await refreshSessionCacheAfterReasonixReady("reasonix_start_success");
     warmupActive = false;
     mocked.reconcileStoredModelSelectionMock.mockResolvedValue(COMPLETE);
     await vi.advanceTimersByTimeAsync(5000);
@@ -423,7 +420,7 @@ describe("opencode/ready-refresh", () => {
     vi.useFakeTimers();
     mocked.reconcileStoredModelSelectionMock.mockResolvedValue(FAVORITE_PROVIDER_MISSING);
 
-    await refreshSessionCacheAfterOpencodeReady("opencode_start_success");
+    await refreshSessionCacheAfterReasonixReady("reasonix_start_success");
     expect(vi.getTimerCount()).toBe(1);
 
     stopModelCatalogWait();
@@ -440,7 +437,7 @@ describe("opencode/ready-refresh", () => {
       .mockResolvedValueOnce(FELL_BACK)
       .mockResolvedValue(COMPLETE);
 
-    await refreshSessionCacheAfterOpencodeReady("opencode_start_success");
+    await refreshSessionCacheAfterReasonixReady("reasonix_start_success");
     await vi.advanceTimersByTimeAsync(5000);
 
     const nextChange = watchLateModelCatalogChanges();
@@ -455,10 +452,10 @@ describe("opencode/ready-refresh", () => {
     vi.useFakeTimers();
     mocked.reconcileStoredModelSelectionMock.mockResolvedValue(FAVORITE_PROVIDER_MISSING);
 
-    await refreshSessionCacheAfterOpencodeReady("opencode_start_success");
+    await refreshSessionCacheAfterReasonixReady("reasonix_start_success");
     const firstSettle = watchLateModelCatalogChanges()();
 
-    await refreshSessionCacheAfterOpencodeReady("auto_restart_interval");
+    await refreshSessionCacheAfterReasonixReady("auto_restart_interval");
 
     await expect(firstSettle).resolves.toBe(false);
     expect(vi.getTimerCount()).toBe(1);

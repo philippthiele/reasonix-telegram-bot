@@ -1,6 +1,6 @@
 import type { Bot, Context } from "grammy";
 import type { AppContainer } from "../../app/bootstrap/app-container.js";
-import { opencodeClient } from "../../opencode/client.js";
+import { reasonixClient } from "../../reasonix/client.js";
 import { resolveProjectAgent } from "../../app/services/agent-selection-service.js";
 import { getStoredModel } from "../../app/services/model-selection-service.js";
 import { setCurrentSession } from "../../app/services/session-service.js";
@@ -94,7 +94,7 @@ export async function selectSessionById(
     return;
   }
 
-  const { data: session, error } = await opencodeClient.session.get({
+  const { data: session, error } = await reasonixClient.session.get({
     sessionID: sessionId,
     directory: currentProject.worktree,
   });
@@ -375,7 +375,7 @@ async function releaseSessionPickHold(
 
 async function readSessionBusy(sessionId: string, directory: string): Promise<boolean> {
   try {
-    const { data, error } = await opencodeClient.session.status({ directory });
+    const { data, error } = await reasonixClient.session.status({ directory });
     if (error || !data) {
       logger.warn("[Sessions] Failed to read session status for pick:", error);
       return true;
@@ -398,7 +398,7 @@ async function loadSessionPickMessages(
 
   try {
     for (;;) {
-      const { data, error } = await opencodeClient.session.messages({
+      const { data, error } = await reasonixClient.session.messages({
         sessionID: sessionId,
         directory,
         limit: SESSION_PICK_PAGE_SIZE,
@@ -457,7 +457,7 @@ async function loadParentMessage(
   directory: string,
 ): Promise<SessionPickMessage | null> {
   try {
-    const { data, error } = await opencodeClient.session.message({
+    const { data, error } = await reasonixClient.session.message({
       sessionID: sessionId,
       messageID: messageId,
       directory,
@@ -532,7 +532,7 @@ async function loadLatestAssistantResponse(
   directory: string,
 ): Promise<string | null> {
   try {
-    const { data: messages, error } = await opencodeClient.session.messages({
+    const { data: messages, error } = await reasonixClient.session.messages({
       sessionID: sessionId,
       directory,
       limit: LATEST_ASSISTANT_RESPONSE_MESSAGES_LIMIT,

@@ -1,62 +1,62 @@
-# OpenCode Telegram Bot
+# Reasonix Telegram Bot
 
-[![npm version](https://img.shields.io/npm/v/@grinev/opencode-telegram-bot)](https://www.npmjs.com/package/@grinev/opencode-telegram-bot)
-[![CI](https://github.com/grinev/opencode-telegram-bot/actions/workflows/ci.yml/badge.svg)](https://github.com/grinev/opencode-telegram-bot/actions/workflows/ci.yml)
+[![npm version](https://img.shields.io/npm/v/@philippthiele/reasonix-telegram-bot)](https://www.npmjs.com/package/@philippthiele/reasonix-telegram-bot)
+[![CI](https://github.com/philippthiele/reasonix-telegram-bot/actions/workflows/ci.yml/badge.svg)](https://github.com/philippthiele/reasonix-telegram-bot/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Node.js](https://img.shields.io/badge/node-%3E%3D22.14-brightgreen)](https://nodejs.org)
 [![Follow updates](https://img.shields.io/badge/-Follow%20updates-333333?logo=x)](https://x.com/grin_rus)
 [![Community](https://img.shields.io/badge/Community-Telegram-26A5E4?logo=telegram&logoColor=white)](https://t.me/+Fj_IyKRi6-41MGUy)
 
-OpenCode Telegram Bot is a secure Telegram client for [OpenCode](https://opencode.ai) CLI that runs on your local machine.
+Reasonix Telegram Bot is a secure Telegram client for [Reasonix](https://reasonix.ai) CLI that runs on your local machine.
 
 Run AI coding tasks, monitor progress, switch models, and manage sessions from your phone.
 
-No open ports, no exposed APIs. The bot communicates with your local OpenCode server and the Telegram Bot API only.
+No open ports, no exposed APIs. The bot communicates with your local Reasonix server and the Telegram Bot API only.
 
 Platforms: macOS, Windows, Linux
 
 Languages: English (`en`), العربية (`ar`), Deutsch (`de`), Español (`es`), Français (`fr`), Bahasa Indonesia (`id`), Italiano (`it`), 한국어 (`ko`), Português (Brasil) (`pt`), Русский (`ru`), Türkçe (`tr`), 简体中文 (`zh`)
 
 <p align="center">
-  <img src="assets/screencast.gif" width="45%" alt="OpenCode Telegram Bot screencast" />
+  <img src="assets/screencast.gif" width="45%" alt="Reasonix Telegram Bot screencast" />
 </p>
 
-> I use [boardown](https://github.com/grinev/boardown), my open-source Markdown-based task board, to plan and track this project. It stores tasks in plain `.md` files and can be used as a VS Code extension or a desktop app.
+> I use [boardown](https://github.com/philippthiele/boardown), my open-source Markdown-based task board, to plan and track this project. It stores tasks in plain `.md` files and can be used as a VS Code extension or a desktop app.
 
 ## Features
 
-- **OpenCode V2 support** — works with the new OpenCode V2 as well as the classic V1; for setup details, see [Old and New OpenCode Versions](#old-and-new-opencode-versions)
-- **Remote coding** — send prompts to OpenCode from anywhere, receive complete results with code sent as files
+- **Reasonix server support** — talks to the Reasonix HTTP/SSE API directly; the bot manages one `reasonix serve` process per configured project root, see [Reasonix Server Management](#reasonix-server-management)
+- **Remote coding** — send prompts to Reasonix from anywhere, receive complete results with code sent as files
 - **Session management** — create new sessions or continue existing ones, just like in the TUI
-- **Track live session** — follow a live OpenCode CLI session; see [Track Existing Session](#track-existing-session)
+- **Track live session** — follow a live Reasonix CLI session; see [Track Existing Session](#track-existing-session)
 - **Background session notifications** — get short notifications when detached or non-current sessions in the current project/worktree reply, ask questions, or request permissions
 - **Live status** — pinned message with current project/worktree, model, context usage, and changed files list, updated in real time
-- **Model switching** — pick models from OpenCode favorites and recent history directly in the chat (favorites are shown first), or browse all models by provider
+- **Model switching** — switch models directly in the chat and browse the full catalog by provider
 - **Agent modes** — switch between Plan and Build modes on the fly
 - **Subagent activity** — watch live subagent progress in chat, including the current task, agent, model (with variant when set), and active tool step
-- **Custom Commands** — run OpenCode custom commands (and built-ins like `init`/`review`) from an inline menu with confirmation
-- **Skills Catalog** — browse OpenCode skills from an inline menu and run them immediately or with arguments in the next message
+- **Custom Commands** — run Reasonix custom commands (and built-ins like `init`/`review`) from an inline menu with confirmation
+- **Skills Catalog** — browse Reasonix skills from an inline menu and run them immediately or with arguments in the next message
 - **Interactive Q&A** — answer agent questions and approve permissions via inline buttons
 - **Runtime settings** — use `/settings` to change runtime preferences; see [Runtime Settings](#runtime-settings)
 - **Voice prompts** — send voice/audio messages, transcribe them via a Whisper-compatible API, and optionally enable spoken replies in `/settings`
-- **File attachments** — send images, PDF documents, and text-based files to OpenCode, including multiple files in one Telegram album
+- **File attachments** — send images, PDF documents, and text-based files to Reasonix, including multiple files in one Telegram album
 - **Scheduled tasks** — schedule prompts to run later or on a recurring interval; see [Scheduled Tasks](#scheduled-tasks)
-- **Message queue** — messages sent while the agent is busy are held and sent one by one afterwards (Queue) or, on OpenCode V2, steered into the running task (Steer); each waiting message is a bottom-keyboard button you can tap to withdraw it; `/detach` leaves waiting messages to the session they were sent to
+- **Message queue** — messages sent while the agent is busy are handed to the Reasonix session inbox and delivered by Reasonix itself, never buffered by the bot; each waiting message is a bottom-keyboard button you can tap to withdraw it; `/detach` leaves waiting messages to the session they were sent to
 - **Context control** — tap the bottom 📊 button to see context usage and the latest assistant message's tokens and cost; compact from the details with an inline confirmation
 - **Input flow control** — when an interactive flow is active, the bot accepts only relevant input to keep context consistent and avoid accidental actions
 - **Git worktree switching** — browse and switch between existing git worktrees for the current repository with `/worktree`
 - **Security** — strict user ID whitelist; no one else can access your bot, even if they find it
 - **Localization** — UI localization is supported for multiple languages (`BOT_LOCALE`)
-- **Docker support** — run the bot as a container while OpenCode stays on the host; see [Docker Deployment](#docker-deployment)
+- **Docker support** — run the bot as a container while Reasonix stays on the host; see [Docker Deployment](#docker-deployment)
 - **Interactive file browser** — use `/ls` to browse files and directories inside the current project, open subdirectories, go back, and download files by tapping them
-- **Attach a file to your next prompt** — tap **📎 Attach to next prompt** on a text file in `/ls`, and it is sent to OpenCode together with your next message, once
+- **Attach a file to your next prompt** — tap **📎 Attach to next prompt** on a text file in `/ls`, and it is sent to Reasonix together with your next message, once
 
 Planned features currently in development are listed in [Current Task List](PRODUCT.md#current-task-list).
 
 ## Prerequisites
 
 - **Node.js 22.14+** — [download](https://nodejs.org)
-- **OpenCode** — install from [opencode.ai](https://opencode.ai) or [GitHub](https://github.com/sst/opencode)
+- **Reasonix** — the `reasonix` CLI (tested against v1.39.x); the bot spawns `reasonix serve` per project root, so the binary must be on `PATH` or set `REASONIX_SERVE_BINARY`
 - **Telegram Bot** — you'll create one during setup (takes 1 minute)
 
 ## Quick Start
@@ -69,37 +69,35 @@ Planned features currently in development are listed in [Current Task List](PROD
 
 You'll also need your **Telegram User ID** — send any message to [@userinfobot](https://t.me/userinfobot) and it will reply with your numeric ID.
 
-### 2. Start OpenCode Server
+### 2. Configure Project Roots
 
-Run the OpenCode server on the same machine where the bot runs:
+The bot serves one Reasonix instance per project root and starts each one on demand. List the roots it may open in `REASONIX_ROOTS` (comma-separated, absolute paths):
 
 ```bash
-opencode serve
+REASONIX_ROOTS=/home/you/projects/repo-a,/home/you/projects/repo-b
 ```
 
-> The bot connects to the local OpenCode API at `http://localhost:4096` by default. For OpenCode V2, see [Old and New OpenCode Versions](#old-and-new-opencode-versions).
-
-> After the bot is configured, you can also start and stop the local OpenCode server from Telegram with `/opencode_start` and `/opencode_stop`.
+When `REASONIX_ROOTS` is unset, the bot uses its own working directory. A session outside the configured roots cannot be opened from Telegram. See [Reasonix Server Management](#reasonix-server-management) for how ports and processes are assigned.
 
 ### 3. Install & Run
 
 The fastest way — run directly with `npx`:
 
 ```bash
-npx @grinev/opencode-telegram-bot@latest
+npx @philippthiele/reasonix-telegram-bot@latest
 ```
 
-> **Note:** This README tracks the `main` branch, which may include unreleased changes. The latest npm release may not include every feature described here yet. See [recent commits on `main`](https://github.com/grinev/opencode-telegram-bot/commits/main).
+> **Note:** This README tracks the `main` branch, which may include unreleased changes. The latest npm release may not include every feature described here yet. See [recent commits on `main`](https://github.com/philippthiele/reasonix-telegram-bot/commits/main).
 
-> Quick start is for npm usage. You do not need to clone this repository. If you run this command from the source directory (repository root), it may fail with `opencode-telegram: not found`. To run from sources, use the [Development](#development) section.
+> Quick start is for npm usage. You do not need to clone this repository. If you run this command from the source directory (repository root), it may fail with `reasonix-telegram: not found`. To run from sources, use the [Development](#development) section.
 
-If required configuration is not supplied through process environment variables or an `.env` file, an interactive wizard will guide you through setup. It asks for interface language first, then your bot token, user ID, the OpenCode version (V1 or V2; V2 is offered on a first setup, a re-run offers the saved one), the OpenCode API URL (its default follows the version), and the OpenCode server credentials: the username, and a password that is optional for V1 and required for V2 (see [Old and New OpenCode Versions](#old-and-new-opencode-versions) for where to get it; on a re-run, Enter keeps the saved password). After that, you're ready to go. Open your bot in Telegram and start sending tasks.
+If required configuration is not supplied through process environment variables or an `.env` file, an interactive wizard will guide you through setup. It asks for the interface language first, then your bot token, user ID, and the default model provider and model ID. After that, you're ready to go: the bot starts a `reasonix serve` instance per configured root on first use. Open your bot in Telegram and start sending tasks.
 
 #### Alternative: Global Install
 
 ```bash
-npm install -g @grinev/opencode-telegram-bot
-opencode-telegram start
+npm install -g @philippthiele/reasonix-telegram-bot
+reasonix-telegram start
 ```
 
 `start` runs in the foreground by default. This is the recommended mode for `systemd`, Docker, local debugging, and other external process managers.
@@ -107,19 +105,19 @@ opencode-telegram start
 To run the bot in the built-in background mode instead:
 
 ```bash
-opencode-telegram start --daemon
-opencode-telegram status
-opencode-telegram stop
+reasonix-telegram start --daemon
+reasonix-telegram status
+reasonix-telegram stop
 ```
 
-> Built-in daemon mode is intended for standalone npm installs without an external supervisor. For `systemd`, `pm2`, or Docker, keep using `opencode-telegram start` without `--daemon`.
+> Built-in daemon mode is intended for standalone npm installs without an external supervisor. For `systemd`, `pm2`, or Docker, keep using `reasonix-telegram start` without `--daemon`.
 
 For Linux `systemd` setup, see [`docs/LINUX_SYSTEMD_SETUP.md`](./docs/LINUX_SYSTEMD_SETUP.md).
 
 To reconfigure at any time:
 
 ```bash
-opencode-telegram config
+reasonix-telegram config
 ```
 
 ## Supported Platforms
@@ -141,21 +139,21 @@ opencode-telegram config
 | `/sessions`       | Browse and switch between recent sessions               |
 | `/recent`         | Browse recent sessions across projects and worktrees, see their status and attach directly |
 | `/messages`       | Browse user messages, revert or fork from a previous state     |
-| `/projects`       | Switch between OpenCode projects                        |
+| `/projects`       | Switch between Reasonix projects                        |
 | `/worktree`       | Switch between existing git worktrees                   |
 | `/open`           | Add a project by browsing directories                   |
 | `/ls`             | List directory contents, then tap to open or download   |
 | `/settings`       | Change bot settings                                     |
-| `/rename`         | Rename the current session                              |
 | `/commands`       | Browse and run custom commands                          |
-| `/skills`         | Browse and run OpenCode skills                          |
-| `/mcps`           | Browse and toggle MCP servers                           |
+| `/skills`         | Browse and run Reasonix skills                          |
 | `/task`           | Create a scheduled task                                 |
 | `/tasklist`       | Browse and delete scheduled tasks                       |
-| `/opencode_start` | Start the local OpenCode server on the bot machine      |
-| `/opencode_stop`  | Stop the local OpenCode server, including during a run  |
-| `/reload`         | Reload the OpenCode configuration without restarting the server (V2 only) |
+| `/reasonix_start` | Start the Reasonix server for the current project root |
+| `/reasonix_stop`  | Stop the Reasonix server for the current project root, including during a run |
+| `/reload`         | Reload the Reasonix configuration without restarting the server |
 | `/help`           | Show available commands                                 |
+
+`/rename` and `/mcps` were removed: Reasonix exposes neither session renaming nor MCP toggling over its server API.
 
 Any regular text message is sent as a prompt to the coding agent only when no blocking interaction is active. Voice/audio messages are transcribed and then sent as prompts when STT is configured.
 
@@ -171,9 +169,9 @@ The `/messages` command displays all user messages in the current session, sorte
 
 ## Scheduled Tasks
 
-Scheduled tasks let you prepare prompts in advance and run them automatically later or on a recurring schedule. This is useful for periodic checks, routine code maintenance, or tasks you want OpenCode to execute while you are away from your computer. Use `/task` to create a scheduled task and `/tasklist` to review or delete existing ones.
+Scheduled tasks let you prepare prompts in advance and run them automatically later or on a recurring schedule. This is useful for periodic checks, routine code maintenance, or tasks you want Reasonix to execute while you are away from your computer. Use `/task` to create a scheduled task and `/tasklist` to review or delete existing ones.
 
-- Each task is created from the currently selected OpenCode project, model, and agent
+- Each task is created from the currently selected Reasonix project, model, and agent
 - The agent is fixed when the task is created and every run uses it; it is shown in the creation confirmation and in the task details in `/tasklist`
 - Tasks run outside your active chat session, so they do not interrupt or affect the current session flow
 - The minimum recurring interval is 5 minutes
@@ -183,31 +181,31 @@ Scheduled tasks let you prepare prompts in advance and run them automatically la
 
 ## Track Existing Session
 
-After you create a new session, select an existing one, or let the bot auto-create one from your first prompt, the bot automatically starts tracking that session. It follows live events from the same OpenCode session, shows external text input sent from another client, and lets you continue the same session from Telegram.
+After you create a new session, select an existing one, or let the bot auto-create one from your first prompt, the bot automatically starts tracking that session. It follows live events from the same Reasonix session, shows external text input sent from another client, and lets you continue the same session from Telegram.
 
-With **OpenCode V2** this works out of the box: all clients (TUI, desktop, web) connect to one background service, so just point the bot to it (see [Old and New OpenCode Versions](#old-and-new-opencode-versions)) and select or create the same session in Telegram.
+Sessions belong to a project root, and the bot keeps one Reasonix instance per root, so a session created from the desktop app or the TUI shows up in `/sessions` as long as it lives under a configured root.
 
-With **OpenCode V1** the console OpenCode instance must be started on the same port the bot connects to. By default, OpenCode starts on a random port, so use one of the setups below.
+**Taking over a session.** Reasonix lets one runtime write to a session at a time. A session the desktop app still holds is watched read-only until the bot takes the writer lease (`POST /resume` then `POST /reclaim`) on your next prompt. This is automatic: you do not have to release the session on the desktop first, but any turn in flight there will be finished before the bot can write.
 
-- **Single TUI, simplest setup** — start OpenCode on a fixed port: `opencode --port 4096`
-- Point the bot to `http://127.0.0.1:4096`, then select or create the same session in Telegram
-- **Multiple TUI clients, shared backend** — start one backend: `opencode serve --port 4096`
-- In each terminal client, connect with: `opencode attach http://127.0.0.1:4096`
-- In the bot, select or create the same session to start tracking it automatically
+## Reasonix Server Management
 
-## Old and New OpenCode Versions
+The bot does not expect you to run a Reasonix server yourself. It manages one per project root.
 
-The bot works with both the classic OpenCode V1 (`opencode-ai`) and the new OpenCode V2 (`@opencode/cli`). Their server APIs differ and the bot does not detect the version, so set `OPENCODE_SERVER_VERSION` (`v1` by default, or `v2`); changing it needs a bot restart.
+**Per-root instances.** Every root in `REASONIX_ROOTS` gets its own `reasonix serve` process, so projects cannot see each other's sessions. If `REASONIX_ROOTS` is empty the bot serves its working directory only.
 
-|             | V1                      | V2                                                                   |
-| ----------- | ----------------------- | -------------------------------------------------------------------- |
-| Server      | `opencode serve`        | background service (`opencode service start`) or `opencode serve`    |
-| Default URL | `http://localhost:4096` | `http://127.0.0.1:49374`                                             |
-| Password    | optional                | required: `opencode service get password`, or printed by `opencode serve` |
+**Stable ports.** A root is hashed to a port in the range `47610`–`47809`, so the same root always reuses the same port and the bot can reconnect to an instance it started earlier. Each instance is bound to `127.0.0.1` and started as:
 
-Set `OPENCODE_API_URL` (host and port, no `/api` suffix) if the server runs elsewhere. Sessions are not shared between the versions. A wrong password or a server of the other version shows up as an error in the bot log.
+```bash
+reasonix serve --addr 127.0.0.1:<port> --auth token --token <generated>
+```
 
-`/opencode_start` and auto-restart run `opencode serve --port <port>` on V1 and the V2 background server (`opencode serve --service --port <port>`) on V2, with the port taken from `OPENCODE_API_URL`. The bot refuses to start a server and logs the reason if the password is rejected, if the server or the local `opencode` is the other version, or if another V2 background server already runs on a different port. With both versions installed, the bot starts whichever one the `opencode` command runs.
+**Token auth.** Each root gets its own generated token, so access is scoped to that instance. A token is never taken from the environment or written to disk in plaintext; the port-to-root mapping is persisted under the app home with mode `600`.
+
+**Reuse over restart.** Before spawning, the bot checks whether something is already listening on the root's port. If so it reuses that process instead of leaking a new one.
+
+**Health.** There is no dedicated health route. The bot treats a successful `GET /models` response — which carries a model list, so it proves the instance is both up and serving that root — as healthy. Set `REASONIX_SERVE_BINARY` if the `reasonix` binary is not on `PATH`.
+
+Use `/reasonix_start` and `/reasonix_stop` to start or stop the current root's instance from Telegram.
 
 ## Configuration
 
@@ -229,15 +227,15 @@ Trusted local commands live in `<appHome>/local-commands/`, one JSON file per co
 }
 ```
 
-`description` and `exec` are required; `description` is a single line of at most 256 characters. Extra fields are ignored. Commands run through the platform shell with the bot’s OS permissions and inherited environment, from `<appHome>`; treat every file in this directory as trusted code. They receive no Telegram text or attachments, never invoke OpenCode, time out after 30 seconds, and are not listed in `/help` or `/commands`. `allowWhenBusy` defaults to `false`; it permits a command while OpenCode is working but never during an active bot interaction.
+`description` and `exec` are required; `description` is a single line of at most 256 characters. Extra fields are ignored. Commands run through the platform shell with the bot’s OS permissions and inherited environment, from `<appHome>`; treat every file in this directory as trusted code. They receive no Telegram text or attachments, never invoke Reasonix, time out after 30 seconds, and are not listed in `/help` or `/commands`. `allowWhenBusy` defaults to `false`; it permits a command while Reasonix is working but never during an active bot interaction.
 
 ### Environment Variables
 
 Configuration can be provided through process environment variables or an `.env` file. Process environment values take precedence. When installed via npm, the configuration wizard handles any missing required values and stores the generated `.env` file in your platform's app data directory:
 
-- **macOS:** `~/Library/Application Support/opencode-telegram-bot/.env`
-- **Windows:** `%APPDATA%\opencode-telegram-bot\.env`
-- **Linux:** `~/.config/opencode-telegram-bot/.env`
+- **macOS:** `~/Library/Application Support/reasonix-telegram-bot/.env`
+- **Windows:** `%APPDATA%\reasonix-telegram-bot\.env`
+- **Linux:** `~/.config/reasonix-telegram-bot/.env`
 
 | Variable                                   | Description                                                                                                           | Required | Default                  |
 | ------------------------------------------ | --------------------------------------------------------------------------------------------------------------------- | :------: | ------------------------ |
@@ -247,14 +245,10 @@ Configuration can be provided through process environment variables or an `.env`
 | `TELEGRAM_API_ROOT`                        | Custom Telegram Bot API root URL (e.g. nginx reverse-proxying `api.telegram.org`); applied to API calls and file downloads | No | `https://api.telegram.org` |
 | `TELEGRAM_PROXY_SECRET`                    | Shared secret sent as `X-Proxy-Secret` header on every Bot API request and file download (used with `TELEGRAM_API_ROOT`) | No | —                        |
 | `TELEGRAM_FORCE_IPV4`                      | Force IPv4 for direct Telegram API and file requests; useful when IPv6 DNS works but outbound IPv6 is broken           |    No    | `false`                  |
-| `OPENCODE_SERVER_VERSION`                  | OpenCode server API version: `v1` or `v2`; must match the server you run; set by the setup wizard                     |    No    | `v1`                     |
-| `OPENCODE_API_URL`                         | OpenCode server URL                                                                                                   |    No    | `http://localhost:4096` (V1), `http://127.0.0.1:49374` (V2) |
-| `OPENCODE_AUTO_RESTART_ENABLED`            | Automatically restart a local OpenCode server when health-checks fail                                                 |    No    | `false`                  |
-| `OPENCODE_MONITOR_INTERVAL_SEC`            | Health monitor interval in seconds when OpenCode auto-restart is enabled                                              |    No    | `300`                    |
-| `OPENCODE_SERVER_USERNAME`                 | Server auth username                                                                                                  |    No    | `opencode`               |
-| `OPENCODE_SERVER_PASSWORD`                 | Server auth password (needed for V2, see [Old and New OpenCode Versions](#old-and-new-opencode-versions))                                   |    No    | —                        |
-| `OPENCODE_MODEL_PROVIDER`                  | Default model provider                                                                                                |   Yes    | `opencode`               |
-| `OPENCODE_MODEL_ID`                        | Default model ID                                                                                                      |   Yes    | `big-pickle`             |
+| `REASONIX_ROOTS`                          | Comma-separated absolute project roots the bot may serve; one Reasonix instance per root            |    No    | the bot's working directory |
+| `REASONIX_SERVE_BINARY`                    | Path to the `reasonix` binary the bot spawns for each root                                          |    No    | `reasonix`                |
+| `REASONIX_MODEL_PROVIDER`                  | Default model provider                                                                                                |   Yes    | —                         |
+| `REASONIX_MODEL_ID`                        | Default model ID                                                                                                      |   Yes    | —                         |
 | `BOT_LOCALE`                               | Bot UI language (supported locale code, e.g. `en`, `ar`, `de`, `es`, `fr`, `id`, `it`, `ko`, `pt`, `ru`, `tr`, `zh`)  |    No    | `en`                     |
 | `SESSIONS_LIST_LIMIT`                      | Sessions per page in `/sessions` and maximum sessions in `/recent`                                                    |    No    | `10`                     |
 | `MESSAGES_LIST_LIMIT`                      | User messages per page in `/messages`                                                                                 |    No    | `10`                     |
@@ -305,15 +299,15 @@ Runtime preferences are changed from `/settings` and stored in `settings.json`:
 - Diff file attachments
 - Response streaming mode: `edit` or `draft (experimental)`; applies only to final assistant replies, not thinking messages
 - Audio replies: `off`, `all`, or `auto` when TTS is configured
-- Message queue: `Off`, or what happens to text, voice, photos, rich formatted messages with photos, documents, and media groups sent while the agent is busy — on OpenCode V2 `Queue` or `Steer` (the default), on V1 `On` (the bot's own queue, off by default)
+- Message queue: `Off` or `Queue` (off by default) — what happens to text, voice, photos, rich formatted messages with photos, documents, and media groups sent while the agent is busy
 
-With the message queue on, text, transcribed voice, photos, rich formatted messages with photos, supported documents, and media groups sent while the agent is busy are accepted instead of being turned down. At most `MAX_QUEUED_PROMPTS` (5) messages wait at a time. Waiting messages appear as buttons above the usual bottom-keyboard grid — tap one to withdraw it — and `/abort`, `/opencode_stop` or a session/project switch withdraws them all. When a waiting message is picked up, its button disappears and its text is quoted as external user input.
+With the message queue on, text, transcribed voice, photos, rich formatted messages with photos, supported documents, and media groups sent while the agent is busy are accepted instead of being turned down. A waiting message is handed straight to the Reasonix session inbox and **nothing is buffered by the bot** — Reasonix delivers it. There is therefore no queued-media size limit, and a bot restart does not lose waiting messages, only their buttons. The bot keeps a mirror of the inbox so it can show waiting messages and let you withdraw one.
 
-`/detach` does not withdraw them: they stay with the detached session and reach it as if the bot had stayed attached, with the agent and model selected at `/detach` — a message still being transcribed or downloaded included. Their buttons leave the keyboard and they no longer count toward the limit. A later session or project switch leaves them alone; `/abort` after returning to that session, or `/opencode_stop`, withdraws them. Picked up while detached, they show nothing in the chat beyond the usual background notification; back in the session before pickup, each is quoted as external user input when it starts.
+`Steer` is not offered: Reasonix cannot steer a running turn. The client submits a turn directly (`POST /submit`) when the session is free and falls back to the inbox when Reasonix answers `409`, so a message sent while busy always waits for the current run to finish and then starts its own run.
 
-On OpenCode V2 a waiting message is sent to OpenCode at once and waits in the session's inbox, not in the bot: with `Steer` the running task picks it up at its next step and keeps going in the same progress message with one footer at the end; with `Queue` it starts its own run once the task finishes. Nothing is held by the bot, so there is no queued-media size limit, and after a bot restart the buttons are gone while OpenCode still delivers the messages.
+At most `MAX_QUEUED_PROMPTS` (5) waiting messages are tracked at a time. Waiting messages appear as buttons above the usual bottom-keyboard grid — tap one to withdraw it. `/abort`, `/reasonix_stop` or a session/project switch withdraws them all. When a waiting message is picked up, its button disappears and its text is quoted as external user input.
 
-On OpenCode V1 the bot holds the messages itself and sends them one at a time as each run finishes. Its queue also holds at most 20 MiB of raw Telegram media bytes in total; the limit is checked from reliable Telegram `file_size` metadata before media is downloaded or prepared, while base64 data-URI expansion is not counted. Queued media without a reliable source size is refused while the task is busy.
+`/detach` does not withdraw them: they stay with the detached session and reach it as if the bot had stayed attached, with the agent and model selected at `/detach` — a message still being transcribed or downloaded included. Their buttons leave the keyboard and they no longer count toward the limit. A later session or project switch leaves them alone; `/abort` after returning to that session, or `/reasonix_stop`, withdraws them. Picked up while detached, they show nothing in the chat beyond the usual background notification; back in the session before pickup, each is quoted as external user input when it starts.
 
 You can seed the initial defaults for any of these settings without hard-coding them in your Docker image by setting `INITIAL_SETTINGS_PRESET` to a JSON object. Only keys not yet persisted in `settings.json` are affected — settings the user has already changed via `/settings` are left untouched:
 
@@ -378,7 +372,7 @@ If `STT_API_URL` and `STT_API_KEY` are set, the bot will:
 1. Accept `voice` and `audio` Telegram messages
 2. Transcribe them via `POST {STT_API_URL}/audio/transcriptions`
 3. Show recognized text in chat
-4. Send the recognized text to OpenCode as a normal prompt
+4. Send the recognized text to Reasonix as a normal prompt
 
 If `STT_NOTE_PROMPT` is set to a non-empty value other than `false` or `0`, the bot prepends `[Note: ...]` to the transcription before sending it to the LLM. The recognized text shown in Telegram stays unchanged.
 
@@ -442,30 +436,26 @@ If the extractor is not configured and the model doesn't support documents, the 
 
 ### Model Configuration
 
-The model picker uses OpenCode local model state (`favorite` + `recent`):
+Reasonix keeps no favorites or recent-model history, so the model picker has no persisted list: the top of the picker shows just the currently selected model, and the full catalog is reached by provider.
 
-- Favorites are shown first, then recent
-- Models already in favorites are not duplicated in recent
-- Current model is marked with `✅`
-- Default model from `OPENCODE_MODEL_PROVIDER` + `OPENCODE_MODEL_ID` is always included in favorites
-
-To add a model to favorites, open OpenCode TUI (`opencode`), go to model selection, and press **Cmd+F/Ctrl+F** on the model.
-
-To pick a model that is neither a favorite nor recent, tap **🗂 Providers** in the model picker: it lists the connected providers, then the models of the selected one, both paginated by `MODELS_LIST_LIMIT`.
+- The current model is marked with `✅`
+- The default model from `REASONIX_MODEL_PROVIDER` + `REASONIX_MODEL_ID` is the selection until you pick another one
+- Tap **🗂 Providers** in the model picker: it lists the connected providers, then the models of the selected one, both paginated by `MODELS_LIST_LIMIT`
+- Only models Reasonix currently offers are listed; a provider with no models left is hidden
 
 ## Security
 
 The bot enforces a strict **user ID whitelist**. Only the Telegram user whose numeric ID matches `TELEGRAM_ALLOWED_USER_ID` can interact with the bot. Messages from any other user are silently ignored and logged as unauthorized access attempts.
 
-Since the bot runs locally on your machine and connects to your local OpenCode server, there is no external attack surface beyond the Telegram Bot API itself.
+Since the bot runs locally on your machine and connects to your local Reasonix server, there is no external attack surface beyond the Telegram Bot API itself.
 
 ## Development
 
 ### Running from Source
 
 ```bash
-git clone https://github.com/grinev/opencode-telegram-bot.git
-cd opencode-telegram-bot
+git clone https://github.com/philippthiele/reasonix-telegram-bot.git
+cd reasonix-telegram-bot
 npm install
 cp .env.example .env
 # Edit .env with your bot token, user ID, and model settings
@@ -479,24 +469,24 @@ npm run dev
 
 ### Docker Deployment
 
-The bot can also be run as a container using Docker and Docker Compose. The image contains **only the Telegram bot**. OpenCode stays on the host and must already be running before you start the container (`opencode serve --port 4096` on V1; for V2 see below). `/opencode_start` and `/opencode_stop` do not work from inside the container.
+The bot can also be run as a container using Docker and Docker Compose. The image contains **only the Telegram bot**; the `reasonix` binary must be reachable inside the container, either from a mounted build or from the host. `/reasonix_start` and `/reasonix_stop` do not work from inside the container.
 
 ```bash
-git clone https://github.com/grinev/opencode-telegram-bot.git
-cd opencode-telegram-bot
+git clone https://github.com/philippthiele/reasonix-telegram-bot.git
+cd reasonix-telegram-bot
 cp .env.example .env
 # Edit .env with your bot token, user ID, and model settings
 ```
 
 `.env` stays on the host. It is injected at runtime and is not copied into the image.
 
-**Linux** (OpenCode on the host at `127.0.0.1:4096`):
+**Linux** (host networking, so the spawned `reasonix serve` instances stay on loopback):
 
 ```bash
 docker compose up -d --build
 ```
 
-**macOS / Windows (Docker Desktop):** host networking does not reach OpenCode on the Windows/macOS localhost. Use the Desktop override, which talks to the host via `host.docker.internal`:
+**macOS / Windows (Docker Desktop):** host networking is not supported there. Use the Desktop override, which switches to the default bridge network:
 
 ```bash
 docker compose -f docker-compose.yml -f docker-compose.desktop.yml up -d --build
@@ -505,7 +495,7 @@ docker compose -f docker-compose.yml -f docker-compose.desktop.yml up -d --build
 Follow logs:
 
 ```bash
-docker compose logs -f opencode-bot
+docker compose logs -f reasonix-bot
 ```
 
 Stop:
@@ -516,27 +506,26 @@ docker compose down
 
 #### Persistence
 
-Runtime state (settings, logs, SQLite databases) is stored in a Docker named volume `opencode-bot-data` mapped to `/app/data` inside the container. The volume is created automatically on first run. It is the bot's own state, not your project files. OpenCode on the host continues to edit projects on the host disk.
+Runtime state (settings, logs, and the Reasonix instance port/token map) is stored in a Docker named volume `reasonix-bot-data` mapped to `/app/data` inside the container. The volume is created automatically on first run. It is the bot's own state, not your project files; project edits still happen on whatever disk the roots point at.
 
 #### Configuration
 
-All configuration is provided through environment variables in the `.env` file. Compose also sets `OPENCODE_TELEGRAM_CONTAINER=1` so the bot can warn about commands that need the host filesystem or a local OpenCode process.
+All configuration is provided through environment variables in the `.env` file. Compose also sets `REASONIX_TELEGRAM_CONTAINER=1` so the bot can warn about commands that need the host filesystem or a local Reasonix process.
 
-- `OPENCODE_API_URL` — URL of the OpenCode server. On Linux with the default compose file this is `http://127.0.0.1:4096` via `network_mode: host`. The Desktop override sets `http://host.docker.internal:4096`.
-- **OpenCode V2 in Docker** — both compose files point to a V1 server on port 4096. For V2, set `OPENCODE_SERVER_VERSION=v2`, `OPENCODE_SERVER_PASSWORD` and `OPENCODE_API_URL` together: in `.env` on Linux (for example `http://127.0.0.1:49374`), and by changing the URL in `docker-compose.desktop.yml` on Docker Desktop to the host address the V2 server listens on.
+The bot starts its own `reasonix serve` per root, so `reasonix` must be reachable inside the container. The default image does not bundle the Reasonix binary: either point `REASONIX_SERVE_BINARY` at a Reasonix build mounted into the container, or run Reasonix on the host and keep the roots on a shared volume. Set `REASONIX_ROOTS` to the container-visible paths of your projects.
 
 #### Commands that are not available in Docker
 
-These need the bot process to see host project paths or to spawn/stop `opencode` in the same machine namespace. The default image does neither, so the bot replies with a warning instead of a generic error:
+These need the bot process to see host project paths or to spawn/stop `reasonix serve` in the same machine namespace. The default image does neither, so the bot replies with a warning instead of a generic error:
 
 - `/open` — directory browser to add a project
 - `/ls` — project file browser / download / attach
-- `/opencode_start` and `/opencode_stop`
+- `/reasonix_start` and `/reasonix_stop`
 - `/worktree`
 
-`/projects`, `/sessions`, prompts, and live updates still go through the OpenCode HTTP API and work as usual.
+`/projects`, `/sessions`, prompts, and live updates still go through the Reasonix HTTP API and work as usual.
 
-Port 4096 is **not** exposed by the bot image; it belongs to the OpenCode server, which runs separately.
+Ports `47610`–`47809` are **not** exposed by the bot image; they belong to the Reasonix instances the bot spawns, which stay on the container's loopback interface.
 
 ### Available Scripts
 
@@ -562,23 +551,23 @@ Port 4096 is **not** exposed by the bot image; it belongs to the OpenCode server
 - Make sure `TELEGRAM_ALLOWED_USER_ID` matches your actual Telegram user ID (check with [@userinfobot](https://t.me/userinfobot))
 - Verify the bot token is correct
 
-**"OpenCode server is not available"**
+**"Reasonix server is not available"**
 
-- Ensure an OpenCode server is running at the configured `OPENCODE_API_URL` (default: `http://localhost:4096` on V1, `http://127.0.0.1:49374` on V2)
-- Check that `OPENCODE_SERVER_VERSION` matches the server you run, and on V2 that `OPENCODE_SERVER_PASSWORD` is correct (an authentication error in the bot log means a wrong password)
-- For a local setup, you can start it with `opencode serve` or use `/opencode_start` in Telegram
-- For VPS/systemd setups with scheduled tasks, enable `OPENCODE_AUTO_RESTART_ENABLED=true` to let the bot restart a local OpenCode server when health-checks fail
-- If `OPENCODE_API_URL` points to a remote server, verify that the address is reachable from the bot machine and that the remote server is healthy
+- Check that the `reasonix` binary is on the bot machine's `PATH`, or set `REASONIX_SERVE_BINARY` to its full path. The bot logs the spawn error when it cannot start it.
+- Check that the project path is inside a configured `REASONIX_ROOTS` entry, or add it. A session outside the roots is never opened.
+- Use `/reasonix_start` to start the current root's instance from Telegram and `/status` to see its health.
+- In a container, confirm the binary and the project roots are visible inside the container, not only on the host.
+- A bind failure on the root's port (already taken by an unrelated process) is reported per root in the bot log; the bot reuses whatever already listens on that port instead of starting a second one.
 
 **No models in model picker**
 
-- Add models to your OpenCode favorites: open OpenCode TUI, go to model selection, press **Ctrl+F** on desired models
-- Verify `OPENCODE_MODEL_PROVIDER` and `OPENCODE_MODEL_ID` point to an available model in your setup
+- Confirm Reasonix offers at least one provider and model: run `reasonix serve` and check `/models`, or open the Reasonix TUI model selection
+- Verify `REASONIX_MODEL_PROVIDER` and `REASONIX_MODEL_ID` point to an available model in your setup
 
 **Linux: permission denied errors**
 
-- Make sure the CLI binary has execute permission: `chmod +x $(which opencode-telegram)`
-- Check that the config directory is writable: `~/.config/opencode-telegram-bot/`
+- Make sure the CLI binary has execute permission: `chmod +x $(which reasonix-telegram)`
+- Check that the config directory is writable: `~/.config/reasonix-telegram-bot/`
 
 ## Contributing
 
@@ -586,7 +575,7 @@ Please follow commit and release note conventions in [CONTRIBUTING.md](CONTRIBUT
 
 ## Community
 
-Have questions, want to share your experience using the bot, or have an idea for a feature? Join the [Telegram group](https://t.me/+Fj_IyKRi6-41MGUy) for announcements and discussions, or start a thread in [GitHub Discussions](https://github.com/grinev/opencode-telegram-bot/discussions).
+Have questions, want to share your experience using the bot, or have an idea for a feature? Join the [Telegram group](https://t.me/+Fj_IyKRi6-41MGUy) for announcements and discussions, or start a thread in [GitHub Discussions](https://github.com/philippthiele/reasonix-telegram-bot/discussions).
 
 ## Support
 

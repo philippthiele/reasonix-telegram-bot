@@ -2,6 +2,7 @@ import { spawn, type ChildProcess } from "node:child_process";
 import { createHash, randomBytes } from "node:crypto";
 import fs from "node:fs";
 import net from "node:net";
+import os from "node:os";
 import path from "node:path";
 import { config } from "../config.js";
 import { logger } from "../utils/logger.js";
@@ -101,12 +102,30 @@ async function waitForReady(instance: ReasonixInstance): Promise<void> {
   throw new Error(`reasonix serve did not become ready on port ${instance.port}`);
 }
 
-function spawnServe(root: string, port: number, token: string): ChildProcess {
+interface SpawnedServe {
+  process: ChildProcess;
+  /** Resolves once the process is up; rejects when it could not be spawned. */
+  started: Promise<void>;
+}
+
+function spawnServe(root: string, port: number, token: string): SpawnedServe {
   const child = spawn(
     config.reasonix.serveBinary,
     ["serve", "--addr", `127.0.0.1:${port}`, "--auth", "token", "--token", token],
     { cwd: root, stdio: ["ignore", "pipe", "pipe"], env: process.env },
   );
+
+  // `spawn` reports a missing binary or a root that is not a directory through an
+  // asynchronous "error" event. Without a listener that is an uncaught exception
+  // that kills the whole bot, so turn it into a rejection the callers handle and
+  // keep a listener attached for any later error.
+  const started = new Promise<void>((resolve, reject) => {
+    child.once("spawn", () => resolve());
+    child.once("error", (error) => reject(error));
+  });
+  child.on("error", (error) => {
+    logger.debug(`[ReasonixInstance] serve(${root}) error: ${String(error)}`);
+  });
 
   child.stdout?.on("data", (chunk: Buffer) => {
     logger.debug(`[ReasonixInstance] serve(${root}): ${chunk.toString().trimEnd()}`);
@@ -123,10 +142,14 @@ function spawnServe(root: string, port: number, token: string): ChildProcess {
     }
   });
 
-  return child;
+  return { process: child, started };
 }
 
 async function startInstance(root: string): Promise<ReasonixInstance> {
+  if (!fs.existsSync(root) || !fs.statSync(root).isDirectory()) {
+    throw new Error(`Reasonix project root does not exist: ${root}`);
+  }
+
   const state = readState();
   const stored = state[root];
   const port = stored?.port ?? portForRoot(root);
@@ -147,18 +170,20 @@ async function startInstance(root: string): Promise<ReasonixInstance> {
   }
 
   logger.info(`[ReasonixInstance] Starting reasonix serve for ${root} on 127.0.0.1:${port}`);
+  const spawned = spawnServe(root, port, token);
   const instance: ReasonixInstance = {
     root,
     port,
     token,
     baseUrl: `http://127.0.0.1:${port}`,
-    process: spawnServe(root, port, token),
+    process: spawned.process,
   };
 
   state[root] = { port, token };
   writeState(state);
 
   try {
+    await spawned.started;
     await waitForReady(instance);
   } catch (error) {
     instance.process?.kill("SIGKILL");
@@ -232,4 +257,18 @@ export async function stopAllInstances(): Promise<void> {
   instances.clear();
   await Promise.all(all.map(stopInstance));
   logger.info(`[ReasonixInstance] Stopped ${all.length} serve instance(s)`);
+}
+
+/**
+ * The roots the bot may serve: the configured ones, or the working directory
+ * when none were named. A session outside these roots cannot be opened.
+ */
+export function configuredRoots(): string[] {
+  const roots = config.reasonix.roots.map((root) => path.resolve(root));
+  return roots.length > 0 ? [...new Set(roots)] : [process.cwd()];
+}
+
+/** Where Reasonix keeps its configuration, memory and transcripts. */
+export function reasonixHome(): string {
+  return process.env.REASONIX_HOME?.trim() || path.join(os.homedir(), ".reasonix");
 }

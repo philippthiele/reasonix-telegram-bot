@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import type { Event } from "@opencode-ai/sdk/v2";
 import { ReasonixEventTranslator } from "../../src/reasonix/events.js";
+import { defined } from "../helpers/defined.js";
 import type { ReasonixEvent } from "../../src/reasonix/types.js";
 
 const SESSION = "e645f97f6095d3daf8a04aaf108eca8b";
@@ -29,7 +30,7 @@ describe("ReasonixEventTranslator", () => {
 
     const started = translator.translate(runtimeState(true));
     expect(typesOf(started)).toEqual(["session.status"]);
-    expect((started[0].properties as { status: { type: string } }).status.type).toBe("busy");
+    expect((defined(started[0]).properties as { status: { type: string } }).status.type).toBe("busy");
 
     // Reasonix repeats the running state on every frame of a turn.
     expect(translator.translate(runtimeState(true))).toEqual([]);
@@ -60,7 +61,7 @@ describe("ReasonixEventTranslator", () => {
       text: "ok",
     });
     expect(typesOf(delta)).toEqual(["message.part.delta"]);
-    const properties = delta[0].properties as {
+    const properties = defined(delta[0]).properties as {
       part: { type: string; text: string };
       delta: string;
     };
@@ -80,7 +81,7 @@ describe("ReasonixEventTranslator", () => {
     });
 
     expect(typesOf(events)).toEqual(["message.updated", "message.part.delta"]);
-    const delta = events[1].properties as { part: { type: string } };
+    const delta = defined(events[1]).properties as { part: { type: string } };
     expect(delta.part.type).toBe("reasoning");
   });
 
@@ -102,13 +103,13 @@ describe("ReasonixEventTranslator", () => {
       "message.updated",
     ]);
 
-    const textPart = events[1].properties as { part: { type: string; text: string } };
+    const textPart = defined(events[1]).properties as { part: { type: string; text: string } };
     expect(textPart.part).toMatchObject({ type: "text", text: "all of it" });
 
-    const reasoningPart = events[2].properties as { part: { type: string; text: string } };
+    const reasoningPart = defined(events[2]).properties as { part: { type: string; text: string } };
     expect(reasoningPart.part).toMatchObject({ type: "reasoning", text: "because" });
 
-    const completed = events[3].properties as {
+    const completed = defined(events[3]).properties as {
       info: { role: string; time: { completed?: number } };
     };
     expect(completed.info.role).toBe("assistant");
@@ -132,7 +133,7 @@ describe("ReasonixEventTranslator", () => {
       messageId: MESSAGE,
       tool: { id: callId, name: "", output: "a.txt\n" },
     });
-    const running = progress[0].properties as {
+    const running = defined(progress[0]).properties as {
       part: { tool: string; state: { status: string; title?: string } };
     };
     expect(running.part.tool).toBe("bash");
@@ -144,7 +145,7 @@ describe("ReasonixEventTranslator", () => {
       messageId: MESSAGE,
       tool: { id: callId, name: "bash", output: "a.txt\n", runState: "completed", durationMs: 252 },
     });
-    const completed = done[0].properties as {
+    const completed = defined(done[0]).properties as {
       part: {
         callID: string;
         state: { status: string; output: string; input: { command: string } };
@@ -166,7 +167,7 @@ describe("ReasonixEventTranslator", () => {
       tool: { id: "call_1", name: "bash", args: '{"command": "false"}', err: "exit status 1" },
     });
 
-    const state = (events[0].properties as { part: { state: { status: string; error: string } } })
+    const state = (defined(events[0]).properties as { part: { state: { status: string; error: string } } })
       .part.state;
     expect(state.status).toBe("error");
     expect(state.error).toBe("exit status 1");
@@ -189,7 +190,7 @@ describe("ReasonixEventTranslator", () => {
     });
 
     expect(typesOf(events)).toEqual(["permission.asked"]);
-    const properties = events[0].properties as unknown as {
+    const properties = defined(events[0]).properties as unknown as {
       id: string;
       sessionID: string;
       permission: string;
@@ -226,7 +227,7 @@ describe("ReasonixEventTranslator", () => {
     });
 
     expect(typesOf(events)).toEqual(["question.asked"]);
-    const properties = events[0].properties as unknown as {
+    const properties = defined(events[0]).properties as unknown as {
       id: string;
       questions: Array<{
         question: string;
@@ -236,15 +237,13 @@ describe("ReasonixEventTranslator", () => {
       }>;
     };
     expect(properties.id).toBe("2");
-    expect(properties.questions[0]).toMatchObject({
+    const question = defined(properties.questions[0]);
+    expect(question).toMatchObject({
       question: "Tea or coffee?",
       header: "Drink",
       custom: false,
     });
-    expect(properties.questions[0].options.map((option) => option.label)).toEqual([
-      "Tea",
-      "Coffee",
-    ]);
+    expect(question.options.map((option) => option.label)).toEqual(["Tea", "Coffee"]);
   });
 
   it("reports a turn that did not complete as a session error", () => {
@@ -272,7 +271,7 @@ describe("ReasonixEventTranslator", () => {
     });
 
     expect(typesOf(events)).toEqual(["session.created", "session.updated"]);
-    const created = events[0].properties as { info: { id: string; directory: string } };
+    const created = defined(events[0]).properties as { info: { id: string; directory: string } };
     expect(created.info).toMatchObject({ id: "new-session", directory: "/home/dev/project" });
   });
 
@@ -287,7 +286,7 @@ describe("ReasonixEventTranslator", () => {
     });
 
     expect(typesOf(events)).toEqual(["session.created", "session.updated"]);
-    const created = events[0].properties as { info: { directory: string } };
+    const created = defined(events[0]).properties as { info: { directory: string } };
     expect(created.info.directory).toBe("/tmp/proj");
   });
 
@@ -301,7 +300,7 @@ describe("ReasonixEventTranslator", () => {
     );
 
     expect(typesOf(events)).toContain("todo.updated");
-    const todos = events[events.length - 1].properties as {
+    const todos = defined(events[events.length - 1]).properties as {
       todos: Array<{ content: string; status: string }>;
     };
     expect(todos.todos).toEqual([

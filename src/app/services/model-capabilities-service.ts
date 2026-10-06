@@ -9,7 +9,7 @@ interface ModelCapabilitiesCache {
 const capabilitiesCache: ModelCapabilitiesCache = {};
 
 /**
- * Get model capabilities from OpenCode API
+ * Get model capabilities from the Reasonix API
  * Capabilities of a listed model are cached in memory per model; an unlisted model is not,
  * so the next file asks the server again.
  */

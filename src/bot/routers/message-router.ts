@@ -8,13 +8,10 @@ import {
   handleModelSearchTextInput,
 } from "../callbacks/model-selection-callback-handler.js";
 import { handleQuestionTextAnswer } from "../callbacks/question-callback-handler.js";
-import { handleRenameTextAnswer } from "../callbacks/rename-callback-handler.js";
 import { handleContextButtonPress } from "../menus/context-control-menu.js";
-import { showAgentSelectionMenu } from "../menus/agent-selection-menu.js";
 import { showModelSelectionMenu } from "../menus/model-selection-menu.js";
 import { showVariantSelectionMenu } from "../menus/variant-selection-menu.js";
 import {
-  AGENT_MODE_BUTTON_TEXT_PATTERN,
   CONTEXT_BUTTON_TEXT_PATTERN,
   MODEL_BUTTON_TEXT_PATTERN,
   QUEUED_PROMPT_BUTTON_TEXT_PATTERN,
@@ -90,25 +87,11 @@ export function registerMessageRouter(bot: Bot<Context>, deps: MessageRouterDeps
 
     // The queue was drained or cleared after Telegram rendered the keyboard the
     // user pressed. Never fall through to the prompt handler: that would send
-    // the button label itself to OpenCode as a prompt.
+    // the button label itself to Reasonix as a prompt.
     const keyboard = container.keyboardManager.getKeyboard();
     await ctx.reply(t("queue.not_found"), keyboard ? { reply_markup: keyboard } : {});
   });
 
-  bot.hears(AGENT_MODE_BUTTON_TEXT_PATTERN, async (ctx) => {
-    logger.debug(`[Bot] Agent button pressed: ${ctx.message?.text}`);
-
-    try {
-      if (await blockMenuWhileInteractionActive(ctx, container.interactionManager)) {
-        return;
-      }
-
-      await showAgentSelectionMenu(ctx, container);
-    } catch (err) {
-      logger.error("[Bot] Error showing agent menu:", err);
-      await ctx.reply(t("error.load_agents"));
-    }
-  });
 
   bot.hears(MODEL_BUTTON_TEXT_PATTERN, async (ctx) => {
     logger.debug(`[Bot] Model button pressed: ${ctx.message?.text}`);
@@ -225,10 +208,6 @@ export function registerMessageRouter(bot: Bot<Context>, deps: MessageRouterDeps
       return;
     }
 
-    const handledRename = await handleRenameTextAnswer(ctx, container);
-    if (handledRename) {
-      return;
-    }
 
     const handledCatalogTextArgs = await handleCatalogTextArguments(ctx, botDeps);
     if (handledCatalogTextArgs) {

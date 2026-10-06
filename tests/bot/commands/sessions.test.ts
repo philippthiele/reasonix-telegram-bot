@@ -19,7 +19,7 @@ const mocked = vi.hoisted(() => ({
     worktree: "/repo",
   } as { id: string; worktree: string; name?: string } | null,
   sessionListMock: vi.fn(),
-  fileListMock: vi.fn(),
+  missingFolders: new Set<string>(),
   sessionGetMock: vi.fn(),
   sessionMessagesMock: vi.fn(),
   sessionStatusMock: vi.fn(),
@@ -43,10 +43,20 @@ const mocked = vi.hoisted(() => ({
   ensureEventSubscriptionMock: vi.fn(),
 }));
 
-vi.mock("../../../src/opencode/client.js", () => ({
-  opencodeServerVersion: "v2",
-  opencodeV2Client: { file: { list: mocked.fileListMock } },
-  opencodeClient: {
+// Folders in `missingFolders` read as gone; every other folder is taken at its word.
+vi.mock("node:fs/promises", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("node:fs/promises")>();
+  const stat = async (folder: string) => {
+    if (mocked.missingFolders.has(folder)) {
+      throw Object.assign(new Error("no such file or directory"), { code: "ENOENT" });
+    }
+    return { isDirectory: () => true };
+  };
+  return { ...actual, stat, default: { ...actual, stat } };
+});
+
+vi.mock("../../../src/reasonix/client.js", () => ({
+  reasonixClient: {
     session: {
       list: mocked.sessionListMock,
       get: mocked.sessionGetMock,
@@ -209,13 +219,13 @@ beforeEach(() => {
 describe("bot/commands/sessions", () => {
   beforeEach(() => {
     container.interactionManager.clear("test_setup");
+    mocked.missingFolders.clear();
     mocked.currentProject = {
       id: "project-1",
       worktree: "/repo",
     };
 
     mocked.sessionListMock.mockReset();
-    mocked.fileListMock.mockReset().mockResolvedValue({ data: [], error: undefined });
     mocked.sessionGetMock.mockReset();
     mocked.sessionMessagesMock.mockReset();
     mocked.sessionMessagesMock.mockResolvedValue({ data: [], error: null });
@@ -275,18 +285,8 @@ describe("bot/commands/sessions", () => {
       data: sessions.slice(0, limit),
       error: null,
     }));
-    mocked.fileListMock.mockImplementation(async ({ path }: { path: string }) =>
-      path === "/gone"
-        ? {
-            data: undefined,
-            error: Object.assign(new Error("500"), {
-              name: "ClientError",
-              reason: "UnexpectedStatus",
-              cause: { status: 500 },
-            }),
-          }
-        : { data: path === "/" ? ["repo/"] : [], error: undefined },
-    );
+    mocked.missingFolders.clear();
+    mocked.missingFolders.add("/gone");
 
     const ctx = createCommandContext();
     await sessionsCommand(ctx as never, createDeps());
@@ -297,7 +297,7 @@ describe("bot/commands/sessions", () => {
     expect(keyboardRows[10]?.[0]?.callback_data).toBe("session:page:1");
   });
 
-  it("lists a session OpenCode has not named yet as a new session", async () => {
+  it("lists a session Reasonix has not named yet as a new session", async () => {
     mocked.sessionListMock.mockResolvedValueOnce({
       data: [{ ...createSession(0), title: "" }],
       error: null,

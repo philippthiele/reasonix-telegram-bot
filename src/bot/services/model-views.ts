@@ -1,6 +1,6 @@
 import type { AppContainer } from "../../app/bootstrap/app-container.js";
 import { getStoredModel } from "../../app/services/model-selection-service.js";
-import { watchLateModelCatalogChanges } from "../../opencode/ready-refresh.js";
+import { watchLateModelCatalogChanges } from "../../reasonix/ready-refresh.js";
 import { logger } from "../../utils/logger.js";
 import { safeBackgroundTask } from "../../utils/safe-background-task.js";
 

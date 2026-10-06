@@ -3,15 +3,18 @@
 ## 1. Install and configure the bot
 
 ```bash
-npm install -g @grinev/opencode-telegram-bot@latest
-opencode-telegram config
+npm install -g reasonix-telegram-bot@latest
+reasonix-telegram config
 ```
+
+`config` writes the `.env` and `settings.json` into the installed app home and launches the setup wizard.
 
 ## 2. Get the required paths
 
 ```bash
 which node
-which opencode-telegram
+which reasonix
+which reasonix-telegram
 dirname "$(which node)"
 ```
 
@@ -19,23 +22,25 @@ Use these values in the service file:
 
 - `<USER>`: your Linux user
 - `<NODE_PATH>`: output of `which node`
-- `<OPENCODE_TELEGRAM_PATH>`: output of `which opencode-telegram`
+- `<REASONIX_TELEGRAM_PATH>`: output of `which reasonix-telegram`
 - `<NODE_BIN_DIR>`: output of `dirname "$(which node)"`
+
+`reasonix` must be on the `PATH` given to the service: the bot starts one `reasonix serve` per project root itself. If the binary is somewhere else, set `REASONIX_SERVE_BINARY` in the bot `.env`.
 
 ## 3. Create the service file
 
-Create `/etc/systemd/system/opencode-telegram-bot.service`:
+Create `/etc/systemd/system/reasonix-telegram-bot.service`:
 
 ```ini
 [Unit]
-Description=OpenCode Telegram Bot
+Description=Reasonix Telegram Bot
 After=network.target
 
 [Service]
 Type=simple
 User=<USER>
 Environment=PATH=<NODE_BIN_DIR>:/usr/local/bin:/usr/bin:/bin
-ExecStart=<NODE_PATH> <OPENCODE_TELEGRAM_PATH> start
+ExecStart=<NODE_PATH> <REASONIX_TELEGRAM_PATH> start
 Restart=on-failure
 RestartSec=5
 
@@ -49,27 +54,30 @@ Run the bot in foreground mode. Do not use `--daemon` under `systemd`.
 
 ```bash
 sudo systemctl daemon-reload
-sudo systemctl enable opencode-telegram-bot
-sudo systemctl start opencode-telegram-bot
-sudo systemctl status opencode-telegram-bot
+sudo systemctl enable reasonix-telegram-bot
+sudo systemctl start reasonix-telegram-bot
+sudo systemctl status reasonix-telegram-bot
 ```
 
-## 5. Optional: auto-restart local OpenCode server
+## 5. Project roots
 
-For VPS setups with scheduled tasks, enable the bot's local OpenCode server monitor in the bot `.env` file:
+The bot serves the roots in `REASONIX_ROOTS`, one `reasonix serve` instance each:
 
 ```env
-OPENCODE_AUTO_RESTART_ENABLED=true
-OPENCODE_MONITOR_INTERVAL_SEC=300
+REASONIX_ROOTS=/home/user/repo-a,/home/user/repo-b
 ```
 
-This only works when `OPENCODE_API_URL` points to a local address, for example `http://localhost:4096`. The bot starts `opencode serve` with the configured port and checks the server every 300 seconds by default. On OpenCode V2 it starts the V2 background server instead; see [Old and New OpenCode Versions](../README.md#old-and-new-opencode-versions).
+When unset, it serves its own working directory. Each root gets a stable port in `47610`-`47809` with its own token; ports and tokens are persisted so a bot restart reconnects to the same instances instead of leaving orphans.
+
+If the bot runs as a system service but you want to serve files under your home directory, grant it read access to those roots. Do not run the service as root.
 
 ## 6. View logs
 
 ```bash
-sudo journalctl -u opencode-telegram-bot -f
+sudo journalctl -u reasonix-telegram-bot -f
 ```
+
+The bot also writes its own log files under `<app home>/logs` (`logs` in source mode).
 
 ## Example
 
@@ -79,14 +87,14 @@ This is a working example for an `nvm`-based setup:
 
 ```ini
 [Unit]
-Description=OpenCode Telegram Bot
+Description=Reasonix Telegram Bot
 After=network.target
 
 [Service]
 Type=simple
 User=admin
-Environment=PATH=/home/admin/.nvm/versions/node/v20.20.2/bin:/usr/local/bin:/usr/bin:/bin
-ExecStart=/home/admin/.nvm/versions/node/v20.20.2/bin/node /home/admin/.nvm/versions/node/v20.20.2/bin/opencode-telegram
+Environment=PATH=/home/admin/.nvm/versions/node/v22.23.2/bin:/usr/local/bin:/usr/bin:/bin
+ExecStart=/home/admin/.nvm/versions/node/v22.23.2/bin/node /home/admin/.nvm/versions/node/v22.23.2/bin/reasonix-telegram
 Restart=on-failure
 RestartSec=5
 

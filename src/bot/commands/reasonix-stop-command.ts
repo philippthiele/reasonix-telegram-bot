@@ -1,11 +1,7 @@
 import { CommandContext, Context } from "grammy";
 import type { AppContainer } from "../../app/bootstrap/app-container.js";
-import { config } from "../../config.js";
-import {
-  findServerPid,
-  killServerProcess,
-  resolveLocalOpencodeTarget,
-} from "../../opencode/process.js";
+import { getRunningInstances, stopAllInstances } from "../../reasonix/instance.js";
+import { stopEventListening } from "../../reasonix/event-stream.js";
 import { logger } from "../../utils/logger.js";
 import { t } from "../../i18n/index.js";
 import { isContainerRuntime } from "../../runtime/container.js";
@@ -16,19 +12,19 @@ import { markAttachedSessionIdle } from "../../app/services/attach-service.js";
 import { clearPromptResponseMode } from "../handlers/prompt.js";
 import { withdrawAllHandedOverPrompts } from "../handlers/prompt-handover.js";
 
-export type OpencodeStopCommandDeps = Pick<
+export type ReasonixStopCommandDeps = Pick<
   AppContainer,
   | "attachManager"
   | "endRunLostWithServer"
   | "foregroundSessionState"
-  | "opencodeReadyLifecycle"
+  | "reasonixReadyLifecycle"
   | "resetInteractions"
   | "resetRuntimeStreams"
 >;
 
-const STOP_REASON = "opencode_stop";
+const STOP_REASON = "reasonix_stop";
 
-async function releaseLocalStateAfterServerStop(deps: OpencodeStopCommandDeps): Promise<void> {
+async function releaseLocalStateAfterServerStop(deps: ReasonixStopCommandDeps): Promise<void> {
   const sessionIds = new Set<string>();
 
   for (const session of deps.foregroundSessionState.getBusySessions()) {
@@ -40,7 +36,7 @@ async function releaseLocalStateAfterServerStop(deps: OpencodeStopCommandDeps): 
     sessionIds.add(attached.sessionId);
   }
 
-  // The stopped server never ends its run: the chat ends it as after /abort (V2 only).
+  // The stopped server never ends its run: the chat ends it as after /abort.
   await deps.endRunLostWithServer(STOP_REASON);
   deps.resetRuntimeStreams(STOP_REASON);
   deps.foregroundSessionState.clearAll(STOP_REASON);
@@ -55,16 +51,16 @@ async function releaseLocalStateAfterServerStop(deps: OpencodeStopCommandDeps): 
 
   promptQueue.clear(STOP_REASON);
   deps.resetInteractions(STOP_REASON);
-  deps.opencodeReadyLifecycle.notifyUnavailable(STOP_REASON);
+  deps.reasonixReadyLifecycle.notifyUnavailable(STOP_REASON);
 }
 
 /**
- * Command handler for /opencode-stop
- * Stops the OpenCode server process
+ * Command handler for /reasonix_stop
+ * Stops the Reasonix serve processes this bot started. They start again on next use.
  */
-export async function opencodeStopCommand(
+export async function reasonixStopCommand(
   ctx: CommandContext<Context>,
-  deps: OpencodeStopCommandDeps,
+  deps: ReasonixStopCommandDeps,
 ) {
   try {
     if (isContainerRuntime()) {
@@ -72,48 +68,37 @@ export async function opencodeStopCommand(
       return;
     }
 
-    const localTarget = resolveLocalOpencodeTarget(config.opencode.apiUrl);
-    if (!localTarget) {
-      await ctx.reply(t("opencode_stop.remote_configured"));
+    const count = getRunningInstances().length;
+    if (count === 0) {
+      await ctx.reply(t("reasonix_stop.not_running"));
       return;
     }
 
-    const pid = await findServerPid(localTarget.port);
-    if (!pid) {
-      await ctx.reply(t("opencode_stop.not_running"));
-      return;
-    }
+    const statusMessage = await ctx.reply(t("reasonix_stop.stopping", { count }));
 
-    const statusMessage = await ctx.reply(t("opencode_stop.stopping", { pid }));
-
-    // The OpenCode V2 inbox outlives the process, so waiting prompts are withdrawn first,
+    // A Reasonix inbox outlives the process, so waiting prompts are withdrawn first,
     // those handed over at /detach included.
     await withdrawPromptQueue(STOP_REASON);
     await withdrawAllHandedOverPrompts(STOP_REASON);
 
-    const stopped = await killServerProcess(pid, 5000);
-    if (!stopped) {
-      await editBotText({
-        api: ctx.api,
-        chatId: ctx.chat.id,
-        messageId: statusMessage.message_id,
-        text: t("opencode_stop.stop_error", { error: t("common.unknown_error") }),
-      });
-      return;
-    }
+    // Stop listening before the processes die: the reconnect loop re-subscribes through the
+    // client, which would immediately spawn a fresh serve and undo the stop. The next use
+    // re-subscribes and starts serve again.
+    stopEventListening();
 
+    await stopAllInstances();
     await releaseLocalStateAfterServerStop(deps);
 
     await editBotText({
       api: ctx.api,
       chatId: ctx.chat.id,
       messageId: statusMessage.message_id,
-      text: t("opencode_stop.success"),
+      text: t("reasonix_stop.success", { count }),
     });
 
-    logger.info(`[Bot] OpenCode server stopped successfully, PID=${pid}, port=${localTarget.port}`);
+    logger.info(`[Bot] Stopped ${count} Reasonix serve instance(s)`);
   } catch (err) {
-    logger.error("[Bot] Error in /opencode-stop command:", err);
-    await ctx.reply(t("opencode_stop.error"));
+    logger.error("[Bot] Error in /reasonix_stop command:", err);
+    await ctx.reply(t("reasonix_stop.error"));
   }
 }

@@ -1,6 +1,6 @@
 import type { Context } from "grammy";
 import type { AppContainer } from "../../app/bootstrap/app-container.js";
-import { opencodeClient } from "../../opencode/client.js";
+import { reasonixClient } from "../../reasonix/client.js";
 import { getCurrentProject } from "../../app/stores/settings-store.js";
 import { getCurrentSession } from "../../app/services/session-service.js";
 import {
@@ -36,7 +36,7 @@ function getCallbackMessageId(ctx: Context): number | null {
   return typeof messageId === "number" ? messageId : null;
 }
 
-/** The poll's last question: answering it sends the whole poll to OpenCode. */
+/** The poll's last question: answering it sends the whole poll to Reasonix. */
 function isLastQuestion(deps: QuestionCallbackDeps, questionIndex: number): boolean {
   return questionIndex === deps.questionManager.getTotalQuestions() - 1;
 }
@@ -208,7 +208,7 @@ async function handleSubmitAnswer(
 
 /**
  * A question was answered: the last one sends the poll's answers and stays on screen until
- * OpenCode takes them, an earlier one gives way to the next question. A poll that was closed
+ * Reasonix takes them, an earlier one gives way to the next question. A poll that was closed
  * while the tap was being acknowledged (settled outside Telegram, a reset) is left as it is.
  */
 async function answerStep(
@@ -307,7 +307,7 @@ async function handleCancelPoll(ctx: Context, deps: QuestionCallbackDeps): Promi
   safeBackgroundTask({
     taskName: "question.reject",
     task: async (): Promise<QuestionReplyResult> => {
-      const { error } = await opencodeClient.question.reject({ requestID, directory });
+      const { error } = await reasonixClient.question.reject({ requestID, directory });
       if (!error) {
         return "accepted";
       }
@@ -326,7 +326,7 @@ async function handleCancelPoll(ctx: Context, deps: QuestionCallbackDeps): Promi
 }
 
 /**
- * Ends the poll once OpenCode answered the dismissal, or leaves it answerable with a
+ * Ends the poll once Reasonix answered the dismissal, or leaves it answerable with a
  * warning when the dismissal did not get through. A poll something else already ended
  * stays as it is.
  */
@@ -353,7 +353,7 @@ async function finishDismissal(
   } else if (result === "gone") {
     await closeQuestionSettledOutside(api, chatId, "cancelled", deps);
   } else if (result === "accepted" || settled === "cancelled") {
-    // A lost reply still counts when OpenCode reported the question dismissed.
+    // A lost reply still counts when Reasonix reported the question dismissed.
     await closeQuestionCancelled(api, chatId, deps);
   } else {
     questionManager.failDismissal();

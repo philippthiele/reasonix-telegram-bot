@@ -2,9 +2,9 @@ import { describe, expect, it } from "vitest";
 import {
   extractErrorMessage,
   isServerUnavailableError,
-} from "../../src/utils/opencode-error.js";
+} from "../../src/utils/reasonix-error.js";
 
-describe("utils/opencode-error", () => {
+describe("utils/reasonix-error", () => {
   describe("extractErrorMessage", () => {
     it("extracts the message from Error instances", () => {
       expect(extractErrorMessage(new Error("boom"))).toBe("boom");

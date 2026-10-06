@@ -1,7 +1,7 @@
 import type { I18nDictionary } from "./en.js";
 
 /**
- * Indonesian localization for OpenCode Telegram Bot.
+ * Indonesian localization for Reasonix Telegram Bot.
  *
  * Keep upstream emoji and technical terms where they help recognition.
  * Prefer natural Indonesian wording over literal translation.
@@ -28,17 +28,15 @@ export const id: I18nDictionary = {
   "cmd.description.tasklist": "Daftar tugas terjadwal",
   "cmd.description.commands": "Perintah khusus",
   "cmd.description.skills": "Katalog skill",
-  "cmd.description.mcps": "Server MCP",
-  "cmd.description.opencode_start": "Mulai server OpenCode",
-  "cmd.description.opencode_stop": "Hentikan server OpenCode",
-  "cmd.description.reload": "Reload OpenCode configuration",
+  "cmd.description.reasonix_start": "Mulai server Reasonix",
+  "cmd.description.reasonix_stop": "Hentikan server Reasonix",
+  "cmd.description.reload": "Reload Reasonix configuration",
   "cmd.description.ls": "Daftar isi direktori",
   "cmd.description.help": "Bantuan",
 
   "callback.unknown_command": "Perintah tidak dikenal",
   "callback.processing_error": "Gagal memproses",
 
-  "error.load_agents": "❌ Gagal memuat daftar agent",
   "error.load_models": "❌ Gagal memuat daftar model",
   "error.load_variants": "❌ Gagal memuat daftar varian",
   "error.context_button": "❌ Gagal memproses tombol konteks",
@@ -71,11 +69,9 @@ export const id: I18nDictionary = {
   "common.unknown_error": "kesalahan tidak diketahui",
 
   "start.welcome":
-    "👋 Selamat datang di OpenCode Telegram Bot!\n\nGunakan perintah:\n/projects — pilih proyek\n/sessions — daftar sesi\n/new — sesi baru\n/commands — perintah khusus\n/skills — katalog skill\n/task — tugas terjadwal\n/tasklist — daftar tugas terjadwal\n/status — status\n/help — bantuan\n\nGunakan tombol di bawah untuk memilih agent, model, dan varian.",
+    "👋 Selamat datang di Reasonix Telegram Bot!\n\nGunakan perintah:\n/projects — pilih proyek\n/sessions — daftar sesi\n/new — sesi baru\n/commands — perintah khusus\n/skills — katalog skill\n/task — tugas terjadwal\n/tasklist — daftar tugas terjadwal\n/status — status\n/help — bantuan\n\nGunakan tombol di bawah untuk memilih agent, model, dan varian.",
   "help.keyboard_hint":
     "💡 Gunakan tombol keyboard di bawah untuk agent, model, varian, dan aksi konteks.",
-  "help.text":
-    "📖 **Bantuan**\n\n/status - Periksa status server\n/sessions - Daftar sesi\n/new - Buat sesi baru\n/help - Bantuan",
 
   "bot.thinking": "💭 Berpikir...",
   "progress.compact.activity": "{header}\n{activity}",
@@ -83,7 +79,6 @@ export const id: I18nDictionary = {
   "progress.compact.finished_header": "✅ Pekerjaan Selesai",
   "progress.compact.thinking": "💭 Berpikir...",
   "progress.compact.responding": "✍️ Menulis jawaban...",
-  "progress.compact.waiting_question": "❓ Menunggu jawabanmu...",
   "progress.compact.waiting_permission": "🔐 Menunggu izin...",
   "progress.compact.retrying": "🔁 Mencoba lagi...",
   "progress.compact.task": "🤖 Menjalankan Tugas",
@@ -97,12 +92,12 @@ export const id: I18nDictionary = {
     "⏳ Agent sedang menjalankan tugas. Tunggu hingga selesai atau gunakan /abort untuk menghentikan tugas yang sedang berjalan.",
   "bot.session_reset_project_mismatch":
     "⚠️ Sesi aktif tidak cocok dengan proyek yang dipilih, jadi sesi direset. Gunakan /sessions untuk memilih atau /new untuk membuat sesi baru.",
-  "bot.prompt_send_error": "Gagal mengirim prompt ke OpenCode.",
+  "bot.prompt_send_error": "Gagal mengirim prompt ke Reasonix.",
   "bot.project_folder_missing":
     "🚫 The project folder no longer exists: {path}. Choose another project in /projects.",
   "bot.project_folder_missing_worktree":
     "🚫 The project folder no longer exists: {path}. Choose another worktree in /worktree.",
-  "bot.session_error": "🔴 OpenCode mengembalikan kesalahan: {message}",
+  "bot.session_error": "🔴 Reasonix mengembalikan kesalahan: {message}",
   "bot.assistant_reply_undelivered":
     "⚠️ Balasan terakhir dari asisten tidak berhasil dikirim. Kirim ulang pesanmu jika masih membutuhkannya.",
   "bot.stale_messages_skipped":
@@ -118,40 +113,28 @@ export const id: I18nDictionary = {
   "bot.unknown_command":
     "⚠️ Perintah tidak dikenal: {command}. Gunakan /help untuk melihat perintah yang tersedia.",
   "bot.photo_downloading": "⏳ Mengunduh foto...",
-  "bot.photo_too_large": "⚠️ Foto terlalu besar (maks {maxSizeMb}MB)",
   "bot.photo_model_no_image": "⚠️ Model saat ini tidak mendukung input gambar. Mengirim teks saja.",
   "bot.photo_download_error": "🔴 Gagal mengunduh foto",
-  "bot.photo_no_caption":
-    "💡 Tips: Tambahkan keterangan untuk menjelaskan apa yang ingin dilakukan dengan foto ini.",
   "bot.file_downloading": "⏳ Mengunduh file...",
   "bot.files_downloading": "⏳ Mengunduh file...",
-  "bot.file_too_large": "⚠️ File terlalu besar (maks {maxSizeMb}MB)",
   "bot.file_download_error": "🔴 Gagal mengunduh file",
   "bot.file_type_unsupported":
     "⚠️ Jenis file ini tidak didukung. Kirim gambar, dokumen (PDF, DOCX, PPTX), atau file teks/kode.",
   "bot.rich_message_media_skipped": "⚠️ Melewati {count} bagian media yang tidak didukung.",
   "bot.message_type_unsupported": "⚠️ Jenis pesan ini tidak didukung.",
   "bot.media_group_not_processed":
-    "⚠️ Ada file di album ini yang tidak bisa diproses. Tidak ada yang dikirim ke OpenCode.",
+    "⚠️ Ada file di album ini yang tidak bisa diproses. Tidak ada yang dikirim ke Reasonix.",
   "bot.media_group_download_error":
-    "🔴 Gagal mengunduh salah satu file. Tidak ada yang dikirim ke OpenCode.",
+    "🔴 Gagal mengunduh salah satu file. Tidak ada yang dikirim ke Reasonix.",
   "bot.model_no_pdf": "⚠️ Model saat ini tidak mendukung input PDF. Mengirim teks saja.",
   "bot.document_extraction_error": "🔴 Gagal mengekstrak teks dokumen.",
   "bot.text_file_too_large": "⚠️ File teks terlalu besar (maks {maxSizeKb}KB)",
 
-  "status.header_running": "🟢 Server OpenCode sedang berjalan",
-  "status.health.healthy": "Sehat",
-  "status.health.unhealthy": "Tidak sehat",
-  "status.line.health": "Status: {health}",
-  "status.line.version": "Versi OpenCode: {version}",
+  "status.header_running": "🟢 Server Reasonix sedang berjalan",
+  "status.line.version": "Versi Reasonix: {version}",
   "status.line.bot_version": "Versi bot: {version}",
-  "status.line.managed_yes": "Dimulai oleh bot: Ya",
-  "status.line.managed_no": "Dimulai oleh bot: Tidak",
-  "status.line.pid": "PID: {pid}",
-  "status.line.uptime_sec": "Waktu aktif: {seconds} detik",
   "status.line.mode": "Agent: {mode}",
   "status.line.model": "Model: {model}",
-  "status.line.tts": "Balasan audio: {tts}",
   "status.tts.off": "Nonaktif",
   "status.tts.all": "Semua",
   "status.tts.auto": "Otomatis",
@@ -163,8 +146,8 @@ export const id: I18nDictionary = {
   "status.session_selected": "Sesi saat ini: {title}",
   "status.session_not_selected": "Sesi saat ini: belum dipilih",
   "status.session_hint": "Gunakan /sessions untuk memilih atau /new untuk membuat",
-  "status.header_unavailable": "🔴 Server OpenCode tidak tersedia",
-  "status.unavailable_hint": "Gunakan /opencode_start untuk memulai server.",
+  "status.header_unavailable": "🔴 Server Reasonix tidak tersedia",
+  "status.unavailable_hint": "Gunakan /reasonix_start untuk memulai server.",
 
   "tts.off": "🔇 Balasan audio nonaktif.",
   "tts.all": "🔊 Balasan audio aktif untuk semua pesan.",
@@ -187,18 +170,17 @@ export const id: I18nDictionary = {
   "settings.prompt_queue.label": "Antrean pesan",
   "settings.value.on": "Aktif",
   "settings.value.off": "Nonaktif",
-  "settings.prompt_queue.queue": "Queue",
-  "settings.prompt_queue.steer": "Steer",
+  "settings.prompt_queue.queue": "Antrean",
   "settings.saved": "✅ Pengaturan disimpan.",
 
   "projects.empty":
-    "📭 Tidak ada proyek.\n\nBuka direktori di OpenCode dan buat minimal satu sesi, lalu proyek akan muncul di sini.",
+    "📭 Tidak ada proyek.\n\nBuka direktori di Reasonix dan buat minimal satu sesi, lalu proyek akan muncul di sini.",
   "projects.select": "Pilih proyek:",
   "projects.select_with_current": "Pilih proyek:\n\nSaat ini: 🏗 {project}",
   "projects.page_indicator": "Halaman {current}/{total}",
   "projects.prev_page": "⬅️ Sebelumnya",
   "projects.next_page": "Berikutnya ➡️",
-  "projects.fetch_error": "🔴 Server OpenCode tidak tersedia atau gagal memuat proyek.",
+  "projects.fetch_error": "🔴 Server Reasonix tidak tersedia atau gagal memuat proyek.",
   "projects.page_load_error": "Tidak dapat memuat halaman ini. Coba lagi.",
   "projects.selected":
     "✅ Proyek dipilih: {project}\n\n📋 Sesi direset. Gunakan /sessions atau /new untuk proyek ini.",
@@ -208,7 +190,7 @@ export const id: I18nDictionary = {
   "sessions.empty": "📭 Tidak ada sesi.\n\nBuat sesi baru dengan /new.",
   "sessions.select": "Pilih sesi:",
   "sessions.select_page": "Pilih sesi (halaman {page}):",
-  "sessions.fetch_error": "🔴 Server OpenCode tidak tersedia atau gagal memuat sesi.",
+  "sessions.fetch_error": "🔴 Server Reasonix tidak tersedia atau gagal memuat sesi.",
   "sessions.select_project_first": "🔴 Proyek belum dipilih. Gunakan /projects.",
   "sessions.page_empty_callback": "Tidak ada sesi di halaman ini",
   "sessions.page_load_error_callback": "Tidak dapat memuat halaman ini. Coba lagi.",
@@ -229,7 +211,7 @@ export const id: I18nDictionary = {
   "messages.empty": "📭 Tidak ada pesan pengguna di sesi saat ini.",
   "messages.select": "Pilih pesan:",
   "messages.select_page": "Pilih pesan (halaman {page}):",
-  "messages.fetch_error": "🔴 Server OpenCode tidak tersedia atau gagal memuat pesan.",
+  "messages.fetch_error": "🔴 Server Reasonix tidak tersedia atau gagal memuat pesan.",
   "messages.inactive_callback": "Menu pesan ini tidak aktif",
   "messages.page_empty_callback": "Tidak ada pesan di halaman ini",
   "messages.button.prev_page": "⬅️ Sebelumnya",
@@ -243,28 +225,15 @@ export const id: I18nDictionary = {
   "messages.fork_success": "🔀 Fork dibuat dari pesan:\n\n{text}",
   "messages.fork_error": "❌ Gagal membuat fork. Coba lagi.",
 
-  "attach.project_not_selected": "🏗 Proyek belum dipilih.\n\nPilih dulu proyek dengan /projects.",
-  "attach.session_not_selected": "💬 Sesi belum dipilih.\n\nPilih dulu sesi dengan /sessions.",
-  "attach.session_project_mismatch":
-    "⚠️ Sesi yang dipilih tidak cocok dengan proyek saat ini. Pilih kembali sesi melalui /sessions.",
-  "attach.connected": "✅ Terhubung ke sesi: {title}",
-  "attach.already_connected": "ℹ️ Sudah terhubung ke sesi: {title}",
-  "attach.status.idle_message": "Status: menganggur. Menunggu event baru.",
-  "attach.status.busy_message": "Status: sibuk. Prompt baru sementara tidak bisa dikirim.",
-  "attach.restored_question": "Pertanyaan yang tertunda sudah dipulihkan.",
-  "attach.restored_permissions": "Permintaan izin yang tertunda sudah dipulihkan: {count}.",
-  "attach.disconnect_hint": "Untuk memutus koneksi, pindah ke sesi atau proyek lain.",
-  "attach.error": "🔴 Gagal terhubung ke sesi saat ini.",
-
   "detach.project_not_selected": "🏗 Proyek belum dipilih.\n\nPilih dulu proyek dengan /projects.",
   "detach.no_active_session": "ℹ️ Bot sudah terlepas dari sesi mana pun.",
   "detach.success":
-    "✅ Terlepas dari sesi: {title}\n\nSesi OpenCode tidak dihentikan. Jika masih berjalan, sesi akan lanjut sendiri. Untuk memeriksanya nanti, pilih lagi lewat /sessions.",
+    "✅ Terlepas dari sesi: {title}\n\nSesi Reasonix tidak dihentikan. Jika masih berjalan, sesi akan lanjut sendiri. Untuk memeriksanya nanti, pilih lagi lewat /sessions.",
   "detach.error": "🔴 Gagal melepaskan dari sesi saat ini.",
 
   "new.project_not_selected": "🏗 Proyek belum dipilih.\n\nPilih dulu proyek dengan /projects.",
   "new.created": "✅ Sesi baru dibuat: {title}",
-  "new.create_error": "🔴 Server OpenCode tidak tersedia atau gagal membuat sesi.",
+  "new.create_error": "🔴 Server Reasonix tidak tersedia atau gagal membuat sesi.",
 
   "stop.no_active_session":
     "🛑 Agent belum dimulai\n\nBuat sesi dengan /new atau pilih melalui /sessions.",
@@ -283,54 +252,31 @@ export const id: I18nDictionary = {
     "⚠️ Stream event dihentikan secara lokal, tetapi pembatalan di server gagal.",
   "stop.error": "🔴 Gagal menghentikan aksi.\n\nStream event sudah dihentikan, coba /abort lagi.",
 
-  "opencode_start.already_running_managed":
-    "⚠️ Server OpenCode sudah berjalan\n\nPID: {pid}\nWaktu aktif: {seconds} detik",
-  "opencode_start.already_running_external":
-    "✅ Server OpenCode sudah berjalan sebagai proses eksternal\n\nVersi: {version}\n\nServer ini tidak dimulai oleh bot, jadi /opencode-stop tidak bisa menghentikannya.",
-  "opencode_start.already_running": "✅ Server OpenCode sudah berjalan\n\nVersi: {version}",
-  "opencode_start.remote_configured":
-    "⚠️ /opencode_start hanya berfungsi dengan Server OpenCode lokal.",
-  "opencode_start.starting": "🔄 Memulai Server OpenCode...",
-  "opencode_start.start_error":
-    "🔴 Gagal memulai Server OpenCode\n\nKesalahan: {error}\n\nPastikan OpenCode CLI terinstal dan tersedia di PATH:\nopencode --version\nnpm install -g @opencode-ai/cli",
-  "opencode_start.started_not_ready":
-    "⚠️ Server OpenCode dimulai, tetapi tidak merespons\n\nPID: {pid}\n\nServer mungkin masih dalam proses memulai. Coba /status beberapa detik lagi.",
-  "opencode_start.success": "✅ Server OpenCode berhasil dimulai\n\nPID: {pid}\nVersi: {version}",
-  "opencode_start.error": "🔴 Gagal memulai server.\n\nPeriksa log aplikasi untuk detailnya.",
-  "opencode_stop.external_running":
-    "⚠️ Server OpenCode berjalan sebagai proses eksternal\n\nServer ini tidak dimulai melalui /opencode-start.\nHentikan secara manual atau periksa /status.",
-  "opencode_stop.remote_configured":
-    "⚠️ /opencode_stop hanya berfungsi dengan Server OpenCode lokal.",
-  "opencode_stop.not_running": "⚠️ Server OpenCode tidak berjalan",
-  "opencode_stop.pid_not_found":
-    "⚠️ Server OpenCode merespons di port {port}, tetapi tidak ada proses lokal yang bisa dihentikan.",
-  "opencode_stop.stopping": "🛑 Menghentikan Server OpenCode...\n\nPID: {pid}",
-  "opencode_stop.stop_error": "🔴 Gagal menghentikan Server OpenCode\n\nKesalahan: {error}",
-  "opencode_stop.still_running": "Server masih merespons meski sudah diminta berhenti.",
-  "opencode_stop.success": "✅ Server OpenCode berhasil dihentikan",
-  "opencode_stop.error": "🔴 Gagal menghentikan server.\n\nPeriksa log aplikasi untuk detailnya.",
-  "reload.reloading": "🔄 Reloading OpenCode configuration...",
-  "reload.success": "✅ OpenCode configuration reloaded",
-  "reload.failed": "🔴 Failed to reload OpenCode configuration",
-  "reload.failed_with_error": "🔴 Failed to reload OpenCode configuration\n\nError: {error}",
-
-  "agent.changed_message": "✅ Agent diubah menjadi: {name}",
-  "agent.change_error_callback": "Gagal mengubah agent",
-  "agent.menu.current": "Agent saat ini: {name}\n\nPilih agent:",
-  "agent.menu.select": "Pilih agent:",
-  "agent.menu.empty": "⚠️ Tidak ada agent yang tersedia",
-  "agent.menu.error": "🔴 Gagal memuat daftar agent",
+  "reasonix_start.already_running": "✅ Reasonix server is already running for this project",
+  "reasonix_start.starting": "🔄 Starting the Reasonix server for this project...",
+  "reasonix_start.start_error":
+    "🔴 Failed to start the Reasonix server\n\nError: {error}\n\nCheck that the Reasonix CLI is installed and on PATH:\nreasonix --version",
+  "reasonix_start.success":
+    "✅ Reasonix server started\n\nProject: {root}\nPort: {port}\nVersion: {version}",
+  "reasonix_start.error":
+    "🔴 An error occurred while starting the server.\n\nCheck application logs for details.",
+  "reasonix_stop.not_running": "⚠️ No Reasonix server started by the bot is running.",
+  "reasonix_stop.stopping": "🛑 Stopping {count} Reasonix server(s)...",
+  "reasonix_stop.success": "✅ Stopped {count} Reasonix server(s). They start again on next use.",
+  "reasonix_stop.error":
+    "🔴 An error occurred while stopping the server.\n\nCheck application logs for details.",
+  "reload.reloading": "🔄 Reloading Reasonix configuration...",
+  "reload.success": "✅ Reasonix configuration reloaded",
+  "reload.failed": "🔴 Failed to reload Reasonix configuration",
+  "reload.failed_with_error": "🔴 Failed to reload Reasonix configuration\n\nError: {error}",
 
   "model.changed_message": "✅ Model diubah menjadi: {name}",
   "model.change_error_callback": "Gagal mengubah model",
-  "model.menu.empty": "⚠️ Tidak ada model yang tersedia",
   "model.menu.select": "Pilih model:",
-  "model.menu.current": "Model saat ini: {name}\n\nPilih model:",
-  "model.menu.favorites_title": "⭐ Favorit (Tambahkan model ke favorit di OpenCode CLI)",
+  "model.menu.favorites_title": "⭐ Favorit (Tambahkan model ke favorit di Reasonix CLI)",
   "model.menu.favorites_empty": "— Kosong.",
   "model.menu.recent_title": "🕘 Terbaru",
   "model.menu.recent_empty": "— Kosong.",
-  "model.menu.favorites_hint": "ℹ️ Tambahkan model ke favorit di OpenCode CLI agar tetap di atas.",
   "model.menu.error": "🔴 Gagal memuat daftar model",
   "model.search.button": "🔍 Cari",
   "model.search.prompt": "🔍 Ketik nama model yang ingin dicari:",
@@ -399,7 +345,7 @@ export const id: I18nDictionary = {
   "permission.outcome.outside_suffix": " · answered outside Telegram",
   "permission.outcome.settled_outside": "☑️ Answered outside Telegram",
   "permission.outcome.not_answered": "⏹ Not answered",
-  "permission.delivery_failed": "⚠️ The answer did not reach OpenCode — tap again",
+  "permission.delivery_failed": "⚠️ The answer did not reach Reasonix — tap again",
   "permission.name.bash": "Bash",
   "permission.name.edit": "Edit",
   "permission.name.write": "Tulis",
@@ -433,20 +379,15 @@ export const id: I18nDictionary = {
   "question.summary.question": "Pertanyaan {index}:\n{question}\n\n",
   "question.summary.answer": "Jawaban:\n{answer}\n\n",
 
-  "keyboard.agent_mode": "{emoji} {name} Agent",
   "keyboard.context": "📊 {used} / {limit} ({percent}%)",
   "keyboard.context_empty": "📊 0",
-  "keyboard.variant": "💭 {name}",
   "keyboard.variant_default": "💡 Default",
   "keyboard.queued_prompt": "❌ {index}. {text}",
   "queue.added":
     "📥 Ditambahkan ke antrean ({count}/{max}). Akan dikirim setelah tugas saat ini selesai.",
   "queue.full": "⚠️ Antrean penuh ({max}). Hapus pesan atau tunggu tugas saat ini selesai.",
-  "queue.media_limit":
-    "⚠️ Media dalam antrean dibatasi {maxSizeMb} MiB. Tunggu hingga satu item terkirim, lalu coba lagi.",
   "queue.removed": "🗑 Pesan dihapus dari antrean.",
   "queue.not_found": "Pesan ini sudah tidak ada di antrean.",
-  "queue.steer_added": "📥 Added to the current task ({count}/{max}).",
   "queue.disabled_hint": "Aktifkan antrean pesan di /settings.",
   "keyboard.updated": "⌨️ Keyboard diperbarui",
 
@@ -455,23 +396,13 @@ export const id: I18nDictionary = {
   "pinned.line.project": "Proyek: {project}",
   "pinned.line.worktree": "Worktree: {worktree}",
   "pinned.line.model": "Model: {model}",
-  "pinned.line.attach": "Pelacakan: {status}",
-  "pinned.attach.status.idle": "aktif, menganggur",
-  "pinned.attach.status.busy": "aktif, sibuk",
   "pinned.line.context": "Konteks: {used} / {limit} ({percent}%)",
   "pinned.line.cost": "Biaya terpakai: {cost}",
-  "subagent.header": "Subagent {agent}: {description}",
-  "subagent.line.status": "Status: {status}",
   "subagent.line.task": "Tugas: {task}",
   "subagent.line.agent": "Agent: {agent}",
   "subagent.working": "Bekerja...",
-  "subagent.working_with_details": "Bekerja: {details}",
   "subagent.completed": "Selesai",
   "subagent.failed": "Tugas gagal",
-  "subagent.status.pending": "tertunda",
-  "subagent.status.running": "berjalan",
-  "subagent.status.completed": "selesai",
-  "subagent.status.error": "kesalahan",
   "pinned.files.title": "File ({count}):",
   "pinned.files.item": "  {path}{diff}",
   "pinned.files.more": "  ... dan {count} lagi",
@@ -494,43 +425,14 @@ export const id: I18nDictionary = {
   "runtime.wizard.ask_user_id":
     "Masukkan ID Pengguna Telegram (bisa diperoleh dari @userinfobot).\n> ",
   "runtime.wizard.user_id_invalid": "Masukkan bilangan bulat positif (> 0).\n",
-  "runtime.wizard.ask_api_url":
-    "Masukkan URL API OpenCode (opsional).\nTekan Enter untuk menggunakan default: {defaultUrl}\n> ",
-  "runtime.wizard.ask_server_username":
-    "Masukkan nama pengguna server OpenCode (opsional).\nTekan Enter untuk menggunakan default: {defaultUsername}\n> ",
-  "runtime.wizard.ask_server_password":
-    "Masukkan kata sandi server OpenCode (opsional).\nTekan Enter untuk membiarkannya kosong.\n> ",
-  "runtime.wizard.ask_server_version":
-    "Select OpenCode server version:\n1 - OpenCode V1 (1.x, npm package opencode-ai)\n2 - OpenCode V2 (2.x, npm package @opencode/cli)\nPress Enter to use default: {defaultVersion}\n> ",
-  "runtime.wizard.server_version_invalid": "Enter 1 or 2, or press Enter for default.\n",
-  "runtime.wizard.ask_server_password_required":
-    "Enter OpenCode V2 server password (required).\nShow it with: opencode service get password\n> ",
-  "runtime.wizard.server_password_required":
-    "The password is required for OpenCode V2. Please try again.\n",
-  "runtime.wizard.ask_server_password_keep":
-    "Enter OpenCode server password.\nPress Enter to keep the saved password.\n> ",
-  "runtime.wizard.api_url_invalid":
-    "Masukkan URL yang valid (http/https) atau tekan Enter untuk default.\n",
-  "runtime.wizard.start": "Menyiapkan OpenCode Telegram Bot.\n",
+  "runtime.wizard.start": "Menyiapka Reasonix Telegram Bot.\n",
   "runtime.wizard.saved": "Konfigurasi disimpan:\n- {envPath}\n",
   "runtime.wizard.not_configured_starting": "Aplikasi belum dikonfigurasi. Membuka wizard...\n",
   "runtime.wizard.tty_required":
-    "Wizard interaktif memerlukan terminal TTY. Jalankan `opencode-telegram config` di shell interaktif.",
+    "Wizard interaktif memerlukan terminal TTY. Jalankan `reasonix-telegram config` di shell interaktif.",
   "runtime.container.command_unavailable": "⚠️ Perintah ini tidak tersedia di image Docker.",
 
-  "rename.no_session": "⚠️ Tidak ada sesi aktif. Buat atau pilih sesi terlebih dahulu.",
-  "rename.prompt": "📝 Masukkan judul baru untuk sesi:\n\nSaat ini: {title}",
-  "rename.empty_title": "⚠️ Judul tidak boleh kosong.",
-  "rename.success": "✅ Nama sesi diubah menjadi: {title}",
-  "rename.error": "🔴 Gagal mengganti nama sesi.",
   "rename.cancelled": "❌ Ganti nama dibatalkan.",
-  "rename.inactive_callback": "Ganti nama tidak aktif",
-  "rename.inactive": "⚠️ Ganti nama tidak aktif. Jalankan /rename lagi.",
-  "rename.blocked.expected_name":
-    "⚠️ Masukkan nama sesi baru sebagai teks atau ketuk Batal di pesan ganti nama.",
-  "rename.blocked.command_not_allowed":
-    "⚠️ Perintah ini tidak tersedia selama ganti nama menunggu nama baru.",
-  "rename.button.cancel": "❌ Batal",
 
   "task.prompt.schedule":
     "⏰ Kirim jadwal tugas dalam bahasa alami.\n\nContoh:\n- setiap 5 menit\n- setiap hari pukul 17:00\n- besok pukul 12:00",
@@ -579,9 +481,9 @@ export const id: I18nDictionary = {
   "tasklist.inactive_callback": "Menu tugas terjadwal ini tidak aktif",
   "tasklist.load_error": "🔴 Gagal memuat tugas terjadwal.",
 
-  "commands.select": "Pilih perintah OpenCode:",
-  "commands.empty": "📭 Tidak ada perintah OpenCode yang tersedia untuk proyek ini.",
-  "commands.fetch_error": "🔴 Gagal memuat perintah OpenCode.",
+  "commands.select": "Pilih perintah Reasonix:",
+  "commands.empty": "📭 Tidak ada perintah Reasonix yang tersedia untuk proyek ini.",
+  "commands.fetch_error": "🔴 Gagal memuat perintah Reasonix.",
   "commands.no_description": "Tanpa deskripsi",
   "commands.button.execute": "✅ Jalankan",
   "commands.button.cancel": "❌ Batal",
@@ -591,13 +493,11 @@ export const id: I18nDictionary = {
   "commands.execute_callback": "Menjalankan perintah...",
   "commands.executing_prefix": "⚡ Menjalankan perintah:",
   "commands.arguments_empty": "⚠️ Argumen tidak boleh kosong. Kirim teks atau ketuk Jalankan.",
-  "commands.execute_error": "🔴 Gagal menjalankan perintah OpenCode.",
-  "commands.select_page": "Pilih perintah OpenCode (halaman {page}):",
+  "commands.execute_error": "🔴 Gagal menjalankan perintah Reasonix.",
+  "commands.select_page": "Pilih perintah Reasonix (halaman {page}):",
   "commands.button.prev_page": "⬅️ Sebelumnya",
   "commands.button.next_page": "Berikutnya ➡️",
   "commands.page_empty_callback": "Tidak ada perintah di halaman ini",
-  "commands.page_load_error_callback": "Tidak dapat memuat halaman ini. Coba lagi.",
-  "commands.download.no_roots": "Belum ada direktori root yang diizinkan untuk ditelusuri.",
   "commands.download.downloading": "Mengunduh file...",
   "commands.download.not_found": "File tidak ditemukan",
   "commands.download.not_file": "Path ini bukan file",
@@ -606,9 +506,9 @@ export const id: I18nDictionary = {
   "commands.download.modified": "Diubah",
   "commands.download.error": "Gagal mengunduh file.",
 
-  "skills.select": "Pilih skill OpenCode:",
-  "skills.empty": "📭 Tidak ada skill OpenCode yang tersedia untuk proyek ini.",
-  "skills.fetch_error": "🔴 Gagal memuat skill OpenCode.",
+  "skills.select": "Pilih skill Reasonix:",
+  "skills.empty": "📭 Tidak ada skill Reasonix yang tersedia untuk proyek ini.",
+  "skills.fetch_error": "🔴 Gagal memuat skill Reasonix.",
   "skills.no_description": "Tanpa deskripsi",
   "skills.button.execute": "✅ Jalankan",
   "skills.button.cancel": "❌ Batal",
@@ -618,40 +518,10 @@ export const id: I18nDictionary = {
   "skills.execute_callback": "Menggunakan skill...",
   "skills.executing_prefix": "⚡ Menggunakan skill:",
   "skills.arguments_empty": "⚠️ Argumen tidak boleh kosong. Kirim teks atau ketuk Jalankan.",
-  "skills.select_page": "Pilih skill OpenCode (halaman {page}):",
+  "skills.select_page": "Pilih skill Reasonix (halaman {page}):",
   "skills.button.prev_page": "⬅️ Sebelumnya",
   "skills.button.next_page": "Berikutnya ➡️",
   "skills.page_empty_callback": "Tidak ada skill di halaman ini",
-  "skills.page_load_error_callback": "Tidak dapat memuat halaman ini. Coba lagi.",
-
-  "mcps.select": "Server MCP:",
-  "mcps.empty": "📭 Tidak ada server MCP yang dikonfigurasi.",
-  "mcps.fetch_error": "🔴 Gagal memuat server MCP.",
-  "mcps.toggle_error": "🔴 Gagal mengubah status server MCP.",
-  "mcps.enabling": "Mengaktifkan...",
-  "mcps.disabling": "Menonaktifkan...",
-  "mcps.status.connected": "🟢 Terhubung",
-  "mcps.status.disabled": "🔴 Nonaktif",
-  "mcps.status.failed": "⚠️ Gagal",
-  "mcps.status.needs_auth": "🔒 Perlu autentikasi",
-  "mcps.status.needs_client_registration": "🔒 Perlu registrasi",
-  "mcps.detail.title": "Server: {name}",
-  "mcps.detail.status": "Status: {status}",
-  "mcps.detail.error": "Kesalahan: {error}",
-  "mcps.button.enable": "🟢 Aktifkan",
-  "mcps.button.disable": "🔴 Nonaktifkan",
-  "mcps.button.back": "⬅️ Kembali",
-  "mcps.auth_required": "Server ini butuh otorisasi dan tidak bisa diaktifkan dari bot.",
-
-  "cmd.description.rename": "Ganti nama sesi saat ini",
-
-  "legacy.models.fetch_error":
-    "🔴 Gagal memuat daftar model. Periksa status server dengan /status.",
-  "legacy.models.empty": "📋 Tidak ada model yang tersedia. Atur provider di OpenCode.",
-  "legacy.models.header": "📋 Model yang tersedia:\n\n",
-  "legacy.models.no_provider_models": "  ⚠️ Tidak ada model yang tersedia\n",
-  "legacy.models.env_hint": "💡 Untuk menggunakan model di .env:\n",
-  "legacy.models.error": "🔴 Gagal memuat daftar model.",
 
   "stt.recognizing": "🎤 Mengenali audio...",
   "stt.recognized": "🎤 Terdeteksi:",
@@ -661,7 +531,6 @@ export const id: I18nDictionary = {
   "stt.empty_result": "🎤 Tidak ada suara yang terdeteksi di pesan audio.",
 
   "cmd.description.open": "Tambah proyek dengan menelusuri direktori",
-  "worktree.branch_detached": "detached HEAD",
   "worktree.select_with_current": "Pilih worktree:",
   "worktree.project_not_selected": "🏗 Proyek belum dipilih.\n\nPilih dulu proyek dengan /projects.",
   "worktree.not_git_repo":

@@ -37,8 +37,8 @@ vi.mock("../../../src/config.js", () => ({
   },
 }));
 
-vi.mock("../../../src/opencode/client.js", () => ({
-  opencodeClient: {
+vi.mock("../../../src/reasonix/client.js", () => ({
+  reasonixClient: {
     session: {
       create: vi.fn(),
       prompt: vi.fn(),
@@ -287,7 +287,7 @@ describe("app/services/scheduled-task-runtime-service", () => {
       finishedAt: "2026-03-16T10:01:00.000Z",
       resultText: null,
       errorMessage:
-        "Request timed out after 300000ms. Check OpenCode model timeout settings: https://opencode.ai/docs/config/#models",
+        "Request timed out after 300000ms. Check Reasonix model timeout settings: https://reasonix.ai/docs/config/#models",
     });
 
     vi.useFakeTimers();
@@ -300,7 +300,7 @@ describe("app/services/scheduled-task-runtime-service", () => {
       expect.objectContaining({
         chatId: 777,
         format: "raw",
-        text: expect.stringContaining("https://opencode.ai/docs/config/#models"),
+        text: expect.stringContaining("https://reasonix.ai/docs/config/#models"),
       }),
     );
 

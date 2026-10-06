@@ -22,7 +22,7 @@ vi.mock("../../../src/config.js", () => ({
   config: {
     stt: mockStt,
     // Provide minimal stubs for properties that other modules read at import time
-    // (e.g., opencode/client.ts reads config.opencode during module initialization
+    // (e.g., reasonix/client.ts reads config.reasonix during module initialization
     // and may get loaded via the test setup's resetSingletonState).
     telegram: { token: "test", allowedUserId: 0, proxyUrl: "" },
     opencode: {

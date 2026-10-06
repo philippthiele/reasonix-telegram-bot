@@ -2,7 +2,6 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { InteractionManager } from "../../../src/app/managers/interaction-manager.js";
 import { PermissionManager } from "../../../src/app/managers/permission-manager.js";
 import { QuestionManager } from "../../../src/app/managers/question-manager.js";
-import { RenameManager } from "../../../src/app/managers/rename-manager.js";
 import { TaskCreationManager } from "../../../src/app/managers/scheduled-task-creation-manager.js";
 import type { PermissionRequest } from "../../../src/app/types/permission.js";
 import type { Question } from "../../../src/app/types/question.js";
@@ -28,14 +27,12 @@ const TEST_PERMISSION: PermissionRequest = {
 let interactionManager: InteractionManager;
 let permissionManager: PermissionManager;
 let questionManager: QuestionManager;
-let renameManager: RenameManager;
 let taskCreationManager: TaskCreationManager;
 
 beforeEach(() => {
   interactionManager = new InteractionManager();
   permissionManager = new PermissionManager(interactionManager);
   questionManager = new QuestionManager(interactionManager);
-  renameManager = new RenameManager(interactionManager);
   taskCreationManager = new TaskCreationManager(interactionManager);
 });
 
@@ -107,24 +104,6 @@ describe("app/managers/interaction-error-scope", () => {
 
     expect(permissionManager.isActive()).toBe(false);
     expect(interactionManager.getSnapshot()).toBeNull();
-  });
-
-  it("clears renameManager and the matching interaction for the rename scope", () => {
-    renameManager.startWaiting("session-1", "D:/repo", "Old title");
-
-    interactionManager.clearErrorScope("rename", "test_cleanup");
-
-    expect(renameManager.isWaitingForName()).toBe(false);
-    expect(interactionManager.getSnapshot()).toBeNull();
-  });
-
-  it("keeps an unrelated interaction for the rename scope", () => {
-    questionManager.startQuestions([TEST_QUESTION], "req-1", "session-1");
-
-    interactionManager.clearErrorScope("rename", "test_cleanup");
-
-    expect(renameManager.isWaitingForName()).toBe(false);
-    expect(interactionManager.getSnapshot()?.kind).toBe("question");
   });
 
   it("clears taskCreationManager and the matching interaction for the taskCreation scope", () => {

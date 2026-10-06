@@ -14,10 +14,10 @@ describe("config boolean env parsing", () => {
   beforeEach(() => {
     vi.stubEnv("TELEGRAM_BOT_TOKEN", "test-telegram-token");
     vi.stubEnv("TELEGRAM_ALLOWED_USER_ID", "123456789");
-    vi.stubEnv("OPENCODE_MODEL_PROVIDER", "test-provider");
-    vi.stubEnv("OPENCODE_MODEL_ID", "test-model");
-    vi.stubEnv("OPENCODE_AUTO_RESTART_ENABLED", "");
-    vi.stubEnv("OPENCODE_MONITOR_INTERVAL_SEC", "");
+    vi.stubEnv("REASONIX_MODEL_PROVIDER", "test-provider");
+    vi.stubEnv("REASONIX_MODEL_ID", "test-model");
+    vi.stubEnv("REASONIX_AUTO_RESTART_ENABLED", "");
+    vi.stubEnv("REASONIX_MONITOR_INTERVAL_SEC", "");
   });
 
   it("tracks background sessions by default", async () => {
@@ -246,41 +246,10 @@ describe("config boolean env parsing", () => {
     expect(config.bot.scheduledTaskExecutionTimeoutMinutes).toBe(120);
   });
 
-  it("uses disabled OpenCode auto-restart by default", async () => {
-    const config = await loadConfig();
 
-    expect(config.opencode.autoRestartEnabled).toBe(false);
-  });
 
-  it("parses OPENCODE_AUTO_RESTART_ENABLED as a boolean", async () => {
-    vi.stubEnv("OPENCODE_AUTO_RESTART_ENABLED", "true");
 
-    const config = await loadConfig();
 
-    expect(config.opencode.autoRestartEnabled).toBe(true);
-  });
-
-  it("uses 300 seconds as default OpenCode monitor interval", async () => {
-    const config = await loadConfig();
-
-    expect(config.opencode.monitorIntervalSec).toBe(300);
-  });
-
-  it("parses OPENCODE_MONITOR_INTERVAL_SEC as a positive integer", async () => {
-    vi.stubEnv("OPENCODE_MONITOR_INTERVAL_SEC", "600");
-
-    const config = await loadConfig();
-
-    expect(config.opencode.monitorIntervalSec).toBe(600);
-  });
-
-  it("falls back to default OpenCode monitor interval on invalid value", async () => {
-    vi.stubEnv("OPENCODE_MONITOR_INTERVAL_SEC", "zero");
-
-    const config = await loadConfig();
-
-    expect(config.opencode.monitorIntervalSec).toBe(300);
-  });
 
   it("keeps TTS credentials unset when dedicated vars are missing", async () => {
     vi.stubEnv("STT_API_URL", "https://api.openai.com/v1");
@@ -331,8 +300,8 @@ describe("config telegram reverse-proxy", () => {
   beforeEach(() => {
     vi.stubEnv("TELEGRAM_BOT_TOKEN", "test-telegram-token");
     vi.stubEnv("TELEGRAM_ALLOWED_USER_ID", "123456789");
-    vi.stubEnv("OPENCODE_MODEL_PROVIDER", "test-provider");
-    vi.stubEnv("OPENCODE_MODEL_ID", "test-model");
+    vi.stubEnv("REASONIX_MODEL_PROVIDER", "test-provider");
+    vi.stubEnv("REASONIX_MODEL_ID", "test-model");
     delete process.env.TELEGRAM_PROXY_URL;
     delete process.env.TELEGRAM_API_ROOT;
     delete process.env.TELEGRAM_PROXY_SECRET;
@@ -437,46 +406,3 @@ describe("config telegram reverse-proxy", () => {
   });
 });
 
-describe("config OpenCode server version", () => {
-  beforeEach(() => {
-    vi.stubEnv("TELEGRAM_BOT_TOKEN", "test-telegram-token");
-    vi.stubEnv("TELEGRAM_ALLOWED_USER_ID", "123456789");
-    vi.stubEnv("OPENCODE_MODEL_PROVIDER", "test-provider");
-    vi.stubEnv("OPENCODE_MODEL_ID", "test-model");
-    vi.stubEnv("OPENCODE_API_URL", "");
-    vi.stubEnv("OPENCODE_SERVER_VERSION", "");
-  });
-
-  it("uses V1 and the V1 default URL when the version is not set", async () => {
-    const config = await loadConfig();
-
-    expect(config.opencode.serverVersion).toBe("v1");
-    expect(config.opencode.apiUrl).toBe("http://localhost:4096");
-  });
-
-  it("uses the V2 default URL when V2 is selected", async () => {
-    vi.stubEnv("OPENCODE_SERVER_VERSION", " V2 ");
-
-    const config = await loadConfig();
-
-    expect(config.opencode.serverVersion).toBe("v2");
-    expect(config.opencode.apiUrl).toBe("http://127.0.0.1:49374");
-  });
-
-  it("keeps an explicit API URL whatever the version", async () => {
-    vi.stubEnv("OPENCODE_SERVER_VERSION", "v2");
-    vi.stubEnv("OPENCODE_API_URL", "http://127.0.0.1:4096");
-
-    const config = await loadConfig();
-
-    expect(config.opencode.apiUrl).toBe("http://127.0.0.1:4096");
-  });
-
-  it("falls back to V1 on an unrecognised version", async () => {
-    vi.stubEnv("OPENCODE_SERVER_VERSION", "2");
-
-    const config = await loadConfig();
-
-    expect(config.opencode.serverVersion).toBe("v1");
-  });
-});

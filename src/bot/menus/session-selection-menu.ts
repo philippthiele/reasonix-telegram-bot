@@ -1,5 +1,5 @@
 import { InlineKeyboard } from "grammy";
-import { opencodeClient } from "../../opencode/client.js";
+import { reasonixClient } from "../../reasonix/client.js";
 import { getDateLocale, t } from "../../i18n/index.js";
 import { formatSessionTitle } from "../../app/formatters/session-title-formatter.js";
 import { logger } from "../../utils/logger.js";
@@ -128,7 +128,7 @@ export async function loadSessionPage(
   // Sessions whose folder is gone are left out before the list is split into pages.
   const sessions = await collectFromPresentFolders(
     async (limit) => {
-      const { data, error } = await opencodeClient.session.list({ directory, limit, roots: true });
+      const { data, error } = await reasonixClient.session.list({ directory, limit, roots: true });
       if (error || !data) {
         throw error || new Error("No data received from server");
       }

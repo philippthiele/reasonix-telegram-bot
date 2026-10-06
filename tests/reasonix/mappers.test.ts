@@ -192,7 +192,7 @@ describe("toQuestion", () => {
       multiple: true,
       custom: false,
     });
-    expect(question.questions[0].options).toEqual([{ label: "A", description: "first" }]);
+    expect(question.questions[0]?.options).toEqual([{ label: "A", description: "first" }]);
   });
 
   it("still produces one question when Reasonix sent none", () => {

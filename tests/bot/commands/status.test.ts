@@ -39,14 +39,12 @@ vi.mock("../../../src/utils/logger.js", () => ({
   },
 }));
 
-vi.mock("../../../src/opencode/client.js", () => ({
-  opencodeClient: {
+vi.mock("../../../src/reasonix/client.js", () => ({
+  reasonixClient: {
     global: {
       health: mocked.healthMock,
     },
   },
-  opencodeServerVersion: "v1",
-  probeOpencodeServer: async () => ({ kind: "none" }),
 }));
 
 vi.mock("../../../src/app/services/session-service.js", () => ({
@@ -129,7 +127,7 @@ describe("bot/commands/status-command", () => {
     mocked.sendBotTextMock.mockResolvedValue(undefined);
   });
 
-  it("includes bot and OpenCode versions and omits health and audio replies", async () => {
+  it("includes bot and Reasonix versions and omits health and audio replies", async () => {
     const ctx = {
       chat: { id: 42, type: "private" },
       message: { text: "/status" },
@@ -141,8 +139,8 @@ describe("bot/commands/status-command", () => {
 
     const message = mocked.sendBotTextMock.mock.calls[0]?.[0]?.text as string;
     expect(message).toContain(`Bot version: ${botVersion}`);
-    expect(message).toContain("OpenCode version: 1.0.0");
-    expect(message).toContain("OpenCode version: 1.0.0\n\nAgent:");
+    expect(message).toContain("Reasonix version: 1.0.0");
+    expect(message).toContain("Reasonix version: 1.0.0\n\nAgent:");
     expect(message).not.toContain("Status: Healthy");
     expect(message).not.toContain("Audio replies");
     expect(message).not.toContain("Started by bot");
@@ -196,10 +194,10 @@ describe("bot/commands/status-command", () => {
     expect(mocked.loggerWarnMock).toHaveBeenCalledTimes(1);
     expect(reply).toHaveBeenCalledTimes(1);
     const replyText = reply.mock.calls[0]?.[0] as string;
-    expect(replyText).toContain("OpenCode Server is unavailable");
+    expect(replyText).toContain("Reasonix Server is unavailable");
     expect(replyText).toContain(`Bot version: ${botVersion}`);
-    expect(replyText).toContain("Use /opencode_start to start the server.");
-    expect(replyText).not.toContain("OpenCode version:");
+    expect(replyText).toContain("Use /reasonix_start to start the server.");
+    expect(replyText).not.toContain("Reasonix version:");
   });
 
   it("logs unexpected failures as errors", async () => {
@@ -224,10 +222,10 @@ describe("bot/commands/status-command", () => {
     );
     expect(reply).toHaveBeenCalledTimes(1);
     const replyText = reply.mock.calls[0]?.[0] as string;
-    expect(replyText).toContain("OpenCode Server is unavailable");
+    expect(replyText).toContain("Reasonix Server is unavailable");
     expect(replyText).toContain(`Bot version: ${botVersion}`);
-    expect(replyText).toContain("Use /opencode_start to start the server.");
-    expect(replyText).not.toContain("OpenCode version:");
+    expect(replyText).toContain("Use /reasonix_start to start the server.");
+    expect(replyText).not.toContain("Reasonix version:");
   });
 
   it("appends a named variant on the Model line", async () => {
@@ -290,7 +288,7 @@ describe("bot/commands/status-command", () => {
     expect(message).not.toContain("gpt-5 (");
   });
 
-  it("names the current session with the title OpenCode has for it now", async () => {
+  it("names the current session with the title Reasonix has for it now", async () => {
     mocked.getCurrentSessionMock.mockReturnValue({ id: "s1", title: "", directory: "/repo" });
     mocked.fetchSessionTitleMock.mockResolvedValue("Greeting message");
 
@@ -312,7 +310,7 @@ describe("bot/commands/status-command", () => {
     expect(message).toContain("Current session: Greeting message");
   });
 
-  it("shows a session OpenCode has not named yet as a new session", async () => {
+  it("shows a session Reasonix has not named yet as a new session", async () => {
     mocked.fetchSessionTitleMock.mockResolvedValue("");
 
     const ctx = {

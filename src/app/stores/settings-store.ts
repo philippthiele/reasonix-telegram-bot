@@ -250,24 +250,16 @@ export function setSendDiffFileAttachments(enabled: boolean): void {
 }
 
 /**
- * The message queue mode in effect for the configured OpenCode server. V1 keeps its
- * released On/Off boolean (off by default); V2 stores its own mode (steer by default),
- * so neither version's choice moves the other's.
+ * Whether prompts sent while the agent is busy are handed to the Reasonix session
+ * inbox. The released On/Off boolean is still honoured so an existing settings.json
+ * keeps its choice.
  */
 export function getPromptQueueMode(): PromptQueueMode {
-  if (config.opencode.serverVersion === "v2") {
-    return currentSettings.promptQueueMode ?? "steer";
-  }
-
-  return currentSettings.promptQueueEnabled === true ? "queue" : "off";
+  return currentSettings.promptQueueMode ?? (currentSettings.promptQueueEnabled === true ? "queue" : "off");
 }
 
 export function setPromptQueueMode(mode: PromptQueueMode): void {
-  if (config.opencode.serverVersion === "v2") {
-    currentSettings.promptQueueMode = mode;
-  } else {
-    currentSettings.promptQueueEnabled = mode !== "off";
-  }
+  currentSettings.promptQueueMode = mode;
   void writeSettingsFile(currentSettings);
 }
 

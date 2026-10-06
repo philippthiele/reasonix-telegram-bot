@@ -1,7 +1,7 @@
 import { getCurrentModel, setCurrentModel } from "../stores/settings-store.js";
 import { config } from "../../config.js";
-import { opencodeClient } from "../../opencode/client.js";
-import { isServerUnavailableError } from "../../utils/opencode-error.js";
+import { reasonixClient } from "../../reasonix/client.js";
+import { isServerUnavailableError } from "../../utils/reasonix-error.js";
 import { logger } from "../../utils/logger.js";
 import type {
   ModelInfo,
@@ -9,12 +9,6 @@ import type {
   ModelSelectionLists,
   ProviderInfo,
 } from "../types/model.js";
-import path from "node:path";
-
-interface OpenCodeModelState {
-  favorite?: Array<{ providerID?: string; modelID?: string }>;
-  recent?: Array<{ providerID?: string; modelID?: string }>;
-}
 
 interface ModelCatalogReadResult {
   validModelKeys: Set<string> | null;
@@ -23,7 +17,7 @@ interface ModelCatalogReadResult {
 }
 
 /**
- * Whether OpenCode offers a model: listed; its provider listed without it; its provider
+ * Whether Reasonix offers a model: listed; its provider listed without it; its provider
  * not listed after the bounded wait; or unknown, when the list could not be read.
  */
 export type ModelAvailability = "offered" | "model-missing" | "provider-missing" | "unknown";
@@ -39,7 +33,7 @@ export interface StoredModelReconcileResult {
   storedModelReplaced: boolean;
 }
 
-const fetchProvidersList = () => opencodeClient.config.providers();
+const fetchProvidersList = () => reasonixClient.config.providers();
 type ProvidersResponse = Awaited<ReturnType<typeof fetchProvidersList>>;
 
 const MODEL_CATALOG_CACHE_TTL_MS = 10 * 60 * 1000;
@@ -67,8 +61,8 @@ function getModelKey(providerID: string, modelID: string): string {
 }
 
 function getEnvDefaultModel(): FavoriteModel | null {
-  const providerID = config.opencode.model.provider;
-  const modelID = config.opencode.model.modelId;
+  const providerID = config.reasonix.model.provider;
+  const modelID = config.reasonix.model.modelId;
 
   if (!providerID || !modelID) {
     return null;
@@ -103,7 +97,7 @@ function filterModelsByCatalog(
 
 function logModelCatalogRefreshFailure(error: unknown, type: "error" | "exception"): void {
   if (isServerUnavailableError(error)) {
-    logger.warn("[ModelManager] OpenCode server is not running; skipping model catalog refresh");
+    logger.warn("[ModelManager] Reasonix server is not running; skipping model catalog refresh");
     return;
   }
 
@@ -147,15 +141,6 @@ async function getExpectedProviderIds(): Promise<Set<string>> {
 
   if (selectedModel.providerID) {
     providerIds.add(selectedModel.providerID);
-  }
-
-  try {
-    const { favorites, recent } = await readOpenCodeModelState();
-    for (const model of [...favorites, ...recent]) {
-      providerIds.add(model.providerID);
-    }
-  } catch {
-    // Without OpenCode model state only the selected model's provider is expected.
   }
 
   return providerIds;
@@ -231,7 +216,7 @@ async function readProvidersUntilListed(
 
 /**
  * Read the providers list, waiting (bounded) while it lacks a provider the caller needs:
- * a location OpenCode unloaded while idle lists its providers a few seconds after waking.
+ * a location Reasonix unloaded while idle lists its providers a few seconds after waking.
  * A provider still missing after the full wait counts as gone and is not waited for again
  * until a list names it or the server starts again. A failed read is returned at once.
  * @param providerID Wait only for this provider; omitted, wait for every expected provider
@@ -273,7 +258,7 @@ async function readModelCatalog(options?: {
 
   const read = (async (): Promise<ModelCatalogReadResult> => {
     try {
-      logger.debug("[ModelManager] Refreshing model catalog from OpenCode API");
+      logger.debug("[ModelManager] Refreshing model catalog from the Reasonix API");
       const response = waitForExpectedProviders
         ? await readProvidersWhenListed()
         : await fetchProvidersList();
@@ -388,161 +373,35 @@ async function readModelCatalog(options?: {
   return read;
 }
 
-// The model menu shows favorites and recent, so it waits for all their providers.
+// The model menu shows the selected model, so it waits for that model's provider.
 async function getValidModelKeys(): Promise<Set<string> | null> {
   return (await readModelCatalog({ waitForExpectedProviders: true })).validModelKeys;
 }
 
-function normalizeFavoriteModels(state: OpenCodeModelState): FavoriteModel[] {
-  if (!Array.isArray(state.favorite)) {
-    return [];
-  }
-
-  return state.favorite
-    .filter(
-      (model): model is { providerID: string; modelID: string } =>
-        typeof model?.providerID === "string" &&
-        model.providerID.length > 0 &&
-        typeof model.modelID === "string" &&
-        model.modelID.length > 0,
-    )
-    .map((model) => ({
-      providerID: model.providerID,
-      modelID: model.modelID,
-    }));
-}
-
-function normalizeRecentModels(state: OpenCodeModelState): FavoriteModel[] {
-  if (!Array.isArray(state.recent)) {
-    return [];
-  }
-
-  return state.recent
-    .filter(
-      (model): model is { providerID: string; modelID: string } =>
-        typeof model?.providerID === "string" &&
-        model.providerID.length > 0 &&
-        typeof model.modelID === "string" &&
-        model.modelID.length > 0,
-    )
-    .map((model) => ({
-      providerID: model.providerID,
-      modelID: model.modelID,
-    }));
-}
-
-function getOpenCodeModelStatePath(): string {
-  const xdgStateHome = process.env.XDG_STATE_HOME;
-
-  if (xdgStateHome && xdgStateHome.trim().length > 0) {
-    return path.join(xdgStateHome, "opencode", "model.json");
-  }
-
-  const homeDir = process.env.HOME || process.env.USERPROFILE || "";
-  return path.join(homeDir, ".local", "state", "opencode", "model.json");
-}
-
 /**
- * Read favorite and recent models from OpenCode local state file.
- * Throws when the file is missing or unreadable.
- */
-async function readOpenCodeModelState(): Promise<{
-  stateFilePath: string;
-  favorites: FavoriteModel[];
-  recent: FavoriteModel[];
-}> {
-  const fs = await import("fs/promises");
-
-  const stateFilePath = getOpenCodeModelStatePath();
-  const content = await fs.readFile(stateFilePath, "utf-8");
-  const state = JSON.parse(content) as OpenCodeModelState;
-
-  return {
-    stateFilePath,
-    favorites: normalizeFavoriteModels(state),
-    recent: normalizeRecentModels(state),
-  };
-}
-
-/**
- * Get favorite and recent models from OpenCode local state file.
- * Config model is treated as favorite while OpenCode offers it.
+ * Get the models to show in the selection menu. Reasonix keeps no favorites or recent
+ * models, so the menu offers the currently selected model (which falls back to the config
+ * model) and the full catalog is reached through the providers and search views.
+ * The selected model is hidden while Reasonix does not offer it.
  */
 export async function getModelSelectionLists(): Promise<ModelSelectionLists> {
-  const envDefaultModel = getEnvDefaultModel();
+  const selectedModel = getStoredModel();
+  const candidates: FavoriteModel[] =
+    selectedModel.providerID && selectedModel.modelID
+      ? [{ providerID: selectedModel.providerID, modelID: selectedModel.modelID }]
+      : [];
+  const validModelKeys = candidates.length > 0 ? await getValidModelKeys() : null;
+  const favorites = dedupeModels(filterModelsByCatalog(candidates, validModelKeys));
 
-  try {
-    const {
-      stateFilePath,
-      favorites: rawFavorites,
-      recent: rawRecent,
-    } = await readOpenCodeModelState();
-    const shouldValidateWithCatalog =
-      rawFavorites.length > 0 || rawRecent.length > 0 || envDefaultModel !== null;
-    const validModelKeys = shouldValidateWithCatalog ? await getValidModelKeys() : null;
-
-    const validatedFavorites = filterModelsByCatalog(rawFavorites, validModelKeys);
-    const validatedRecent = filterModelsByCatalog(rawRecent, validModelKeys);
-    const offeredDefaultModels = filterModelsByCatalog(
-      envDefaultModel ? [envDefaultModel] : [],
-      validModelKeys,
-    );
-
-    const favorites = dedupeModels([...validatedFavorites, ...offeredDefaultModels]);
-
-    if (rawFavorites.length === 0 && envDefaultModel) {
-      logger.info(
-        `[ModelManager] No favorites in ${stateFilePath}, using config model as favorite`,
-      );
-    }
-
-    if (favorites.length === 0) {
-      logger.warn(`[ModelManager] No favorites in ${stateFilePath}`);
-    }
-
-    const filteredOutFavorites = rawFavorites.length - validatedFavorites.length;
-    const filteredOutRecent = rawRecent.length - validatedRecent.length;
-
-    if (filteredOutFavorites > 0 || filteredOutRecent > 0) {
-      logger.info(
-        `[ModelManager] Filtered unavailable models from OpenCode state: favoritesRemoved=${filteredOutFavorites}, recentRemoved=${filteredOutRecent}`,
-      );
-    }
-
-    const favoriteKeys = new Set(
-      favorites.map((model) => getModelKey(model.providerID, model.modelID)),
-    );
-    const recent = dedupeModels(validatedRecent).filter(
-      (model) => !favoriteKeys.has(getModelKey(model.providerID, model.modelID)),
-    );
-
-    logger.debug(
-      `[ModelManager] Loaded model selection lists from ${stateFilePath}: favorites=${favorites.length}, recent=${recent.length}`,
-    );
-
-    return { favorites, recent };
-  } catch (err) {
-    if (envDefaultModel) {
-      logger.warn(
-        "[ModelManager] Failed to load OpenCode model state, using config model as favorite:",
-        err,
-      );
-      return {
-        favorites: filterModelsByCatalog([envDefaultModel], await getValidModelKeys()),
-        recent: [],
-      };
-    }
-
-    logger.error("[ModelManager] Failed to load OpenCode model state:", err);
-    return {
-      favorites: [],
-      recent: [],
-    };
+  if (favorites.length === 0) {
+    logger.warn("[ModelManager] No selected or config model to offer");
   }
+
+  return { favorites, recent: [] };
 }
 
 /**
- * Validate stored selected model against OpenCode providers catalog.
+ * Validate stored selected model against the Reasonix providers catalog.
  * If selected model is unavailable, fallback to env default model — but not while
  * the catalog still lacks expected providers.
  */
@@ -620,7 +479,7 @@ export async function reconcileStoredModelSelection(options?: {
 }
 
 /**
- * Check whether OpenCode offers one model, reading only its provider's list (with the
+ * Check whether Reasonix offers one model, reading only its provider's list (with the
  * bounded wait for that provider), so a missing provider never delays another one.
  * A model found missing drops the cached catalog: whatever is drawn next is read afresh.
  */
@@ -677,7 +536,7 @@ async function isModelAdoptable(model: FavoriteModel): Promise<boolean> {
 
 /**
  * Pick the model to store when a session or an agent brings one: the model itself while
- * OpenCode offers it, otherwise the config model, otherwise none (leave the selection).
+ * Reasonix offers it, otherwise the config model, otherwise none (leave the selection).
  */
 export async function resolveModelToAdopt(model: FavoriteModel): Promise<FavoriteModel | null> {
   if (await isModelAdoptable(model)) {
@@ -708,15 +567,6 @@ export function __resetModelCatalogCacheForTests(): void {
   modelCatalogWarmupEndsAt = 0;
   providersPresumedGone.clear();
   providersWaitsInFlight.clear();
-}
-
-/**
- * Get list of favorite models from OpenCode local state file
- * Falls back to env default model if file is unavailable or empty
- */
-export async function getFavoriteModels(): Promise<FavoriteModel[]> {
-  const { favorites } = await getModelSelectionLists();
-  return favorites;
 }
 
 /**
@@ -825,11 +675,11 @@ export function getStoredModel(): ModelInfo {
   }
 
   // Fallback to model from config (environment variables)
-  if (config.opencode.model.provider && config.opencode.model.modelId) {
+  if (config.reasonix.model.provider && config.reasonix.model.modelId) {
     logger.debug("[ModelManager] Using model from config");
     return {
-      providerID: config.opencode.model.provider,
-      modelID: config.opencode.model.modelId,
+      providerID: config.reasonix.model.provider,
+      modelID: config.reasonix.model.modelId,
       variant: "default",
     };
   }

@@ -212,7 +212,7 @@ export async function getGitWorktreeContext(worktree: string): Promise<GitWorktr
 }
 
 /**
- * The worktrees to list: those whose folder the OpenCode server confirms is gone are left
+ * The worktrees to list: those whose folder the Reasonix server confirms is gone are left
  * out, while each row keeps its index in the full list, which is what a selection reads.
  */
 export async function listPresentWorktrees(
@@ -253,7 +253,7 @@ export async function findWorktreeOwner(folder: string): Promise<string | null> 
 }
 
 /**
- * The worktree context of the current folder. When that folder is a worktree the OpenCode
+ * The worktree context of the current folder. When that folder is a worktree the Reasonix
  * server confirms is gone, it is the context of the repository that still lists it, with no
  * row marked current, so /worktree can lead away from it.
  */

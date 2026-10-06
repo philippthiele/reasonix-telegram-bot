@@ -22,7 +22,7 @@ vi.mock("../../../src/bot/handlers/tts-response-handler.js", async (importOrigin
   sendTtsResponseForSession: mocked.sendTtsResponseForSession,
 }));
 
-vi.mock("../../../src/opencode/events.js", () => ({
+vi.mock("../../../src/reasonix/event-stream.js", () => ({
   subscribeToEvents: mocked.subscribeToEvents,
   stopEventListening: mocked.stopEventListening,
 }));
@@ -435,7 +435,7 @@ function emitQuestionSettled(
   } as unknown as Event);
 }
 
-/** OpenCode fails the question tool when its question is dismissed. */
+/** Reasonix fails the question tool when its question is dismissed. */
 function emitQuestionToolError(
   summaryAggregator: { processEvent(event: Event): void },
   sessionID = "session-1",
@@ -488,10 +488,10 @@ describe("bot/services/event-subscription-service", () => {
   beforeEach(async () => {
     vi.stubEnv("TELEGRAM_BOT_TOKEN", "test-telegram-token");
     vi.stubEnv("TELEGRAM_ALLOWED_USER_ID", "123456789");
-    vi.stubEnv("OPENCODE_MODEL_PROVIDER", "test-provider");
-    vi.stubEnv("OPENCODE_MODEL_ID", "test-model");
-    vi.stubEnv("OPENCODE_TELEGRAM_HOME", await mkdtemp(path.join(os.tmpdir(), "event-service-")));
-    tempHome = process.env.OPENCODE_TELEGRAM_HOME!;
+    vi.stubEnv("REASONIX_MODEL_PROVIDER", "test-provider");
+    vi.stubEnv("REASONIX_MODEL_ID", "test-model");
+    vi.stubEnv("REASONIX_TELEGRAM_HOME", await mkdtemp(path.join(os.tmpdir(), "event-service-")));
+    tempHome = process.env.REASONIX_TELEGRAM_HOME!;
     setRuntimeMode("installed");
 
     mocked.subscribeToEvents.mockReset();
@@ -2002,7 +2002,7 @@ describe("bot/services/event-subscription-service", () => {
     return api.editMessageText.mock.calls.find((call) => call[1] === messageId);
   }
 
-  it("ends permission prompts with the outcome OpenCode reports", async () => {
+  it("ends permission prompts with the outcome Reasonix reports", async () => {
     const { api, summaryAggregator } = await setupService(true);
     const { permissionManager, interactionManager } = activeContainer;
     api.sendMessage
@@ -2060,7 +2060,7 @@ describe("bot/services/event-subscription-service", () => {
     expect(String(edit[2]).endsWith(`\n${t("permission.outcome.not_answered")}`)).toBe(true);
     expect(edit[3]).toBeUndefined();
 
-    // OpenCode's own rejection that follows the abort changes nothing.
+    // Reasonix's own rejection that follows the abort changes nothing.
     emitPermissionReplied(summaryAggregator, "permission-1", "reject");
     await new Promise((resolve) => setTimeout(resolve, 30));
     expect(api.editMessageText.mock.calls.filter((call) => call[1] === 520)).toHaveLength(1);
@@ -2389,7 +2389,7 @@ describe("bot/services/event-subscription-service", () => {
       expect(api.deleteMessage).not.toHaveBeenCalledWith(42, 722);
     });
 
-    it("ends a poll whose Cancel was reported lost as cancelled once OpenCode reports it", async () => {
+    it("ends a poll whose Cancel was reported lost as cancelled once Reasonix reports it", async () => {
       const { api, summaryAggregator } = await setupService(true);
       const { questionManager } = getInteractionManagers();
       api.sendMessage.mockResolvedValueOnce({ message_id: 723 });
@@ -2570,7 +2570,7 @@ describe("bot/services/event-subscription-service", () => {
         expect(questionManager.isActive()).toBe(false);
       });
 
-      it("keeps the first ending when a reset comes before OpenCode's own cancel", async () => {
+      it("keeps the first ending when a reset comes before Reasonix's own cancel", async () => {
         const { api, summaryAggregator } = await setupService(true);
         const { questionManager, interactionManager } = getInteractionManagers();
         const release = holdNextSend(api, 761);

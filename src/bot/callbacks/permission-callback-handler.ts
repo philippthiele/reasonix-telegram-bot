@@ -1,7 +1,7 @@
 import type { Context } from "grammy";
 import type { AppContainer } from "../../app/bootstrap/app-container.js";
 import type { PermissionReply } from "../../app/types/permission.js";
-import { opencodeClient, opencodeServerVersion } from "../../opencode/client.js";
+import { reasonixClient } from "../../reasonix/client.js";
 import { getCurrentProject } from "../../app/stores/settings-store.js";
 import { getCurrentSession } from "../../app/services/session-service.js";
 import {
@@ -142,8 +142,8 @@ async function handlePermissionReply(
     reject: t("permission.reply.reject"),
   };
 
-  // On V2 a reject settles every pending request of the session.
-  const settlesSession = reply === "reject" && opencodeServerVersion === "v2";
+  // A reject settles every pending request of the session.
+  const settlesSession = reply === "reject";
   if (
     callbackMessageId === null ||
     !deps.permissionManager.markSending(callbackMessageId, reply, settlesSession)
@@ -173,7 +173,7 @@ async function handlePermissionReply(
       const results: PermissionReplyResults = { accepted: [], gone: [], failed: [] };
 
       for (const requestID of requestIDs) {
-        const response = await opencodeClient.permission.reply({
+        const response = await reasonixClient.permission.reply({
           requestID,
           directory,
           reply,
@@ -233,7 +233,7 @@ interface FinishedPermissionReply {
 }
 
 /**
- * Ends the prompt once OpenCode took the answer, or leaves it answerable with a warning
+ * Ends the prompt once Reasonix took the answer, or leaves it answerable with a warning
  * when the answer did not get through. A prompt an event or a reset already ended stays
  * as it is.
  */

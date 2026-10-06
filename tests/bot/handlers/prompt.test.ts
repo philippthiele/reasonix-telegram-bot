@@ -38,8 +38,8 @@ const mocked = vi.hoisted(() => ({
   getTtsModeMock: vi.fn(),
 }));
 
-vi.mock("../../../src/opencode/client.js", () => ({
-  opencodeClient: {
+vi.mock("../../../src/reasonix/client.js", () => ({
+  reasonixClient: {
     session: {
       status: mocked.sessionStatusMock,
       prompt: mocked.sessionPromptMock,
@@ -288,7 +288,6 @@ describe("bot/handlers/prompt", () => {
         ctx,
         createIncomingPrompt("Also check tests"),
         createDeps(),
-        "queue",
       );
 
       expect(admitted).toBeNull();
@@ -316,7 +315,7 @@ describe("bot/handlers/prompt", () => {
     expect(mocked.suppressionRegisterMock).toHaveBeenCalledWith("session-1", "Review README");
   });
 
-  it("names a session it had to create as a new session while OpenCode has not named it", async () => {
+  it("names a session it had to create as a new session while Reasonix has not named it", async () => {
     mocked.currentSession = null;
     mocked.sessionCreateMock.mockResolvedValueOnce({
       data: { id: "session-2", title: "" },
@@ -380,7 +379,7 @@ describe("bot/handlers/prompt", () => {
 
     expect(deps.bot.api.sendMessage).toHaveBeenCalledWith(
       777,
-      "Failed to send request to OpenCode.",
+      "Failed to send request to Reasonix.",
     );
   });
 
@@ -402,7 +401,7 @@ describe("bot/handlers/prompt", () => {
 
     expect(deps.bot.api.sendMessage).toHaveBeenCalledWith(
       777,
-      "Failed to send request to OpenCode.",
+      "Failed to send request to Reasonix.",
     );
   });
 
@@ -481,7 +480,7 @@ describe("bot/handlers/prompt", () => {
 
     expect(deps.bot.api.sendMessage).toHaveBeenCalledWith(
       777,
-      "Failed to send request to OpenCode.",
+      "Failed to send request to Reasonix.",
     );
   });
 
@@ -537,7 +536,7 @@ describe("bot/handlers/prompt", () => {
     );
   });
 
-  it("does not call OpenCode for an empty prompt without attachments", async () => {
+  it("does not call Reasonix for an empty prompt without attachments", async () => {
     const ctx = createContext();
 
     const handled = await processIncomingPrompt(ctx, createIncomingPrompt(""), createDeps());
@@ -727,7 +726,6 @@ describe("bot/handlers/prompt", () => {
         photos: [{ fileId: "photo", filename: "photo.jpg", source: "rich" }],
       }),
       deps,
-      "steer",
     );
 
     expect(admitted).toBeNull();

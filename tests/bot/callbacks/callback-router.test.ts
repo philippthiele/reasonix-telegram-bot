@@ -4,14 +4,12 @@ import { defined } from "../../helpers/defined.js";
 
 const mocked = vi.hoisted(() => ({
   resetInteractionError: vi.fn(),
-  handleAgentSelect: vi.fn(),
   handleCommandsCallback: vi.fn(),
   handleCompactConfirm: vi.fn(),
   handleCompactDetails: vi.fn(),
   handleLsCallback: vi.fn(),
   handleOpenCallback: vi.fn(),
   handleInlineMenuCancel: vi.fn(),
-  handleMcpsCallback: vi.fn(),
   handleMessagesCallback: vi.fn(),
   handleModelProvidersCallback: vi.fn(),
   handleModelSearchCallback: vi.fn(),
@@ -21,7 +19,6 @@ const mocked = vi.hoisted(() => ({
   handleProjectSelect: vi.fn(),
   handlePromptAttachmentCancel: vi.fn(),
   handleQuestionCallback: vi.fn(),
-  handleRenameCancel: vi.fn(),
   handleBackgroundSessionOpen: vi.fn(),
   handleSessionSelect: vi.fn(),
   handleSettingsCallback: vi.fn(),
@@ -41,9 +38,6 @@ vi.mock("../../../src/i18n/index.js", async (importOriginal) => ({
 vi.mock("../../../src/utils/logger.js", () => ({
   logger: { debug: vi.fn(), info: vi.fn(), warn: vi.fn(), error: vi.fn() },
 }));
-vi.mock("../../../src/bot/callbacks/agent-selection-callback-handler.js", () => ({
-  handleAgentSelect: mocked.handleAgentSelect,
-}));
 vi.mock("../../../src/bot/callbacks/command-catalog-callback-handler.js", () => ({
   handleCommandsCallback: mocked.handleCommandsCallback,
 }));
@@ -57,9 +51,6 @@ vi.mock("../../../src/bot/callbacks/file-browser-callback-handler.js", () => ({
 }));
 vi.mock("../../../src/bot/callbacks/inline-menu-cancel-callback-handler.js", () => ({
   handleInlineMenuCancel: mocked.handleInlineMenuCancel,
-}));
-vi.mock("../../../src/bot/callbacks/mcp-catalog-callback-handler.js", () => ({
-  handleMcpsCallback: mocked.handleMcpsCallback,
 }));
 vi.mock("../../../src/bot/callbacks/message-history-callback-handler.js", () => ({
   handleMessagesCallback: mocked.handleMessagesCallback,
@@ -81,9 +72,6 @@ vi.mock("../../../src/bot/callbacks/prompt-attachment-callback-handler.js", () =
 }));
 vi.mock("../../../src/bot/callbacks/question-callback-handler.js", () => ({
   handleQuestionCallback: mocked.handleQuestionCallback,
-}));
-vi.mock("../../../src/bot/callbacks/rename-callback-handler.js", () => ({
-  handleRenameCancel: mocked.handleRenameCancel,
 }));
 vi.mock("../../../src/bot/callbacks/session-callback-handler.js", () => ({
   handleBackgroundSessionOpen: mocked.handleBackgroundSessionOpen,
@@ -114,13 +102,11 @@ import { registerCallbackRouter } from "../../../src/bot/callbacks/callback-rout
 import { createTestAppContainer } from "../../helpers/app-container.js";
 
 const tableHandlers = [
-  mocked.handleAgentSelect,
   mocked.handleCommandsCallback,
   mocked.handleCompactConfirm,
   mocked.handleCompactDetails,
   mocked.handleLsCallback,
   mocked.handleOpenCallback,
-  mocked.handleMcpsCallback,
   mocked.handleMessagesCallback,
   mocked.handleModelProvidersCallback,
   mocked.handleModelSearchCallback,
@@ -130,7 +116,6 @@ const tableHandlers = [
   mocked.handleProjectSelect,
   mocked.handlePromptAttachmentCancel,
   mocked.handleQuestionCallback,
-  mocked.handleRenameCancel,
   mocked.handleSessionSelect,
   mocked.handleSettingsCallback,
   mocked.handleSkillsCallback,
@@ -153,15 +138,15 @@ describe("bot/callbacks/callback-router", () => {
   });
 
   it("dispatches a callback only to the handler matching its prefix", async () => {
-    mocked.handleAgentSelect.mockResolvedValue(true);
+    mocked.handleVariantSelect.mockResolvedValue(true);
     const callback = registerAndGetCallback();
-    const ctx = createCallbackContext("agent:subagent");
+    const ctx = createCallbackContext("variant:pick");
 
     await callback(ctx);
 
-    expect(mocked.handleAgentSelect).toHaveBeenCalledTimes(1);
+    expect(mocked.handleVariantSelect).toHaveBeenCalledTimes(1);
     for (const handler of tableHandlers) {
-      if (handler !== mocked.handleAgentSelect) {
+      if (handler !== mocked.handleVariantSelect) {
         expect(handler).not.toHaveBeenCalled();
       }
     }
@@ -257,9 +242,9 @@ describe("bot/callbacks/callback-router", () => {
   });
 
   it("clears the interaction scope when a callback handler throws", async () => {
-    mocked.handleAgentSelect.mockRejectedValueOnce(new Error("boom"));
+    mocked.handleVariantSelect.mockRejectedValueOnce(new Error("boom"));
     const callback = registerAndGetCallback();
-    const ctx = createCallbackContext("agent:subagent");
+    const ctx = createCallbackContext("variant:pick");
 
     await callback(ctx);
 

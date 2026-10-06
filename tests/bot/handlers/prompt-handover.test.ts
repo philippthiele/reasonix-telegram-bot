@@ -1,28 +1,12 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { Context } from "grammy";
 import { createIncomingPrompt } from "../../../src/app/types/prompt.js";
 
 const mocked = vi.hoisted(() => ({
-  version: "v1" as "v1" | "v2",
-  status: "busy" as "busy" | "idle",
-  statusMock: vi.fn(),
-  promptAsyncMock: vi.fn(),
   resolveProjectAgentMock: vi.fn(),
   getStoredModelMock: vi.fn(),
   cancelInboxPromptMock: vi.fn(),
-  getCurrentSessionMock: vi.fn(),
-  getPromptQueueModeMock: vi.fn(),
   admitHandedOverPromptToInboxMock: vi.fn(),
-}));
-
-vi.mock("../../../src/opencode/client.js", () => ({
-  opencodeClient: {
-    session: { status: mocked.statusMock, promptAsync: mocked.promptAsyncMock },
-  },
-  opencodeV2Client: {},
-  get opencodeServerVersion() {
-    return mocked.version;
-  },
 }));
 
 vi.mock("../../../src/app/services/agent-selection-service.js", () => ({
@@ -36,14 +20,6 @@ vi.mock("../../../src/app/services/model-selection-service.js", () => ({
 
 vi.mock("../../../src/app/services/prompt-inbox-service.js", () => ({
   cancelInboxPrompt: mocked.cancelInboxPromptMock,
-}));
-
-vi.mock("../../../src/app/services/session-service.js", () => ({
-  getCurrentSession: mocked.getCurrentSessionMock,
-}));
-
-vi.mock("../../../src/app/stores/settings-store.js", () => ({
-  getPromptQueueMode: mocked.getPromptQueueModeMock,
 }));
 
 vi.mock("../../../src/bot/handlers/prompt.js", async (importOriginal) => ({
@@ -60,7 +36,6 @@ import {
   handOverPreparedPrompt,
   handOverPromptQueue,
   initializePromptHandover,
-  wakePromptHandover,
   withdrawAllHandedOverPrompts,
   withdrawHandedOverPrompts,
 } from "../../../src/bot/handlers/prompt-handover.js";
@@ -69,8 +44,8 @@ import { createTestAppContainer } from "../../helpers/app-container.js";
 const SESSION = { id: "ses-1", title: "Session", directory: "D:/repo" };
 const MODEL = { providerID: "p", modelID: "m", variant: "high" };
 
+let inboxCounter = 0;
 let sendMessageMock: ReturnType<typeof vi.fn>;
-let onDrainedMock: ReturnType<typeof vi.fn<() => Promise<void>>>;
 let deps: ReturnType<typeof createDeps>;
 
 function createDeps() {
@@ -80,277 +55,181 @@ function createDeps() {
   };
 }
 
-function sentTexts(): string[] {
-  return mocked.promptAsyncMock.mock.calls.map(
-    ([options]) => (options as { parts: Array<{ text: string }> }).parts[0]?.text ?? "",
-  );
-}
-
 function makeContext(): Context {
   return { chat: { id: 42 }, api: {}, reply: vi.fn() } as unknown as Context;
 }
 
+/** Mirrors one prompt Reasonix is holding for the session. */
+function mirrorQueuedPrompt(text: string, sessionId = "ses-1"): string {
+  inboxCounter += 1;
+  const inboxId = `msg-${inboxCounter}`;
+  const item = promptQueue.confirmReservation(promptQueue.reserve()!, {
+    displayText: text,
+    inbox: { sessionId, inboxId },
+  });
+  if (!item) {
+    throw new Error("reservation was rejected");
+  }
+  return inboxId;
+}
+
+beforeEach(() => {
+  vi.resetAllMocks();
+  inboxCounter = 0;
+  promptQueue.__resetForTests();
+  promptHandover.__resetForTests();
+  __resetPromptHandoverForTests();
+  mocked.resolveProjectAgentMock.mockResolvedValue("build");
+  mocked.getStoredModelMock.mockReturnValue(MODEL);
+  mocked.cancelInboxPromptMock.mockResolvedValue(undefined);
+  mocked.admitHandedOverPromptToInboxMock.mockResolvedValue("msg-9");
+  sendMessageMock = vi.fn().mockResolvedValue(undefined);
+  deps = createDeps();
+  initializePromptHandover(deps);
+});
+
 describe("bot/handlers/prompt-handover", () => {
-  beforeEach(() => {
-    vi.useFakeTimers();
-    promptQueue.__resetForTests();
-    promptHandover.__resetForTests();
-    __resetPromptHandoverForTests();
-    mocked.version = "v1";
-    mocked.status = "busy";
-    mocked.statusMock.mockReset().mockImplementation(async () => ({
-      data: { [SESSION.id]: { type: mocked.status } },
-    }));
-    mocked.promptAsyncMock.mockReset().mockImplementation(async () => {
-      mocked.status = "busy";
-      return { data: undefined };
-    });
-    mocked.resolveProjectAgentMock.mockReset().mockResolvedValue("build");
-    mocked.getStoredModelMock.mockReset().mockReturnValue(MODEL);
-    mocked.cancelInboxPromptMock.mockReset().mockResolvedValue(undefined);
-    mocked.getCurrentSessionMock.mockReset().mockReturnValue(null);
-    mocked.getPromptQueueModeMock.mockReset().mockReturnValue("steer");
-    mocked.admitHandedOverPromptToInboxMock.mockReset().mockResolvedValue("msg-9");
-    sendMessageMock = vi.fn().mockResolvedValue(undefined);
-    onDrainedMock = vi.fn<() => Promise<void>>().mockResolvedValue(undefined);
-    deps = createDeps();
-    initializePromptHandover(deps, onDrainedMock);
+  it("leaves the waiting inbox prompts in Reasonix at /detach", async () => {
+    mirrorQueuedPrompt("first");
+    mirrorQueuedPrompt("second");
+
+    await handOverPromptQueue(SESSION);
+
+    expect(promptQueue.size()).toBe(0);
+    expect(promptHandover.get("ses-1")?.inboxEntries.map((entry) => entry.inboxId)).toEqual([
+      "msg-1",
+      "msg-2",
+    ]);
+    expect(promptHandover.hasPendingPrompts("ses-1")).toBe(true);
+    expect(mocked.cancelInboxPromptMock).not.toHaveBeenCalled();
   });
 
-  afterEach(() => {
-    __resetPromptHandoverForTests();
-    vi.useRealTimers();
+  it("records the selection the chat had at /detach", async () => {
+    mocked.getStoredModelMock.mockReturnValue({ providerID: "x", modelID: "y" });
+    await handOverPromptQueue(SESSION);
+
+    expect(promptHandover.get("ses-1")?.selection).toEqual({
+      agent: "build",
+      providerID: "x",
+      modelID: "y",
+      variant: undefined,
+    });
   });
 
-  describe("on OpenCode V1", () => {
-    it("sends the held prompts after the running turn, one per turn, with the selection at /detach", async () => {
-      promptQueue.add(createIncomingPrompt("first"));
-      promptQueue.add(createIncomingPrompt("second"));
+  it("hands a prompt prepared across /detach over to the session it arrived for", async () => {
+    const ticket = promptHandover.takeTicket("ses-1");
+    await handOverPromptQueue(SESSION);
+    const ctx = makeContext();
 
-      await handOverPromptQueue(SESSION);
-      mocked.getStoredModelMock.mockReturnValue({ providerID: "x", modelID: "y" });
-      expect(promptQueue.size()).toBe(0);
+    await expect(
+      handOverPreparedPrompt(ctx, ticket, createIncomingPrompt("transcribed")),
+    ).resolves.toBe(true);
 
-      await vi.advanceTimersByTimeAsync(3000);
-      expect(mocked.promptAsyncMock).not.toHaveBeenCalled();
+    expect(mocked.admitHandedOverPromptToInboxMock).toHaveBeenCalledWith(
+      ctx.api,
+      expect.objectContaining({ text: "transcribed" }),
+      { id: "ses-1", directory: "D:/repo" },
+      { agent: "build", providerID: "p", modelID: "m", variant: "high" },
+      deps,
+    );
+    expect(ctx.reply).not.toHaveBeenCalled();
+    expect(promptHandover.get("ses-1")?.inboxEntries).toEqual([
+      { sessionId: "ses-1", inboxId: "msg-9" },
+    ]);
+  });
 
-      mocked.status = "idle";
-      await vi.advanceTimersByTimeAsync(1500);
-      expect(sentTexts()).toEqual(["first"]);
-      expect(mocked.promptAsyncMock).toHaveBeenCalledWith({
-        sessionID: "ses-1",
-        directory: "D:/repo",
-        parts: [{ type: "text", text: "first" }],
-        agent: "build",
-        model: { providerID: "p", modelID: "m" },
-        variant: "high",
-      });
+  it("leaves a prompt that arrived after the detach to the normal path", async () => {
+    await handOverPromptQueue(SESSION);
+    const ticket = promptHandover.takeTicket("ses-1");
 
-      await vi.advanceTimersByTimeAsync(6000);
-      expect(sentTexts()).toEqual(["first"]);
+    await expect(
+      handOverPreparedPrompt(makeContext(), ticket, createIncomingPrompt("later")),
+    ).resolves.toBe(false);
+    expect(mocked.admitHandedOverPromptToInboxMock).not.toHaveBeenCalled();
+  });
 
-      mocked.status = "idle";
-      await vi.advanceTimersByTimeAsync(1500);
-      expect(sentTexts()).toEqual(["first", "second"]);
-    });
+  it("leaves a prompt for a session that was never detached to the normal path", async () => {
+    const ticket = promptHandover.takeTicket("ses-2");
 
-    it("continues the attached queue once the last handed-over turn in the current session ends", async () => {
-      mocked.getCurrentSessionMock.mockReturnValue(SESSION);
-      mocked.status = "idle";
-      promptQueue.add(createIncomingPrompt("only"));
+    await expect(
+      handOverPreparedPrompt(makeContext(), ticket, createIncomingPrompt("elsewhere")),
+    ).resolves.toBe(false);
+  });
 
-      await handOverPromptQueue(SESSION);
-      await vi.advanceTimersByTimeAsync(0);
-      expect(sentTexts()).toEqual(["only"]);
-      await vi.advanceTimersByTimeAsync(1500);
-      expect(promptHandover.hasPendingPrompts("ses-1")).toBe(true);
-      expect(onDrainedMock).not.toHaveBeenCalled();
-
-      mocked.status = "idle";
-      await vi.advanceTimersByTimeAsync(1500);
-
-      expect(promptHandover.hasPendingPrompts("ses-1")).toBe(false);
-      expect(onDrainedMock).toHaveBeenCalledTimes(1);
-    });
-
-    it("counts a turn too quick to be seen busy as over after the grace window", async () => {
-      mocked.status = "idle";
-      mocked.promptAsyncMock.mockResolvedValue({ data: undefined });
-      promptQueue.add(createIncomingPrompt("quick"));
-      promptQueue.add(createIncomingPrompt("next"));
-
-      await handOverPromptQueue(SESSION);
-      await vi.advanceTimersByTimeAsync(3000);
-      expect(sentTexts()).toEqual(["quick"]);
-
-      await vi.advanceTimersByTimeAsync(3000);
-      expect(sentTexts()).toEqual(["quick", "next"]);
-    });
-
-    it("checks at once when the session goes idle", async () => {
-      promptQueue.add(createIncomingPrompt("first"));
-      await handOverPromptQueue(SESSION);
-      await vi.advanceTimersByTimeAsync(0);
-
-      mocked.status = "idle";
-      wakePromptHandover("ses-1");
-      await vi.advanceTimersByTimeAsync(0);
-
-      expect(sentTexts()).toEqual(["first"]);
-    });
-
-    it("sends the next prompt after a failed one and posts the failure only when re-attached", async () => {
-      mocked.status = "idle";
-      mocked.promptAsyncMock.mockResolvedValueOnce({ error: { name: "BadRequest" } });
-      promptQueue.add(createIncomingPrompt("fails"));
-      promptQueue.add(createIncomingPrompt("goes"));
-      deps.attachManager.attach("ses-1", "D:/repo");
-
-      await handOverPromptQueue(SESSION);
-      await vi.advanceTimersByTimeAsync(0);
-
-      expect(sentTexts()).toEqual(["fails", "goes"]);
-      expect(sendMessageMock).toHaveBeenCalledWith(
-        config.telegram.allowedUserId,
-        t("bot.prompt_send_error"),
-      );
-    });
-
-    it("posts nothing about a failed prompt while detached", async () => {
-      mocked.status = "idle";
-      mocked.promptAsyncMock.mockResolvedValueOnce({ error: { name: "BadRequest" } });
-      promptQueue.add(createIncomingPrompt("fails"));
-
-      await handOverPromptQueue(SESSION);
-      await vi.advanceTimersByTimeAsync(0);
-
-      expect(sentTexts()).toEqual(["fails"]);
-      expect(sendMessageMock).not.toHaveBeenCalled();
-    });
-
-    it("sends nothing once /abort in that session withdrew them", async () => {
-      promptQueue.add(createIncomingPrompt("withdrawn"));
-      await handOverPromptQueue(SESSION);
-
+  it("cancels a prompt withdrawn while it was on its way to the detached session", async () => {
+    const ticket = promptHandover.takeTicket("ses-1");
+    await handOverPromptQueue(SESSION);
+    mocked.admitHandedOverPromptToInboxMock.mockImplementation(async () => {
       await withdrawHandedOverPrompts("ses-1", "abort_command");
-      mocked.status = "idle";
-      await vi.advanceTimersByTimeAsync(6000);
-
-      expect(mocked.promptAsyncMock).not.toHaveBeenCalled();
-      expect(promptHandover.get("ses-1")).toBeNull();
+      return "msg-9";
     });
 
-    it("sends prompts handed over again while a withdrawn loop is still finishing", async () => {
-      promptQueue.add(createIncomingPrompt("old"));
-      await handOverPromptQueue(SESSION);
-      await vi.advanceTimersByTimeAsync(0);
+    await expect(
+      handOverPreparedPrompt(makeContext(), ticket, createIncomingPrompt("late")),
+    ).resolves.toBe(true);
 
-      let resolveStatus: (value: unknown) => void = () => undefined;
-      mocked.statusMock.mockImplementationOnce(
-        () => new Promise((resolve) => (resolveStatus = resolve)),
-      );
-      await vi.advanceTimersByTimeAsync(1500);
-
-      await withdrawHandedOverPrompts("ses-1", "abort_command");
-      promptQueue.add(createIncomingPrompt("new"));
-      await handOverPromptQueue(SESSION);
-      mocked.status = "idle";
-      resolveStatus({ data: { [SESSION.id]: { type: "idle" } } });
-      await vi.advanceTimersByTimeAsync(0);
-
-      expect(sentTexts()).toEqual(["new"]);
-    });
-
-    it("sends nothing once /opencode_stop withdrew everything", async () => {
-      promptQueue.add(createIncomingPrompt("withdrawn"));
-      await handOverPromptQueue(SESSION);
-
-      await withdrawAllHandedOverPrompts("opencode_stop");
-      mocked.status = "idle";
-      await vi.advanceTimersByTimeAsync(6000);
-
-      expect(mocked.promptAsyncMock).not.toHaveBeenCalled();
-    });
-
-    it("hands a prompt prepared across /detach over to the session it arrived for", async () => {
-      const ticket = promptHandover.takeTicket("ses-1");
-      await handOverPromptQueue(SESSION);
-      mocked.status = "idle";
-
-      await expect(
-        handOverPreparedPrompt(makeContext(), ticket, createIncomingPrompt("transcribed")),
-      ).resolves.toBe(true);
-      await vi.advanceTimersByTimeAsync(0);
-
-      expect(sentTexts()).toEqual(["transcribed"]);
-    });
-
-    it("leaves a prompt that arrived after the detach to the normal path", async () => {
-      await handOverPromptQueue(SESSION);
-      const ticket = promptHandover.takeTicket("ses-1");
-
-      await expect(
-        handOverPreparedPrompt(makeContext(), ticket, createIncomingPrompt("later")),
-      ).resolves.toBe(false);
-    });
+    expect(mocked.cancelInboxPromptMock).toHaveBeenCalledWith(
+      { sessionId: "ses-1", inboxId: "msg-9" },
+      "withdrawn_during_handover",
+    );
   });
 
-  describe("on OpenCode V2", () => {
-    beforeEach(() => {
-      mocked.version = "v2";
-    });
+  it("posts nothing about a refused prompt while detached", async () => {
+    const ticket = promptHandover.takeTicket("ses-1");
+    await handOverPromptQueue(SESSION);
+    mocked.admitHandedOverPromptToInboxMock.mockResolvedValue(null);
 
-    it("leaves waiting inbox prompts in OpenCode at /detach and clears their buttons", async () => {
-      promptQueue.confirmReservation(promptQueue.reserve()!, {
-        displayText: "steered",
-        inbox: { sessionId: "ses-1", inboxId: "msg-1", delivery: "steer" },
-      });
+    await expect(
+      handOverPreparedPrompt(makeContext(), ticket, createIncomingPrompt("refused")),
+    ).resolves.toBe(true);
 
-      await handOverPromptQueue(SESSION);
+    expect(sendMessageMock).not.toHaveBeenCalled();
+  });
 
-      expect(promptQueue.size()).toBe(0);
-      expect(mocked.cancelInboxPromptMock).not.toHaveBeenCalled();
-      expect(mocked.promptAsyncMock).not.toHaveBeenCalled();
-      expect(promptHandover.get("ses-1")?.inboxEntries).toEqual([
-        { sessionId: "ses-1", inboxId: "msg-1", delivery: "steer" },
-      ]);
-    });
+  it("posts the failure of a refused prompt once the bot re-attached", async () => {
+    const ticket = promptHandover.takeTicket("ses-1");
+    await handOverPromptQueue(SESSION);
+    mocked.admitHandedOverPromptToInboxMock.mockResolvedValue(null);
+    deps.attachManager.attach("ses-1", "D:/repo");
 
-    it("cancels the handed-over inbox prompts on /opencode_stop", async () => {
-      promptQueue.confirmReservation(promptQueue.reserve()!, {
-        displayText: "steered",
-        inbox: { sessionId: "ses-1", inboxId: "msg-1", delivery: "steer" },
-      });
-      await handOverPromptQueue(SESSION);
+    await expect(
+      handOverPreparedPrompt(makeContext(), ticket, createIncomingPrompt("refused")),
+    ).resolves.toBe(true);
 
-      await withdrawAllHandedOverPrompts("opencode_stop");
+    expect(sendMessageMock).toHaveBeenCalledWith(
+      config.telegram.allowedUserId,
+      t("bot.prompt_send_error"),
+    );
+  });
 
-      expect(mocked.cancelInboxPromptMock).toHaveBeenCalledWith(
-        { sessionId: "ses-1", inboxId: "msg-1", delivery: "steer" },
-        "opencode_stop",
-      );
-    });
+  it("cancels the handed-over inbox prompts on /abort in that session", async () => {
+    const inboxId = mirrorQueuedPrompt("first");
+    await handOverPromptQueue(SESSION);
 
-    it("sends a prompt prepared across /detach into that session's inbox with the selection at /detach", async () => {
-      const ticket = promptHandover.takeTicket("ses-1");
-      await handOverPromptQueue(SESSION);
-      const input = createIncomingPrompt("transcribed");
-      const ctx = makeContext();
+    await withdrawHandedOverPrompts("ses-1", "abort_command");
 
-      await expect(handOverPreparedPrompt(ctx, ticket, input)).resolves.toBe(true);
+    expect(mocked.cancelInboxPromptMock).toHaveBeenCalledWith(
+      { sessionId: "ses-1", inboxId },
+      "abort_command",
+    );
+    expect(promptHandover.get("ses-1")).toBeNull();
+    expect(promptHandover.hasPendingPrompts("ses-1")).toBe(false);
+  });
 
-      expect(mocked.admitHandedOverPromptToInboxMock).toHaveBeenCalledWith(
-        ctx.api,
-        input,
-        { id: "ses-1", directory: "D:/repo" },
-        { agent: "build", ...MODEL },
-        "steer",
-        deps,
-      );
-      expect(ctx.reply).not.toHaveBeenCalled();
-      expect(promptHandover.get("ses-1")?.inboxEntries).toEqual([
-        { sessionId: "ses-1", inboxId: "msg-9", delivery: "steer" },
-      ]);
-    });
+  it("cancels the handed-over inbox prompts of every session on /reasonix_stop", async () => {
+    mirrorQueuedPrompt("first");
+    await handOverPromptQueue(SESSION);
+    // The queue is emptied by the first /detach, so the next prompt waits for the next one.
+    mirrorQueuedPrompt("second", "ses-2");
+    await handOverPromptQueue({ ...SESSION, id: "ses-2", directory: "D:/other" });
+
+    await withdrawAllHandedOverPrompts("reasonix_stop");
+
+    expect(mocked.cancelInboxPromptMock.mock.calls.map(([entry]) => entry.inboxId)).toEqual([
+      "msg-1",
+      "msg-2",
+    ]);
+    expect(promptHandover.get("ses-1")).toBeNull();
+    expect(promptHandover.get("ses-2")).toBeNull();
   });
 });

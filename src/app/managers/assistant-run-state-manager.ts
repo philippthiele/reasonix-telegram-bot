@@ -16,7 +16,7 @@ export interface AssistantRunResolvedInfo {
 
 export interface AssistantRunInfo extends AssistantRunStartInfo {
   sessionId: string;
-  /** False for a turn the bot only observed: OpenCode's own follow-up or a prompt typed in a client. */
+  /** False for a turn the bot only observed: Reasonix's own follow-up or a prompt typed in a client. */
   startedByBot: boolean;
   actualAgent?: string | undefined;
   actualProviderID?: string | undefined;

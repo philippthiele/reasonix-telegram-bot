@@ -1,6 +1,6 @@
 import type { Bot, Context } from "grammy";
-import { opencodeClient } from "../../opencode/client.js";
-import { isOpencodeServerHealthy } from "../../opencode/ready-refresh.js";
+import { reasonixClient } from "../../reasonix/client.js";
+import { isReasonixServerHealthy } from "../../reasonix/ready-refresh.js";
 import type { AppContainer } from "../bootstrap/app-container.js";
 import type { PermissionPromptChange, PermissionRequest } from "../types/permission.js";
 import type { SessionInfo } from "../types/session.js";
@@ -10,9 +10,9 @@ import { resolveSessionParentChain } from "./recent-sessions-service.js";
 import { resetStreamThrottle } from "../../bot/streaming/stream-throttle.js";
 import { logger } from "../../utils/logger.js";
 import {
-  isExpectedOpencodeUnavailableError,
-  isOpencodeNotFoundError,
-} from "../../utils/opencode-error.js";
+  isExpectedServerUnavailableError,
+  isServerNotFoundError,
+} from "../../utils/reasonix-error.js";
 
 interface EnsureAttachPinnedSessionParams {
   api: Bot<Context>["api"];
@@ -40,10 +40,10 @@ export interface AttachPresentationDeps {
 }
 
 type PendingQuestion = NonNullable<
-  Awaited<ReturnType<typeof opencodeClient.question.list>>["data"]
+  Awaited<ReturnType<typeof reasonixClient.question.list>>["data"]
 >[number];
 type PendingPermission = NonNullable<
-  Awaited<ReturnType<typeof opencodeClient.permission.list>>["data"]
+  Awaited<ReturnType<typeof reasonixClient.permission.list>>["data"]
 >[number];
 
 let attachPresentation: AttachPresentationDeps | null = null;
@@ -106,13 +106,13 @@ async function syncPinnedAttachState(deps: AttachStateDeps): Promise<void> {
 }
 
 async function listPendingQuestions(directory: string): Promise<PendingQuestion[] | null> {
-  const { data, error } = await opencodeClient.question.list({
+  const { data, error } = await reasonixClient.question.list({
     directory,
   });
 
   if (error || !data) {
-    if (isExpectedOpencodeUnavailableError(error)) {
-      logger.warn("[Attach] OpenCode server unavailable; skipping pending question restore");
+    if (isExpectedServerUnavailableError(error)) {
+      logger.warn("[Attach] Reasonix server unavailable; skipping pending question restore");
     } else {
       logger.warn("[Attach] Failed to load pending questions during attach:", error);
     }
@@ -123,13 +123,13 @@ async function listPendingQuestions(directory: string): Promise<PendingQuestion[
 }
 
 async function listPendingPermissions(directory: string): Promise<PendingPermission[] | null> {
-  const { data, error } = await opencodeClient.permission.list({
+  const { data, error } = await reasonixClient.permission.list({
     directory,
   });
 
   if (error || !data) {
-    if (isExpectedOpencodeUnavailableError(error)) {
-      logger.warn("[Attach] OpenCode server unavailable; skipping pending permission restore");
+    if (isExpectedServerUnavailableError(error)) {
+      logger.warn("[Attach] Reasonix server unavailable; skipping pending permission restore");
     } else {
       logger.warn("[Attach] Failed to load pending permissions during attach:", error);
     }
@@ -162,7 +162,7 @@ async function belongsToFollowedSession(
 
 /**
  * Shows the first pending poll of the followed session or its subagents and queues the
- * rest, in OpenCode's order. True when a poll was shown or queued.
+ * rest, in Reasonix's order. True when a poll was shown or queued.
  */
 async function restorePendingQuestions(
   deps: AttachRestoreDeps,
@@ -226,7 +226,7 @@ async function restorePendingPermissions(
   return pendingPermissions.length;
 }
 
-/** Requests on screen or waiting at the moment OpenCode's pending lists were requested. */
+/** Requests on screen or waiting at the moment Reasonix's pending lists were requested. */
 interface TrackedRequestsSnapshot {
   shownQuestionId: string | null;
   waitingQuestionIds: string[];
@@ -244,7 +244,7 @@ function snapshotTrackedRequests(deps: RestoreAfterReconnectDeps): TrackedReques
 }
 
 /**
- * After a reconnect, prompts on screen that OpenCode no longer has pending were settled
+ * After a reconnect, prompts on screen that Reasonix no longer has pending were settled
  * while the stream was down: they end as answered outside Telegram — or as not answered
  * when the server restarted, since they went with it — and waiting requests that are gone
  * leave the queue. Only requests tracked before the lists were requested are checked — one
@@ -337,13 +337,13 @@ export async function attachToSession(deps: AttachSessionDeps): Promise<AttachSe
     summaryAggregator.setBotAndChatId(bot, chatId);
   }
 
-  const { data: statuses, error: statusesError } = await opencodeClient.session.status({
+  const { data: statuses, error: statusesError } = await reasonixClient.session.status({
     directory: session.directory,
   });
 
   if (statusesError) {
-    if (isExpectedOpencodeUnavailableError(statusesError)) {
-      logger.warn("[Attach] OpenCode server unavailable; skipping session status restore");
+    if (isExpectedServerUnavailableError(statusesError)) {
+      logger.warn("[Attach] Reasonix server unavailable; skipping session status restore");
     } else {
       logger.warn("[Attach] Failed to load session status during attach:", statusesError);
     }
@@ -419,9 +419,9 @@ export async function restoreAttachedCurrentSession(
   }
 
   try {
-    if (!(await isOpencodeServerHealthy())) {
+    if (!(await isReasonixServerHealthy())) {
       logger.warn(
-        `[Attach] OpenCode server is unavailable; skipping followed session restore: session=${currentSession.id}, directory=${currentSession.directory}`,
+        `[Attach] Reasonix server is unavailable; skipping followed session restore: session=${currentSession.id}, directory=${currentSession.directory}`,
       );
       return false;
     }
@@ -449,16 +449,16 @@ async function dropSavedSessionIfMissing(
   session: SessionInfo,
   deps: Pick<AppContainer, "pinnedMessageManager">,
 ): Promise<boolean> {
-  const { error } = await opencodeClient.session.get({
+  const { error } = await reasonixClient.session.get({
     sessionID: session.id,
     directory: session.directory,
   });
-  if (!isOpencodeNotFoundError(error)) {
+  if (!isServerNotFoundError(error)) {
     return false;
   }
 
   logger.info(
-    `[Attach] Saved session no longer exists on the OpenCode server; clearing it: session=${session.id}, directory=${session.directory}`,
+    `[Attach] Saved session no longer exists on the Reasonix server; clearing it: session=${session.id}, directory=${session.directory}`,
   );
   clearSession();
   if (deps.pinnedMessageManager.isInitialized()) {
@@ -472,7 +472,7 @@ async function dropSavedSessionIfMissing(
 }
 
 /**
- * After a restart V2 resumes the interrupted run before the stream is back, so the resumed
+ * After a restart Reasonix resumes the interrupted run before the stream is back, so the resumed
  * turn's busy status was never seen: a busy session starts its turn from now, unless a turn
  * ended since `mark` was taken.
  */
@@ -482,7 +482,7 @@ async function startMissedLiveTurn(
   directory: string,
   mark: number,
 ): Promise<void> {
-  const { data: statuses, error } = await opencodeClient.session.status({ directory });
+  const { data: statuses, error } = await reasonixClient.session.status({ directory });
   if (error) {
     logger.warn("[Attach] Failed to load session status after a server restart:", error);
     return;
@@ -495,7 +495,7 @@ async function startMissedLiveTurn(
 
 /**
  * The event stream does not replay what was missed while it was down, so after a reconnect
- * the prompts on screen are checked against what OpenCode still has pending, and the
+ * the prompts on screen are checked against what Reasonix still has pending, and the
  * followed session's pending questions and permissions are loaded again. Anything still
  * on screen or waiting is left alone. `serverRestarted` says the reconnect reached another
  * server process than before.

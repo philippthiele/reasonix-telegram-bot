@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { Event } from "@opencode-ai/sdk/v2";
-import type { EventEnvelope } from "../../../src/opencode/events.js";
+import type { EventEnvelope } from "../../../src/reasonix/event-stream.js";
 
 const mocked = vi.hoisted(() => ({
   reconcileBusyState: vi.fn(),

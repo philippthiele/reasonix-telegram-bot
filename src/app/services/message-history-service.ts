@@ -1,4 +1,4 @@
-import { opencodeClient } from "../../opencode/client.js";
+import { reasonixClient } from "../../reasonix/client.js";
 import { logger } from "../../utils/logger.js";
 
 const LATEST_ASSISTANT_RESPONSE_MESSAGES_LIMIT = 20;
@@ -44,7 +44,7 @@ export async function loadUserMessages(
   sessionId: string,
   directory: string,
 ): Promise<UserMessageItem[]> {
-  const { data, error } = await opencodeClient.session.messages({
+  const { data, error } = await reasonixClient.session.messages({
     sessionID: sessionId,
     directory,
   });
@@ -53,7 +53,7 @@ export async function loadUserMessages(
     throw error || new Error("No message data received");
   }
 
-  const { data: sessionData } = await opencodeClient.session.get({
+  const { data: sessionData } = await reasonixClient.session.get({
     sessionID: sessionId,
     directory,
   });
@@ -95,7 +95,7 @@ export async function loadLatestAssistantResponse(
   directory: string,
 ): Promise<string | null> {
   try {
-    const { data: messages, error } = await opencodeClient.session.messages({
+    const { data: messages, error } = await reasonixClient.session.messages({
       sessionID: sessionId,
       directory,
       limit: LATEST_ASSISTANT_RESPONSE_MESSAGES_LIMIT,
@@ -138,7 +138,7 @@ export async function loadLatestAssistantMetrics(
   sessionId: string,
   directory: string,
 ): Promise<AssistantMessageMetrics | null> {
-  const { data, error } = await opencodeClient.session.messages({ sessionID: sessionId, directory });
+  const { data, error } = await reasonixClient.session.messages({ sessionID: sessionId, directory });
   if (error || !data) {
     throw error || new Error("No message data received");
   }

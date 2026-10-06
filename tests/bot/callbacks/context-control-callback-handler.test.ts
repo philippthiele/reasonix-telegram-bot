@@ -6,7 +6,7 @@ import { t } from "../../../src/i18n/index.js";
 const mocked = vi.hoisted(() => ({ session: vi.fn(), title: vi.fn(), summarize: vi.fn(), model: vi.fn() }));
 vi.mock("../../../src/app/services/session-service.js", () => ({ getCurrentSession: mocked.session, fetchSessionTitle: mocked.title }));
 vi.mock("../../../src/app/services/model-selection-service.js", () => ({ getStoredModel: mocked.model }));
-vi.mock("../../../src/opencode/client.js", () => ({ opencodeClient: { session: { summarize: mocked.summarize } } }));
+vi.mock("../../../src/reasonix/client.js", () => ({ reasonixClient: { session: { summarize: mocked.summarize } } }));
 
 import { handleCompactConfirm, handleCompactDetails } from "../../../src/bot/callbacks/context-control-callback-handler.js";
 import { handleInlineMenuCancel } from "../../../src/bot/callbacks/inline-menu-cancel-callback-handler.js";
@@ -85,7 +85,7 @@ describe("context compaction flow", () => {
     expect(mocked.summarize).not.toHaveBeenCalled();
   });
 
-  it("names the session with the title OpenCode has for it, or as a new session while untitled", async () => {
+  it("names the session with the title Reasonix has for it, or as a new session while untitled", async () => {
     for (const [fetched, shown] of [["Generated title", "Generated title"], ["", t("pinned.default_session_title")]]) {
       mocked.title.mockResolvedValue(fetched);
       const deps = createTestAppContainer();

@@ -1,5 +1,4 @@
 import { Keyboard } from "grammy";
-import { getAgentButtonLabel } from "../../app/types/agent.js";
 import { formatModelForButton } from "../../app/types/model.js";
 import type { ModelInfo } from "../../app/types/model.js";
 import type { ContextInfo } from "./keyboard-types.js";
@@ -28,24 +27,21 @@ function formatContextForButton(contextInfo: ContextInfo): string {
 }
 
 /**
- * Create Reply Keyboard with agent, model, variant, and context indicators
- * @param currentAgent Current agent name (e.g., "build", "plan")
+ * Create Reply Keyboard with model, variant, and context indicators
  * @param currentModel Current model info
  * @param contextInfo Optional context information (tokens used/limit)
  * @param variantName Optional variant display name (e.g., "💭 Default")
  * @param queuedPromptLabels Optional queued prompt labels, one row each above the fixed grid
- * @returns Reply Keyboard with queued prompts on top, agent and context in the next row,
+ * @returns Reply Keyboard with queued prompts on top, context in the next row,
  *          model and variant in the last row
  */
 export function createMainKeyboard(
-  currentAgent: string,
   currentModel: ModelInfo,
   contextInfo?: ContextInfo,
   variantName?: string,
   queuedPromptLabels: string[] = [],
 ): Keyboard {
   const keyboard = new Keyboard();
-  const agentText = getAgentButtonLabel(currentAgent);
 
   // Format model with compact provider/model text and icon
   const modelText = formatModelForButton(currentModel.providerID, currentModel.modelID);
@@ -63,27 +59,11 @@ export function createMainKeyboard(
     keyboard.text(label).row();
   }
 
-  // Row 1: agent and context buttons
-  keyboard.text(agentText).text(contextText).row();
+  // Row 1: context
+  keyboard.text(contextText).row();
 
   // Row 2: model and variant buttons
   keyboard.text(modelText).text(variantText).row();
-
-  return keyboard.resized().persistent();
-}
-
-/**
- * Create Reply Keyboard with agent indicator
- * @param currentAgent Current agent name (e.g., "build", "plan")
- * @returns Reply Keyboard with single button showing current agent
- * @deprecated Use createMainKeyboard instead
- */
-export function createAgentKeyboard(currentAgent: string): Keyboard {
-  const keyboard = new Keyboard();
-  const displayName = getAgentButtonLabel(currentAgent);
-
-  // Single button with current agent
-  keyboard.text(displayName).row();
 
   return keyboard.resized().persistent();
 }

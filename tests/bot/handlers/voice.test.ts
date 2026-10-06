@@ -9,13 +9,31 @@ import { createTestAppContainer } from "../../helpers/app-container.js";
 const mocked = vi.hoisted(() => ({
   getTtsModeMock: vi.fn(),
   getPromptQueueModeMock: vi.fn(),
+  getCurrentSessionMock: vi.fn(),
   flushPendingPromptMock: vi.fn(),
+  promptAsyncMock: vi.fn(),
+  getMissingFolderNoticeMock: vi.fn(),
 }));
 
-vi.mock("../../../src/app/stores/settings-store.js", () => ({
+vi.mock("../../../src/app/stores/settings-store.js", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("../../../src/app/stores/settings-store.js")>()),
   getTtsMode: mocked.getTtsModeMock,
   getPromptQueueMode: mocked.getPromptQueueModeMock,
-  getCurrentSession: vi.fn(() => undefined),
+}));
+
+vi.mock("../../../src/reasonix/client.js", () => ({
+  reasonixClient: { session: { promptAsync: mocked.promptAsyncMock } },
+}));
+
+vi.mock("../../../src/app/services/missing-folder-notice-service.js", () => ({
+  getMissingFolderNotice: mocked.getMissingFolderNoticeMock,
+}));
+
+vi.mock("../../../src/app/services/session-service.js", () => ({
+  getCurrentSession: mocked.getCurrentSessionMock,
+  setCurrentSession: vi.fn(),
+  clearSession: vi.fn(),
+  fetchSessionTitle: vi.fn(async () => "Session"),
 }));
 
 vi.mock("../../../src/utils/logger.js", () => ({
@@ -146,8 +164,8 @@ describe("bot/handlers/voice-handler", () => {
     vi.doUnmock("node:https");
     vi.stubEnv("TELEGRAM_BOT_TOKEN", "test-telegram-token");
     vi.stubEnv("TELEGRAM_ALLOWED_USER_ID", "123456789");
-    vi.stubEnv("OPENCODE_MODEL_PROVIDER", "test-provider");
-    vi.stubEnv("OPENCODE_MODEL_ID", "test-model");
+    vi.stubEnv("REASONIX_MODEL_PROVIDER", "test-provider");
+    vi.stubEnv("REASONIX_MODEL_ID", "test-model");
     vi.stubEnv("TELEGRAM_API_ROOT", "");
     vi.stubEnv("STT_NOTE_PROMPT", "");
   });
@@ -173,7 +191,7 @@ describe("bot/handlers/voice-handler", () => {
     });
   });
 
-  it("transcribes and queues a voice message while the agent is busy", async () => {
+  it("transcribes and sends a voice message to the inbox while the agent is busy", async () => {
     mocked.getPromptQueueModeMock.mockReturnValue("queue");
     const { handleVoiceMessage } = await loadVoiceModule();
     const { promptQueue } = await import("../../../src/app/managers/prompt-queue-manager.js");
@@ -186,6 +204,13 @@ describe("bot/handlers/voice-handler", () => {
     );
     const container = createFreshTestAppContainer();
     promptQueue.__resetForTests();
+    mocked.promptAsyncMock.mockResolvedValue({ data: { inboxID: "inbox-1" }, error: undefined });
+    mocked.getMissingFolderNoticeMock.mockResolvedValue(null);
+    mocked.getCurrentSessionMock.mockReturnValue({
+      id: "session-1",
+      title: "Session",
+      directory: "/repo",
+    });
     container.foregroundSessionState.markBusy("session-1", "/repo");
     const { ctx } = createVoiceContext();
     const { deps: baseDeps, processPromptMock, transcribeMock } = createVoiceDeps();
@@ -196,14 +221,15 @@ describe("bot/handlers/voice-handler", () => {
 
     expect(transcribeMock).toHaveBeenCalledTimes(1);
     expect(processPromptMock).not.toHaveBeenCalled();
+    expect(mocked.promptAsyncMock).toHaveBeenCalledTimes(1);
+    // The inbox holds the transcript; the mirror keeps only what the chat shows.
     expect(promptQueue.list()).toEqual([
       expect.objectContaining({
-        text: "run tests",
+        text: "",
         displayText: "run tests",
         responseMode: "text_only",
       }),
     ]);
-    expect(promptQueue.mediaSize()).toBe(0);
   });
 
   it("continues with prompt processing when recognized text message edit fails", async () => {

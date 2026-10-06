@@ -21,6 +21,7 @@ const mocked = vi.hoisted(() => ({
   keyboardUpdateAgentMock: vi.fn(),
   keyboardUpdateContextMock: vi.fn(),
   pinnedRefreshContextLimitMock: vi.fn(),
+  pinnedRefreshMock: vi.fn(),
   pinnedGetContextInfoMock: vi.fn(),
   pinnedGetContextLimitMock: vi.fn(),
   createMainKeyboardMock: vi.fn(),
@@ -92,6 +93,7 @@ function createDeps() {
     } as never,
     pinnedMessageManager: {
       refreshContextLimit: mocked.pinnedRefreshContextLimitMock,
+      refresh: mocked.pinnedRefreshMock,
       getContextInfo: mocked.pinnedGetContextInfoMock,
       getContextLimit: mocked.pinnedGetContextLimitMock,
     } as never,
@@ -145,6 +147,7 @@ describe("bot model selection", () => {
     mocked.keyboardUpdateAgentMock.mockReset();
     mocked.keyboardUpdateContextMock.mockReset();
     mocked.pinnedRefreshContextLimitMock.mockReset().mockResolvedValue(undefined);
+    mocked.pinnedRefreshMock.mockReset().mockResolvedValue(undefined);
     mocked.pinnedGetContextInfoMock.mockReset().mockReturnValue(null);
     mocked.pinnedGetContextLimitMock.mockReset().mockReturnValue(0);
     mocked.createMainKeyboardMock.mockReset().mockReturnValue({ keyboard: [["main"]] });
@@ -256,6 +259,7 @@ describe("bot model selection", () => {
         variant: "default",
       });
       expect(mocked.getModelSelectionListsMock).not.toHaveBeenCalled();
+      expect(mocked.pinnedRefreshMock).toHaveBeenCalled();
       expect(mocked.showVariantMenuAfterModelChangeMock).toHaveBeenCalledWith(ctx, {
         providerID: "fireworks",
         modelID: longModelID,

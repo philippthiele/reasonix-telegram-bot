@@ -12,7 +12,7 @@ function getDefaultTestHome(): string {
   } catch {
     const fallbackPath = path.join(
       os.tmpdir(),
-      "opencode-telegram-bot",
+      "reasonix-telegram-bot",
       "test-home",
       `${process.pid}-${workerId}`,
     );
@@ -24,12 +24,11 @@ function getDefaultTestHome(): string {
 const TEST_ENV_DEFAULTS: Record<string, string> = {
   TELEGRAM_BOT_TOKEN: "test-telegram-token",
   TELEGRAM_ALLOWED_USER_ID: "123456789",
-  OPENCODE_API_URL: "http://localhost:4096",
-  OPENCODE_MODEL_PROVIDER: "test-provider",
-  OPENCODE_MODEL_ID: "test-model",
+  REASONIX_MODEL_PROVIDER: "test-provider",
+  REASONIX_MODEL_ID: "test-model",
   LOG_LEVEL: "error",
   LOG_RETENTION: "10",
-  OPENCODE_TELEGRAM_HOME: getDefaultTestHome(),
+  REASONIX_TELEGRAM_HOME: getDefaultTestHome(),
 };
 
 export function ensureTestEnvironment(): void {

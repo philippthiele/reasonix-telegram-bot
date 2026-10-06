@@ -10,7 +10,7 @@ vi.mock("../../../src/reasonix/instance.js", () => ({
   restartAllInstances: mocked.restartAllInstances,
 }));
 
-vi.mock("../../../src/opencode/ready-refresh.js", () => ({
+vi.mock("../../../src/reasonix/ready-refresh.js", () => ({
   refreshModelCatalogAfterConfigReload: mocked.refreshModelCatalogAfterConfigReload,
 }));
 

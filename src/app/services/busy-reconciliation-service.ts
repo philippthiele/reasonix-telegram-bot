@@ -1,4 +1,4 @@
-import { opencodeClient } from "../../opencode/client.js";
+import { reasonixClient } from "../../reasonix/client.js";
 import type { AppContainer } from "../bootstrap/app-container.js";
 import type { ForegroundBusySession } from "../managers/foreground-session-state-manager.js";
 import { markAttachedSessionBusy, markAttachedSessionIdle } from "./attach-service.js";
@@ -97,7 +97,7 @@ export async function reconcileBusyStateNow(
     return;
   }
 
-  const { data: statuses, error } = await opencodeClient.session.status({ directory });
+  const { data: statuses, error } = await reasonixClient.session.status({ directory });
   if (error || !statuses) {
     logger.warn("[BusyReconciliation] Failed to load session status", error);
     return;

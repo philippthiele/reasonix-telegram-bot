@@ -10,7 +10,7 @@ import type { ModelInfo } from "../types/model.js";
 import { setCurrentProject } from "../stores/settings-store.js";
 import { clearSession } from "./session-service.js";
 import { detachAttachedSession, type DetachSessionDeps } from "./attach-service.js";
-import { stopEventListening } from "../../opencode/events.js";
+import { stopEventListening } from "../../reasonix/event-stream.js";
 import { getStoredAgent, resolveProjectAgent } from "./agent-selection-service.js";
 import { getStoredModel } from "./model-selection-service.js";
 import { formatVariantForButton } from "./variant-selection-service.js";
@@ -36,7 +36,6 @@ export interface ProjectSwitchPresentation {
   updateKeyboardContext(contextInfo: ProjectSwitchContextInfo): void;
   updateKeyboardAgent(agent: string): void;
   createMainKeyboard(
-    agent: string,
     model: ModelInfo,
     contextInfo: ProjectSwitchContextInfo,
     variantName: string,
@@ -86,5 +85,5 @@ export async function switchToProject(
     await options.ensureEventSubscription(project.worktree);
   }
 
-  return options.presentation.createMainKeyboard(currentAgent, currentModel, contextInfo, variantName);
+  return options.presentation.createMainKeyboard(currentModel, contextInfo, variantName);
 }

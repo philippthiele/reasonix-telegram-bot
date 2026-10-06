@@ -1,16 +1,34 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import {
   MAX_QUEUED_PROMPTS,
-  MAX_QUEUED_MEDIA_BYTES,
   promptQueue,
+  type InboxPromptInput,
 } from "../../../src/app/managers/prompt-queue-manager.js";
-import { createIncomingPrompt } from "../../../src/app/types/prompt.js";
 
-const prompt = createIncomingPrompt;
+let inboxCounter = 0;
+
+/** Mirrors a prompt Reasonix has accepted, so every item has its own inbox id. */
+function inboxPrompt(displayText: string, sessionId = "ses-1"): InboxPromptInput {
+  inboxCounter += 1;
+  return {
+    displayText,
+    inbox: { sessionId, inboxId: `inbox-${inboxCounter}` },
+  };
+}
+
+/** Reserves a slot and confirms it, as the dispatcher does after Reasonix accepted it. */
+function admit(displayText: string, sessionId = "ses-1") {
+  const reservationId = promptQueue.reserve();
+  if (reservationId === null) {
+    return null;
+  }
+  return promptQueue.confirmReservation(reservationId, inboxPrompt(displayText, sessionId));
+}
 
 describe("app/managers/prompt-queue-manager", () => {
   beforeEach(() => {
     promptQueue.__resetForTests();
+    inboxCounter = 0;
   });
 
   it("starts empty", () => {
@@ -19,240 +37,144 @@ describe("app/managers/prompt-queue-manager", () => {
     expect(promptQueue.isFull()).toBe(false);
   });
 
-  it("keeps insertion order", () => {
-    promptQueue.add(prompt("first"));
-    promptQueue.add(prompt("second"));
-    promptQueue.add(prompt("third"));
+  it("mirrors the display text Reasonix holds, not the prompt content", () => {
+    admit("first");
+    admit("  second  ");
 
-    expect(promptQueue.list().map((item) => item.text)).toEqual(["first", "second", "third"]);
+    expect(promptQueue.list().map((item) => item.displayText)).toEqual(["first", "second"]);
+    expect(promptQueue.list().map((item) => item.text)).toEqual(["", ""]);
   });
 
-  it("trims text and rejects blank prompts", () => {
-    expect(promptQueue.add(prompt("  spaced  "))?.text).toBe("spaced");
-    expect(promptQueue.add(prompt("   "))).toBeNull();
+  it("falls back to a placeholder when there is nothing to show", () => {
+    const item = admit("   ");
+
+    expect(item?.displayText).toBe("[Attachment]");
+  });
+
+  it("carries the inbox id of the session that holds the prompt", () => {
+    const item = admit("first", "ses-9");
+
+    expect(item?.inbox).toEqual({ sessionId: "ses-9", inboxId: "inbox-1" });
+    expect(promptQueue.findByInboxId("inbox-1")?.id).toBe(item?.id);
+    expect(promptQueue.findByInboxId("inbox-missing")).toBeNull();
+  });
+
+  it("counts a reservation towards the cap without showing it", () => {
+    for (let index = 0; index < MAX_QUEUED_PROMPTS - 1; index++) {
+      admit(`prompt ${index}`);
+    }
+    const reservationId = promptQueue.reserve();
+
+    expect(reservationId).not.toBeNull();
+    expect(promptQueue.isFull()).toBe(true);
+    expect(promptQueue.reserve()).toBeNull();
+    expect(promptQueue.size()).toBe(MAX_QUEUED_PROMPTS - 1);
+  });
+
+  it("confirms a reservation into a mirror item", () => {
+    const reservationId = promptQueue.reserve();
+
+    expect(promptQueue.confirmReservation(reservationId!, inboxPrompt("later"))?.displayText).toBe(
+      "later",
+    );
     expect(promptQueue.size()).toBe(1);
+    expect(promptQueue.isFull()).toBe(false);
+  });
+
+  it("drops a confirmation whose reservation a clear already took away", () => {
+    const reservationId = promptQueue.reserve();
+    promptQueue.clear("abort");
+
+    expect(promptQueue.confirmReservation(reservationId!, inboxPrompt("too late"))).toBeNull();
+    expect(promptQueue.size()).toBe(0);
   });
 
   it("rejects prompts beyond the limit", () => {
     for (let index = 0; index < MAX_QUEUED_PROMPTS; index++) {
-      expect(promptQueue.add(prompt(`prompt ${index}`))).not.toBeNull();
+      expect(admit(`prompt ${index}`)).not.toBeNull();
     }
 
     expect(promptQueue.isFull()).toBe(true);
-    expect(promptQueue.add(prompt("overflow"))).toBeNull();
+    expect(admit("overflow")).toBeNull();
     expect(promptQueue.size()).toBe(MAX_QUEUED_PROMPTS);
   });
 
   it("removes an item from the middle and keeps the rest in order", () => {
-    promptQueue.add(prompt("first"));
-    const second = promptQueue.add(prompt("second"));
-    promptQueue.add(prompt("third"));
+    admit("first");
+    const second = admit("second");
+    admit("third");
 
     const removed = promptQueue.removeById(second!.id);
 
-    expect(removed?.text).toBe("second");
-    expect(promptQueue.list().map((item) => item.text)).toEqual(["first", "third"]);
+    expect(removed?.displayText).toBe("second");
+    expect(promptQueue.list().map((item) => item.displayText)).toEqual(["first", "third"]);
   });
 
   it("returns null when removing an unknown id", () => {
-    promptQueue.add(prompt("first"));
+    admit("first");
 
     expect(promptQueue.removeById("queued-999")).toBeNull();
-    expect(promptQueue.size()).toBe(1);
   });
 
-  it("releases raw media bytes when an item is removed", () => {
-    const queued = promptQueue.add({
-      ...prompt("photo"),
-      mediaBytes: MAX_QUEUED_MEDIA_BYTES - 1,
-    });
+  it("returns copies so callers cannot mutate the mirror", () => {
+    admit("first");
 
-    promptQueue.removeById(queued!.id);
+    const listed = promptQueue.list();
+    listed[0]!.displayText = "changed";
+    listed[0]!.inbox.inboxId = "changed";
 
-    expect(promptQueue.mediaSize()).toBe(0);
-    expect(promptQueue.canAcceptMedia(MAX_QUEUED_MEDIA_BYTES)).toBe(true);
+    expect(promptQueue.list()[0]?.displayText).toBe("first");
+    expect(promptQueue.list()[0]?.inbox.inboxId).toBe("inbox-1");
   });
 
-  it("takes prompts in FIFO order", () => {
-    promptQueue.add(prompt("first"));
-    promptQueue.add(prompt("second"));
+  it("remembers inbox ids delivered before any item carried them", () => {
+    promptQueue.rememberDeliveredInboxId("inbox-early");
 
-    expect(promptQueue.takeNext()?.text).toBe("first");
-    expect(promptQueue.takeNext()?.text).toBe("second");
-    expect(promptQueue.takeNext()).toBeNull();
+    expect(promptQueue.wasInboxIdDelivered("inbox-early")).toBe(true);
+    expect(promptQueue.wasInboxIdDelivered("inbox-other")).toBe(false);
   });
 
-  it("keeps deferred photo inputs with their queued prompt", () => {
-    const photo = { fileId: "photo-1", filename: "rich.jpg", source: "rich" as const };
+  it("empties the queue and forgets the delivered ids on a clear", () => {
+    admit("first");
+    admit("second");
+    promptQueue.rememberDeliveredInboxId("inbox-early");
 
-    promptQueue.add(createIncomingPrompt("", { photos: [photo] }));
+    const cleared = promptQueue.clear("abort");
 
-    expect(promptQueue.takeNext()).toEqual({
-      id: "queued-1",
-      text: "",
-      fileParts: [],
-      photos: [photo],
-      displayText: "[Attachment]",
-      mediaBytes: 0,
-    });
-  });
-
-  it("caps aggregate raw media bytes and releases them when an item is dequeued", () => {
-    const underCap = MAX_QUEUED_MEDIA_BYTES - 1;
-    expect(promptQueue.add({ ...prompt("album one"), mediaBytes: underCap })).not.toBeNull();
-    expect(promptQueue.canAcceptMedia(2)).toBe(false);
-    expect(promptQueue.add({ ...prompt("album two"), mediaBytes: 2 })).toBeNull();
-
-    promptQueue.takeNext();
-
-    expect(promptQueue.mediaSize()).toBe(0);
-    expect(promptQueue.add({ ...prompt("album two"), mediaBytes: 2 })).not.toBeNull();
-  });
-
-  it("frees a slot after taking a prompt", () => {
-    for (let index = 0; index < MAX_QUEUED_PROMPTS; index++) {
-      promptQueue.add(prompt(`prompt ${index}`));
-    }
-
-    promptQueue.takeNext();
-
-    expect(promptQueue.isFull()).toBe(false);
-    expect(promptQueue.add(prompt("late"))).not.toBeNull();
-  });
-
-  it("clears every queued prompt", () => {
-    promptQueue.add(prompt("first"));
-    promptQueue.add(prompt("second"));
-
-    promptQueue.clear("test");
-
+    expect(cleared.map((item) => item.displayText)).toEqual(["first", "second"]);
     expect(promptQueue.size()).toBe(0);
+    expect(promptQueue.wasInboxIdDelivered("inbox-early")).toBe(false);
   });
 
-  it("returns copies so callers cannot mutate the queue", () => {
-    promptQueue.add(prompt("first"));
+  it("hands the queue over to a detached session without dropping late admissions", () => {
+    admit("first");
+    const reservationId = promptQueue.reserve();
 
-    const items = promptQueue.list();
-    const firstCopy = items[0];
-    if (!firstCopy) {
-      throw new Error("Expected queued prompt copy");
-    }
-    firstCopy.text = "mutated";
+    const handedOver = promptQueue.handOver("ses-detached", "detach");
 
-    expect(promptQueue.list()[0]?.text).toBe("first");
+    expect(handedOver.map((item) => item.displayText)).toEqual(["first"]);
+    expect(promptQueue.size()).toBe(0);
+    expect(promptQueue.releaseHandedOverReservation(reservationId!)).toBe(true);
+    expect(promptQueue.releaseHandedOverReservation(reservationId!)).toBe(false);
   });
 
-  describe("OpenCode inbox mirror", () => {
-    const inbox = (inboxId: string) => ({ sessionId: "ses-1", inboxId, delivery: "steer" as const });
+  it("withdraws the reservations of one session only", () => {
+    const detached = promptQueue.reserve();
+    promptQueue.handOver("ses-detached", "detach");
+    const other = promptQueue.reserve();
+    promptQueue.handOver("ses-other", "detach");
 
-    it("counts a reservation towards the cap without showing it", () => {
-      for (let index = 0; index < MAX_QUEUED_PROMPTS - 1; index++) {
-        promptQueue.add(prompt(`prompt ${index}`));
-      }
+    promptQueue.withdrawHandedOverReservations("ses-detached");
 
-      expect(promptQueue.reserve()).not.toBeNull();
-      expect(promptQueue.isFull()).toBe(true);
-      expect(promptQueue.reserve()).toBeNull();
-      expect(promptQueue.size()).toBe(MAX_QUEUED_PROMPTS - 1);
-    });
-
-    it("turns a reservation into a mirror item found by its inbox id", () => {
-      const reservationId = promptQueue.reserve();
-
-      const item = promptQueue.confirmReservation(reservationId!, {
-        displayText: "Also check the tests",
-        inbox: inbox("msg-1"),
-      });
-
-      expect(item).toMatchObject({ displayText: "Also check the tests", mediaBytes: 0 });
-      expect(promptQueue.findByInboxId("msg-1")?.id).toBe(item?.id);
-      expect(promptQueue.size()).toBe(1);
-      expect(promptQueue.isFull()).toBe(false);
-    });
-
-    it("shows a mirror item without text as an attachment", () => {
-      const item = promptQueue.confirmReservation(promptQueue.reserve()!, {
-        displayText: "  ",
-        inbox: inbox("msg-1"),
-      });
-
-      expect(item?.displayText).toBe("[Attachment]");
-    });
-
-    it("drops reservations on clear so a late confirmation finds nothing", () => {
-      const reservationId = promptQueue.reserve()!;
-      const mirrored = promptQueue.confirmReservation(promptQueue.reserve()!, {
-        displayText: "waiting",
-        inbox: inbox("msg-1"),
-      });
-
-      const removed = promptQueue.clear("test");
-
-      expect(removed.map((item) => item.id)).toEqual([mirrored?.id]);
-      expect(
-        promptQueue.confirmReservation(reservationId, { displayText: "late", inbox: inbox("msg-2") }),
-      ).toBeNull();
-      expect(promptQueue.releaseReservation(reservationId)).toBe(false);
-      expect(promptQueue.size()).toBe(0);
-    });
-
-    it("remembers delivered inbox ids until the queue is cleared", () => {
-      promptQueue.rememberDeliveredInboxId("msg-1");
-
-      expect(promptQueue.wasInboxIdDelivered("msg-1")).toBe(true);
-      expect(promptQueue.wasInboxIdDelivered("msg-2")).toBe(false);
-
-      promptQueue.clear("session_switched");
-
-      expect(promptQueue.wasInboxIdDelivered("msg-1")).toBe(false);
-    });
+    expect(promptQueue.releaseHandedOverReservation(detached!)).toBe(false);
+    expect(promptQueue.releaseHandedOverReservation(other!)).toBe(true);
   });
 
-  describe("hand-over at /detach", () => {
-    it("empties the queue, frees the cap and returns the items in order", () => {
-      promptQueue.add({ ...prompt("first"), mediaBytes: 100 });
-      promptQueue.add(prompt("second"));
+  it("leaves a late clear alone once the session was detached", () => {
+    const reservationId = promptQueue.reserve();
+    promptQueue.handOver("ses-detached", "detach");
+    promptQueue.clear("new_session");
 
-      const handedOver = promptQueue.handOver("ses-1", "detach_command");
-
-      expect(handedOver.map((item) => item.text)).toEqual(["first", "second"]);
-      expect(promptQueue.size()).toBe(0);
-      expect(promptQueue.mediaSize()).toBe(0);
-    });
-
-    it("keeps reservations on their way out of the cap and out of later clears", () => {
-      for (let index = 0; index < MAX_QUEUED_PROMPTS; index++) {
-        promptQueue.reserve();
-      }
-      const reservationId = "reserved-1";
-
-      promptQueue.handOver("ses-1", "detach_command");
-      promptQueue.clear("session_switched");
-
-      expect(promptQueue.isFull()).toBe(false);
-      expect(promptQueue.releaseHandedOverReservation(reservationId)).toBe(true);
-      expect(promptQueue.releaseHandedOverReservation(reservationId)).toBe(false);
-    });
-
-    it("releases handed-over reservations only of the withdrawn session", () => {
-      const first = promptQueue.reserve()!;
-      promptQueue.handOver("ses-1", "detach_command");
-      const second = promptQueue.reserve()!;
-      promptQueue.handOver("ses-2", "detach_command");
-
-      promptQueue.withdrawHandedOverReservations("ses-1");
-
-      expect(promptQueue.releaseHandedOverReservation(first)).toBe(false);
-      expect(promptQueue.releaseHandedOverReservation(second)).toBe(true);
-    });
-
-    it("releases every handed-over reservation when no session is given", () => {
-      const reservationId = promptQueue.reserve()!;
-      promptQueue.handOver("ses-1", "detach_command");
-
-      promptQueue.withdrawHandedOverReservations();
-
-      expect(promptQueue.releaseHandedOverReservation(reservationId)).toBe(false);
-    });
+    expect(promptQueue.releaseHandedOverReservation(reservationId!)).toBe(true);
   });
 });

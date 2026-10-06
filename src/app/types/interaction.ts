@@ -1,9 +1,8 @@
 import type { PermissionRequest, PermissionState } from "./permission.js";
 import type { Question, QuestionState } from "./question.js";
-import type { RenameState } from "./rename.js";
 import type { TaskCreationState } from "./scheduled-task.js";
 
-export type InteractionKind = "inline" | "permission" | "question" | "rename" | "task" | "custom";
+export type InteractionKind = "inline" | "permission" | "question" | "task" | "custom";
 
 export type ExpectedInput = "callback" | "text" | "command" | "mixed";
 
@@ -15,7 +14,6 @@ export type InteractionMetadata = Record<string, unknown>;
 export interface InteractionPayloads {
   question: QuestionState;
   permission: PermissionState;
-  rename: RenameState;
   task: TaskCreationState;
 }
 
@@ -36,7 +34,6 @@ interface InteractionBase {
 export type ActiveInteraction =
   | (InteractionBase & { kind: "question"; payload: QuestionState })
   | (InteractionBase & { kind: "permission"; payload: PermissionState })
-  | (InteractionBase & { kind: "rename"; payload: RenameState })
   | (InteractionBase & { kind: "task"; payload: TaskCreationState })
   | (InteractionBase & { kind: "inline" | "custom" });
 
@@ -55,7 +52,6 @@ interface StartInteractionOptionsBase {
 export type StartInteractionOptions =
   | (StartInteractionOptionsBase & { kind: "question"; payload: QuestionState })
   | (StartInteractionOptionsBase & { kind: "permission"; payload: PermissionState })
-  | (StartInteractionOptionsBase & { kind: "rename"; payload: RenameState })
   | (StartInteractionOptionsBase & { kind: "task"; payload: TaskCreationState })
   | (StartInteractionOptionsBase & { kind: "inline" | "custom" });
 

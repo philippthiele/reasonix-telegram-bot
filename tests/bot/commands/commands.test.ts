@@ -64,15 +64,15 @@ vi.mock("../../../src/app/services/session-cache-service.js", () => ({
   __resetSessionDirectoryCacheForTests: vi.fn(),
 }));
 
-vi.mock("../../../src/opencode/client.js", () => ({
-  opencodeClient: {
+vi.mock("../../../src/reasonix/client.js", () => ({
+  reasonixClient: {
     command: {
       list: mocked.commandListMock,
     },
     session: {
       status: mocked.sessionStatusMock,
       create: mocked.sessionCreateMock,
-      command: mocked.sessionCommandMock,
+      promptAsync: mocked.sessionCommandMock,
     },
   },
 }));
@@ -343,15 +343,11 @@ describe("bot/commands/commands", () => {
     expect(mocked.sessionCommandMock).toHaveBeenCalledWith({
       sessionID: "session-1",
       directory: "D:\\Projects\\Repo",
-      command: "poem",
-      arguments: "",
-      agent: "build",
-      model: "openai/gpt-5",
-      variant: "default",
+      parts: [{ type: "text", text: "/poem" }],
     });
   });
 
-  it("names a session it had to create as a new session while OpenCode has not named it", async () => {
+  it("names a session it had to create as a new session while Reasonix has not named it", async () => {
     mocked.currentSession = null;
     mocked.sessionCreateMock.mockResolvedValueOnce({
       data: { id: "session-2", title: "" },
@@ -416,15 +412,11 @@ describe("bot/commands/commands", () => {
     expect(mocked.sessionCommandMock).toHaveBeenCalledWith({
       sessionID: "session-1",
       directory: "D:\\Projects\\Repo",
-      command: "poem",
-      arguments: "about spring",
-      agent: "build",
-      model: "openai/gpt-5",
-      variant: "default",
+      parts: [{ type: "text", text: "/poem about spring" }],
     });
   });
 
-  it("notifies the user when session.command reports an error while attached", async () => {
+  it("notifies the user when the session prompt reports an error while attached", async () => {
     container.interactionManager.start({
       kind: "custom",
       expectedInput: "mixed",
@@ -446,7 +438,7 @@ describe("bot/commands/commands", () => {
     expect(ctx.api.sendMessage).toHaveBeenCalledWith(777, t("commands.execute_error"));
   });
 
-  it("notifies the user when session.command rejects while attached", async () => {
+  it("notifies the user when the session prompt rejects while attached", async () => {
     container.interactionManager.start({
       kind: "custom",
       expectedInput: "mixed",
@@ -473,7 +465,7 @@ describe("bot/commands/commands", () => {
     expect(ctx.api.sendMessage).toHaveBeenCalledWith(777, t("commands.execute_error"));
   });
 
-  it("does not notify the user when session.command reports an error after detach", async () => {
+  it("does not notify the user when the session prompt reports an error after detach", async () => {
     container.interactionManager.start({
       kind: "custom",
       expectedInput: "mixed",
@@ -501,7 +493,7 @@ describe("bot/commands/commands", () => {
     errorSpy.mockRestore();
   });
 
-  it("does not notify the user when session.command rejects after detach", async () => {
+  it("does not notify the user when the session prompt rejects after detach", async () => {
     container.interactionManager.start({
       kind: "custom",
       expectedInput: "mixed",
@@ -534,7 +526,7 @@ describe("bot/commands/commands", () => {
     errorSpy.mockRestore();
   });
 
-  it("does not notify the user when session.command fails while attached to another session", async () => {
+  it("does not notify the user when the session prompt fails while attached to another session", async () => {
     container.interactionManager.start({
       kind: "custom",
       expectedInput: "mixed",
@@ -559,7 +551,7 @@ describe("bot/commands/commands", () => {
     expect(ctx.api.sendMessage).not.toHaveBeenCalled();
   });
 
-  it("still notifies the user when session.command fails after re-attach to the same session", async () => {
+  it("still notifies the user when the session prompt fails after re-attach to the same session", async () => {
     container.interactionManager.start({
       kind: "custom",
       expectedInput: "mixed",
@@ -802,12 +794,12 @@ describe("commands pagination helpers", () => {
 
   describe("formatCommandsSelectText", () => {
     it("returns base text for first page", () => {
-      expect(formatCommandsSelectText(0)).toBe("Choose an OpenCode command:");
+      expect(formatCommandsSelectText(0)).toBe("Choose a Reasonix command:");
     });
 
     it("returns page-specific text for subsequent pages", () => {
-      expect(formatCommandsSelectText(1)).toBe("Choose an OpenCode command (page 2):");
-      expect(formatCommandsSelectText(5)).toBe("Choose an OpenCode command (page 6):");
+      expect(formatCommandsSelectText(1)).toBe("Choose a Reasonix command (page 2):");
+      expect(formatCommandsSelectText(5)).toBe("Choose a Reasonix command (page 6):");
     });
   });
 

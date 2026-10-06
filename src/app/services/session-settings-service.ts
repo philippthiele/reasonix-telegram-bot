@@ -12,7 +12,7 @@ import { logger } from "../../utils/logger.js";
  * Agent and model are adopted independently: a session that carries only one of
  * them changes only that one, and a session that was never prompted changes
  * nothing. The variant is part of the model record and is never adopted on its
- * own, so a model without a variant is stored at "default". A model OpenCode no
+ * own, so a model without a variant is stored at "default". A model Reasonix no
  * longer offers is replaced by the config model, or not adopted at all.
  * @param session Session to read the settings from
  */

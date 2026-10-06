@@ -1,7 +1,6 @@
 import { Bot, Context } from "grammy";
 import type { Event } from "@opencode-ai/sdk/v2";
 import { config } from "../../config.js";
-import { opencodeServerVersion } from "../../opencode/client.js";
 import { getCurrentSession } from "../../app/services/session-service.js";
 import { restorePendingInteractionsAfterReconnect } from "../../app/services/attach-service.js";
 import { reconcileInboxPrompts } from "../../app/services/prompt-inbox-service.js";
@@ -14,7 +13,7 @@ import {
   stopEventListening,
   subscribeToEvents,
   type ReconnectInfo,
-} from "../../opencode/events.js";
+} from "../../reasonix/event-stream.js";
 import type { ToolInfo } from "../../app/managers/summary-aggregation-manager.js";
 import { closeQuestionNotAnswered } from "../menus/question-menu.js";
 import { SessionRuntimeState } from "../events/session-runtime-state.js";
@@ -55,7 +54,7 @@ export type EventSubscriptionServiceDeps = Pick<
   | "summaryAggregator"
 >;
 
-/** The failure OpenCode reports for a call it stopped, built for a call whose server went away. */
+/** The failure Reasonix reports for a call it stopped, built for a call whose server went away. */
 function buildFailedToolEvent(tool: ToolInfo, now: number): Event {
   const start = "time" in tool.state && tool.state.time ? tool.state.time.start : now;
   return {
@@ -83,7 +82,7 @@ function buildFailedToolEvent(tool: ToolInfo, now: number): Event {
   };
 }
 
-/** The idle OpenCode sends for an interrupted execution, marked the way the V2 adapter does. */
+/** The idle Reasonix sends for an interrupted execution. */
 function buildInterruptedIdleEvents(sessionId: string): Event[] {
   return [
     {
@@ -106,7 +105,7 @@ export function createEventSubscriptionService(
 }
 
 /**
- * Coordinates the OpenCode -> Telegram bridge: owns the subscription lifecycle
+ * Coordinates the Reasonix -> Telegram bridge: owns the subscription lifecycle
  * and is the one place that decides where session messages go. Today every
  * session goes to the single chat, and the followed session is the foreground.
  */
@@ -179,7 +178,7 @@ class EventSubscriptionService implements BotEventSubscriptionService {
     registerSessionLifecycleHandlers(handlerDeps);
     registerDashboardHandlers(handlerDeps);
 
-    logger.info(`[Bot] Subscribing to OpenCode events for project: ${directory}`);
+    logger.info(`[Bot] Subscribing to Reasonix events for project: ${directory}`);
     subscribeToEvents(
       directory,
       createEventRouter({
@@ -194,17 +193,13 @@ class EventSubscriptionService implements BotEventSubscriptionService {
   };
 
   /**
-   * Ends the followed session's run in the chat the way `/abort` does, for a V2 server that
+   * Ends the followed session's run in the chat the way `/abort` does, for a server that
    * ended it without saying so (stopped or restarted): the poll on screen closes as not
-   * answered, then the events OpenCode sends on an abort — each running call failed, then
+   * answered, then the events Reasonix sends on an abort — each running call failed, then
    * an interrupted idle — go through the usual pipeline. Everything up to the first await
    * runs at once, so events that arrive later are handled after the ending.
    */
   endRunLostWithServer = async (reason: string): Promise<void> => {
-    if (opencodeServerVersion !== "v2") {
-      return;
-    }
-
     const { deps, runtime } = this;
     const destination = this.getChatDestination();
     // First: failing the poll's question call below would delete the poll, as after /abort.
@@ -230,7 +225,7 @@ class EventSubscriptionService implements BotEventSubscriptionService {
     }
 
     logger.info(
-      `[Bot] Ending the run lost with the OpenCode server: session=${sessionId}, runningTools=${runningTools.length}, reason=${reason}`,
+      `[Bot] Ending the run lost with the Reasonix server: session=${sessionId}, runningTools=${runningTools.length}, reason=${reason}`,
     );
     deps.assistantRunState.clearRun(sessionId, reason);
 
@@ -251,8 +246,8 @@ class EventSubscriptionService implements BotEventSubscriptionService {
     if (serverRestarted === true) {
       // The restarted server lost the run and resumes it as a new turn: the old one ends
       // here before any event of the new connection is handled.
-      this.endRunLostWithServer("opencode_restarted").catch((error) => {
-        logger.warn("[Bot] Failed to end the run lost with the OpenCode server:", error);
+      this.endRunLostWithServer("reasonix_restarted").catch((error) => {
+        logger.warn("[Bot] Failed to end the run lost with the Reasonix server:", error);
       });
     } else {
       // The new stream no longer knows the background operations the old one announced,

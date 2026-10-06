@@ -9,7 +9,7 @@ const mocked = vi.hoisted(() => ({
   })),
 }));
 
-vi.mock("../../../src/opencode/ready-refresh.js", () => ({
+vi.mock("../../../src/reasonix/ready-refresh.js", () => ({
   watchLateModelCatalogChanges: () => mocked.nextLateCatalogChangeMock,
 }));
 
@@ -47,7 +47,7 @@ describe("bot/services/model-views", () => {
       .mockResolvedValueOnce(false);
     const { deps, pinnedMessageManager, keyboardManager } = createDeps();
 
-    refreshModelViewsAfterLateCatalogSettle(deps, "opencode_start_success");
+    refreshModelViewsAfterLateCatalogSettle(deps, "reasonix_start_success");
 
     await vi.waitFor(() => expect(mocked.nextLateCatalogChangeMock).toHaveBeenCalledTimes(3));
     expect(pinnedMessageManager.refresh).toHaveBeenCalledTimes(2);

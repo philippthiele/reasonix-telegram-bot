@@ -3,6 +3,24 @@ import type { Context } from "grammy";
 
 const flushPendingPromptMock = vi.hoisted(() => vi.fn());
 
+const mocked = vi.hoisted(() => ({
+  promptAsync: vi.fn(),
+  getCurrentSession: vi.fn(),
+  getMissingFolderNotice: vi.fn(),
+}));
+
+vi.mock("../../../src/reasonix/client.js", () => ({
+  reasonixClient: { session: { promptAsync: mocked.promptAsync } },
+}));
+
+vi.mock("../../../src/app/services/session-service.js", () => ({
+  getCurrentSession: mocked.getCurrentSession,
+}));
+
+vi.mock("../../../src/app/services/missing-folder-notice-service.js", () => ({
+  getMissingFolderNotice: mocked.getMissingFolderNotice,
+}));
+
 vi.mock("../../../src/bot/handlers/message-merger.js", () => ({
   flushPendingPrompt: flushPendingPromptMock,
   __resetMessageMergerForTests: vi.fn(),
@@ -19,7 +37,7 @@ vi.mock("../../../src/app/services/document-extractor-service.js", () => ({
 }));
 import { t } from "../../../src/i18n/index.js";
 import { isDocExtractorConfigured } from "../../../src/app/services/document-extractor-service.js";
-import { MAX_QUEUED_MEDIA_BYTES, promptQueue } from "../../../src/app/managers/prompt-queue-manager.js";
+import { promptQueue } from "../../../src/app/managers/prompt-queue-manager.js";
 import * as settingsStore from "../../../src/app/stores/settings-store.js";
 import { initializePromptQueueDispatch } from "../../../src/bot/handlers/prompt-queue-dispatch.js";
 import { createTestAppContainer } from "../../helpers/app-container.js";
@@ -97,6 +115,9 @@ function createDocumentDeps(overrides: Partial<DocumentHandlerDeps> = {}): {
 let container: AppContainer;
 
 beforeEach(() => {
+  mocked.promptAsync.mockReset().mockResolvedValue({ data: { inboxID: "inbox-1" }, error: undefined });
+  mocked.getCurrentSession.mockReset().mockReturnValue(null);
+  mocked.getMissingFolderNotice.mockReset().mockResolvedValue(null);
   container = createTestAppContainer();
 });
 
@@ -107,70 +128,14 @@ describe("bot/handlers/document", () => {
     promptQueue.__resetForTests();
   });
 
-  it("rejects oversized queued image documents before downloading", async () => {
-    vi.spyOn(settingsStore, "getPromptQueueMode").mockReturnValue("queue");
-    container.foregroundSessionState.markBusy("session-1", "/repo");
-    const { ctx } = createDocumentContext({
-      document: {
-        file_id: "image-file-id",
-        file_unique_id: "image-unique-id",
-        file_name: "image.png",
-        mime_type: "image/png",
-        file_size: MAX_QUEUED_MEDIA_BYTES + 1,
-      },
-    });
-    const { deps, downloadMock, processPromptMock } = createDocumentDeps();
-
-    await handleDocumentMessage(ctx, deps);
-
-    expect(downloadMock).not.toHaveBeenCalled();
-    expect(processPromptMock).not.toHaveBeenCalled();
-    expect(promptQueue.mediaSize()).toBe(0);
-  });
-
-  it("rejects oversized queued PDFs before downloading", async () => {
-    vi.spyOn(settingsStore, "getPromptQueueMode").mockReturnValue("queue");
-    container.foregroundSessionState.markBusy("session-1", "/repo");
-    const { ctx } = createDocumentContext({
-      document: {
-        file_id: "pdf-file-id",
-        file_unique_id: "pdf-unique-id",
-        file_name: "large.pdf",
-        mime_type: "application/pdf",
-        file_size: MAX_QUEUED_MEDIA_BYTES + 1,
-      },
-    });
-    const { deps, downloadMock, processPromptMock } = createDocumentDeps();
-
-    await handleDocumentMessage(ctx, deps);
-
-    expect(downloadMock).not.toHaveBeenCalled();
-    expect(processPromptMock).not.toHaveBeenCalled();
-    expect(promptQueue.mediaSize()).toBe(0);
-  });
-
-  it("rejects queued documents with an unknown media size", async () => {
-    vi.spyOn(settingsStore, "getPromptQueueMode").mockReturnValue("queue");
-    container.foregroundSessionState.markBusy("session-1", "/repo");
-    const { ctx } = createDocumentContext({
-      document: {
-        file_id: "unknown-file-id",
-        file_unique_id: "unknown-unique-id",
-        file_name: "unknown.png",
-        mime_type: "image/png",
-      },
-    });
-    const { deps, downloadMock } = createDocumentDeps();
-
-    await handleDocumentMessage(ctx, deps);
-
-    expect(downloadMock).not.toHaveBeenCalled();
-    expect(promptQueue.mediaSize()).toBe(0);
-  });
-
   describe("text files", () => {
-    it("reserves raw source bytes when a text file is queued", async () => {
+    it("sends a text file to the inbox while the session is busy", async () => {
       vi.spyOn(settingsStore, "getPromptQueueMode").mockReturnValue("queue");
+      mocked.getCurrentSession.mockReturnValue({
+        id: "session-1",
+        title: "Session",
+        directory: "/repo",
+      });
       container.foregroundSessionState.markBusy("session-1", "/repo");
       const { ctx } = createDocumentContext();
       const { deps, downloadMock, processPromptMock } = createDocumentDeps();
@@ -179,12 +144,13 @@ describe("bot/handlers/document", () => {
 
       expect(downloadMock).toHaveBeenCalledOnce();
       expect(processPromptMock).not.toHaveBeenCalled();
+      // The mirror keeps no file content and no size accounting, only the display text.
       expect(promptQueue.list()).toEqual([
-        expect.objectContaining({
-          mediaBytes: 1024,
-        }),
+        expect.objectContaining({ displayText: "test.txt" }),
       ]);
-      expect(promptQueue.mediaSize()).toBe(1024);
+      expect(mocked.promptAsync).toHaveBeenCalledWith(
+        expect.objectContaining({ sessionID: "session-1" }),
+      );
     });
 
     it("downloads and sends text file content as prompt", async () => {

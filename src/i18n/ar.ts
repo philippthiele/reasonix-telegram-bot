@@ -1,7 +1,7 @@
 import type { I18nDictionary } from "./en.js";
 
 /**
- * Arabic localization for OpenCode Telegram Bot.
+ * Arabic localization for Reasonix Telegram Bot.
  *
  * Keep upstream emoji and technical terms where they help recognition.
  * Prefer natural Arabic wording over literal translation.
@@ -28,19 +28,16 @@ export const ar: I18nDictionary = {
   "cmd.description.tasklist": "عرض المهام المجدولة",
   "cmd.description.commands": "الأوامر المخصصة",
   "cmd.description.skills": "قائمة المهارات",
-  "cmd.description.mcps": "خوادم MCP",
-  "cmd.description.opencode_start": "تشغيل خادم OpenCode",
-  "cmd.description.opencode_stop": "إيقاف خادم OpenCode",
-  "cmd.description.reload": "Reload OpenCode configuration",
+  "cmd.description.reasonix_start": "تشغيل خادم Reasonix",
+  "cmd.description.reasonix_stop": "إيقاف خادم Reasonix",
+  "cmd.description.reload": "Reload Reasonix configuration",
   "cmd.description.ls": "استعراض ملفات المجلد",
   "cmd.description.help": "المساعدة",
-  "cmd.description.rename": "تغيير اسم الجلسة الحالية",
   "cmd.description.open": "إضافة مشروع عبر استعراض المجلدات",
 
   "callback.unknown_command": "الأمر غير معروف",
   "callback.processing_error": "تعذر تنفيذ الطلب",
 
-  "error.load_agents": "❌ تعذر تحميل قائمة الوكلاء",
   "error.load_models": "❌ تعذر تحميل قائمة النماذج",
   "error.load_variants": "❌ تعذر تحميل خيارات النموذج",
   "error.context_button": "❌ تعذر تنفيذ إجراء السياق",
@@ -67,11 +64,9 @@ export const ar: I18nDictionary = {
   "common.unknown_error": "خطأ غير معروف",
 
   "start.welcome":
-    "👋 أهلًا بك في OpenCode Telegram Bot!\n\nالأوامر الأساسية:\n/projects — اختيار مشروع\n/sessions — عرض الجلسات\n/new — بدء جلسة جديدة\n/commands — الأوامر المخصصة\n/skills — قائمة المهارات\n/task — إنشاء مهمة مجدولة\n/tasklist — عرض المهام المجدولة\n/status — حالة الخادم والجلسة\n/help — المساعدة\n\nاستخدم الأزرار السفلية للتبديل بين الوكيل والنموذج وخيارات التشغيل.",
+    "👋 أهلًا بك في Reasonix Telegram Bot!\n\nالأوامر الأساسية:\n/projects — اختيار مشروع\n/sessions — عرض الجلسات\n/new — بدء جلسة جديدة\n/commands — الأوامر المخصصة\n/skills — قائمة المهارات\n/task — إنشاء مهمة مجدولة\n/tasklist — عرض المهام المجدولة\n/status — حالة الخادم والجلسة\n/help — المساعدة\n\nاستخدم الأزرار السفلية للتبديل بين الوكيل والنموذج وخيارات التشغيل.",
   "help.keyboard_hint":
     "💡 استخدم الأزرار السفلية للتبديل بين الوكيل والنموذج وخيارات التشغيل وإدارة السياق.",
-  "help.text":
-    "📖 **المساعدة**\n\n/status - عرض حالة الخادم والجلسة\n/sessions - عرض الجلسات\n/new - بدء جلسة جديدة\n/help - المساعدة",
 
   "bot.thinking": "💭 جارٍ التفكير...",
   "progress.compact.activity": "{header}\n{activity}",
@@ -79,7 +74,6 @@ export const ar: I18nDictionary = {
   "progress.compact.finished_header": "✅ اكتمل العمل",
   "progress.compact.thinking": "💭 جارٍ التفكير...",
   "progress.compact.responding": "✍️ جارٍ كتابة الرد...",
-  "progress.compact.waiting_question": "❓ في انتظار إجابتك...",
   "progress.compact.waiting_permission": "🔐 في انتظار الإذن...",
   "progress.compact.retrying": "🔁 جارٍ إعادة المحاولة...",
   "progress.compact.task": "🤖 المهمة قيد التشغيل",
@@ -93,12 +87,12 @@ export const ar: I18nDictionary = {
     "⏳ الوكيل مشغول بتنفيذ مهمة الآن. انتظر حتى ينتهي، أو استخدم /abort لإيقاف المهمة الحالية.",
   "bot.session_reset_project_mismatch":
     "⚠️ الجلسة النشطة مرتبطة بمشروع مختلف، لذلك تمت إعادة ضبطها. استخدم /sessions لاختيار جلسة أو /new لبدء جلسة جديدة.",
-  "bot.prompt_send_error": "تعذر إرسال الطلب إلى OpenCode.",
+  "bot.prompt_send_error": "تعذر إرسال الطلب إلى Reasonix.",
   "bot.project_folder_missing":
     "🚫 The project folder no longer exists: {path}. Choose another project in /projects.",
   "bot.project_folder_missing_worktree":
     "🚫 The project folder no longer exists: {path}. Choose another worktree in /worktree.",
-  "bot.session_error": "🔴 أعاد OpenCode الخطأ التالي: {message}",
+  "bot.session_error": "🔴 أعاد Reasonix الخطأ التالي: {message}",
   "bot.assistant_reply_undelivered":
     "⚠️ The last assistant reply could not be delivered. Send your message again if you still need it.",
   "bot.stale_messages_skipped":
@@ -113,38 +107,27 @@ export const ar: I18nDictionary = {
   "background.open_session_button": "فتح الجلسة",
   "bot.unknown_command": "⚠️ الأمر غير معروف: {command}. استخدم /help لعرض الأوامر المتاحة.",
   "bot.photo_downloading": "⏳ جارٍ تنزيل الصورة...",
-  "bot.photo_too_large": "⚠️ حجم الصورة أكبر من الحد المسموح ({maxSizeMb}MB)",
   "bot.photo_model_no_image": "⚠️ النموذج الحالي لا يدعم الصور. سيتم إرسال النص فقط.",
   "bot.photo_download_error": "🔴 تعذر تنزيل الصورة",
-  "bot.photo_no_caption": "💡 نصيحة: أضف وصفًا للصورة حتى يفهم الوكيل المطلوب منها.",
   "bot.file_downloading": "⏳ جارٍ تنزيل الملف...",
   "bot.files_downloading": "⏳ جارٍ تنزيل الملفات...",
-  "bot.file_too_large": "⚠️ حجم الملف أكبر من الحد المسموح ({maxSizeMb}MB)",
   "bot.file_download_error": "🔴 تعذر تنزيل الملف",
   "bot.file_type_unsupported":
     "⚠️ نوع الملف غير مدعوم. أرسل صورة أو مستندًا (PDF، DOCX، PPTX) أو ملفًا نصيًا أو برمجيًا.",
   "bot.rich_message_media_skipped": "⚠️ تم تخطي {count} من أجزاء الوسائط غير المدعومة.",
   "bot.message_type_unsupported": "⚠️ نوع الرسالة هذا غير مدعوم.",
   "bot.media_group_not_processed":
-    "⚠️ تعذر معالجة ملف أو أكثر في هذه المجموعة. لم يتم إرسال أي ملف إلى OpenCode.",
-  "bot.media_group_download_error": "🔴 تعذر تنزيل أحد الملفات. لم يتم إرسال أي ملف إلى OpenCode.",
+    "⚠️ تعذر معالجة ملف أو أكثر في هذه المجموعة. لم يتم إرسال أي ملف إلى Reasonix.",
+  "bot.media_group_download_error": "🔴 تعذر تنزيل أحد الملفات. لم يتم إرسال أي ملف إلى Reasonix.",
   "bot.model_no_pdf": "⚠️ النموذج الحالي لا يدعم ملفات PDF. سيتم إرسال النص فقط.",
   "bot.document_extraction_error": "🔴 فشل استخراج نص المستند.",
   "bot.text_file_too_large": "⚠️ حجم الملف النصي أكبر من الحد المسموح ({maxSizeKb}KB)",
 
-  "status.header_running": "🟢 خادم OpenCode يعمل",
-  "status.health.healthy": "يعمل بشكل طبيعي",
-  "status.health.unhealthy": "توجد مشكلة",
-  "status.line.health": "الحالة: {health}",
-  "status.line.version": "إصدار OpenCode: {version}",
+  "status.header_running": "🟢 خادم Reasonix يعمل",
+  "status.line.version": "إصدار Reasonix: {version}",
   "status.line.bot_version": "Bot version: {version}",
-  "status.line.managed_yes": "تم تشغيله بواسطة البوت: نعم",
-  "status.line.managed_no": "تم تشغيله بواسطة البوت: لا",
-  "status.line.pid": "PID: {pid}",
-  "status.line.uptime_sec": "مدة التشغيل: {seconds} ثانية",
   "status.line.mode": "الوكيل: {mode}",
   "status.line.model": "النموذج: {model}",
-  "status.line.tts": "الردود الصوتية: {tts}",
   "status.tts.off": "معطّلة",
   "status.tts.all": "الكل",
   "status.tts.auto": "تلقائي",
@@ -156,8 +139,8 @@ export const ar: I18nDictionary = {
   "status.session_selected": "الجلسة الحالية: {title}",
   "status.session_not_selected": "الجلسة الحالية: غير محددة",
   "status.session_hint": "استخدم /sessions لاختيار جلسة أو /new لبدء جلسة جديدة",
-  "status.header_unavailable": "🔴 خادم OpenCode غير متاح",
-  "status.unavailable_hint": "استخدم /opencode_start لتشغيل الخادم.",
+  "status.header_unavailable": "🔴 خادم Reasonix غير متاح",
+  "status.unavailable_hint": "استخدم /reasonix_start لتشغيل الخادم.",
 
   "tts.off": "🔇 تم تعطيل الردود الصوتية.",
   "tts.all": "🔊 تم تفعيل الردود الصوتية لجميع الرسائل.",
@@ -180,18 +163,17 @@ export const ar: I18nDictionary = {
   "settings.prompt_queue.label": "قائمة انتظار الرسائل",
   "settings.value.on": "مفعّل",
   "settings.value.off": "معطّل",
-  "settings.prompt_queue.queue": "Queue",
-  "settings.prompt_queue.steer": "Steer",
+  "settings.prompt_queue.queue": "في الانتظار",
   "settings.saved": "✅ تم حفظ الإعداد.",
 
   "projects.empty":
-    "📭 لم يتم العثور على مشاريع.\n\nافتح مجلدًا في OpenCode وأنشئ جلسة واحدة على الأقل، ثم سيظهر المشروع هنا.",
+    "📭 لم يتم العثور على مشاريع.\n\nافتح مجلدًا في Reasonix وأنشئ جلسة واحدة على الأقل، ثم سيظهر المشروع هنا.",
   "projects.select": "اختر مشروعًا:",
   "projects.select_with_current": "اختر مشروعًا:\n\nالمشروع الحالي: 🏗 {project}",
   "projects.page_indicator": "الصفحة {current}/{total}",
   "projects.prev_page": "⬅️ السابق",
   "projects.next_page": "التالي ➡️",
-  "projects.fetch_error": "🔴 تعذر تحميل المشاريع. تأكد من أن خادم OpenCode يعمل ثم حاول مرة أخرى.",
+  "projects.fetch_error": "🔴 تعذر تحميل المشاريع. تأكد من أن خادم Reasonix يعمل ثم حاول مرة أخرى.",
   "projects.page_load_error": "تعذر تحميل هذه الصفحة. حاول مرة أخرى.",
   "projects.selected":
     "✅ تم اختيار المشروع: {project}\n\n📋 تمت إعادة ضبط الجلسة الحالية. استخدم /sessions لاختيار جلسة أو /new لبدء جلسة جديدة.",
@@ -202,7 +184,7 @@ export const ar: I18nDictionary = {
   "sessions.empty": "📭 لا توجد جلسات لهذا المشروع.\n\nابدأ جلسة جديدة باستخدام /new.",
   "sessions.select": "اختر جلسة:",
   "sessions.select_page": "اختر جلسة (الصفحة {page}):",
-  "sessions.fetch_error": "🔴 تعذر تحميل الجلسات. تأكد من أن خادم OpenCode يعمل ثم حاول مرة أخرى.",
+  "sessions.fetch_error": "🔴 تعذر تحميل الجلسات. تأكد من أن خادم Reasonix يعمل ثم حاول مرة أخرى.",
   "sessions.select_project_first": "🔴 حدد مشروعًا أولًا باستخدام /projects.",
   "sessions.page_empty_callback": "لا توجد جلسات في هذه الصفحة",
   "sessions.page_load_error_callback": "تعذر تحميل هذه الصفحة. حاول مرة أخرى.",
@@ -224,7 +206,7 @@ export const ar: I18nDictionary = {
   "messages.empty": "📭 لا توجد رسائل منك في الجلسة الحالية.",
   "messages.select": "اختر رسالة:",
   "messages.select_page": "اختر رسالة (الصفحة {page}):",
-  "messages.fetch_error": "🔴 تعذر تحميل الرسائل. تأكد من أن خادم OpenCode يعمل ثم حاول مرة أخرى.",
+  "messages.fetch_error": "🔴 تعذر تحميل الرسائل. تأكد من أن خادم Reasonix يعمل ثم حاول مرة أخرى.",
   "messages.inactive_callback": "انتهت صلاحية قائمة الرسائل",
   "messages.page_empty_callback": "لا توجد رسائل في هذه الصفحة",
   "messages.button.prev_page": "⬅️ السابق",
@@ -238,30 +220,15 @@ export const ar: I18nDictionary = {
   "messages.fork_success": "🔀 تم إنشاء جلسة متفرعة بدءًا من الرسالة التالية:\n\n{text}",
   "messages.fork_error": "❌ تعذر إنشاء جلسة متفرعة. حاول مرة أخرى.",
 
-  "attach.project_not_selected":
-    "🏗 لم تحدد مشروعًا بعد.\n\nاختر مشروعًا أولًا باستخدام /projects.",
-  "attach.session_not_selected": "💬 لم تحدد جلسة بعد.\n\nاختر جلسة أولًا باستخدام /sessions.",
-  "attach.session_project_mismatch":
-    "⚠️ الجلسة المحددة لا تطابق المشروع الحالي. اختر الجلسة مجددًا باستخدام /sessions.",
-  "attach.connected": "✅ تم الاتصال بالجلسة: {title}",
-  "attach.already_connected": "ℹ️ أنت متصل بالفعل بالجلسة: {title}",
-  "attach.status.idle_message": "الحالة: خاملة. بانتظار أحداث جديدة.",
-  "attach.status.busy_message": "الحالة: مشغولة. الطلبات الجديدة محظورة مؤقتًا.",
-  "attach.restored_question": "تمت استعادة سؤال معلق لهذه الجلسة.",
-  "attach.restored_permissions": "تمت استعادة طلبات الصلاحيات المعلقة: {count}.",
-  "attach.disconnect_hint": "لقطع الاتصال، انتقل إلى جلسة أو مشروع آخر.",
-  "attach.error": "🔴 تعذر الاتصال بالجلسة الحالية.",
-
-  "detach.project_not_selected":
-    "🏗 لم تحدد مشروعًا بعد.\n\nاختر مشروعًا أولًا باستخدام /projects.",
+  "detach.project_not_selected": "🏗 لم تحدد مشروعًا بعد.\n\nاختر مشروعًا أولًا باستخدام /projects.",
   "detach.no_active_session": "ℹ️ البوت غير متصل بأي جلسة بالفعل.",
   "detach.success":
-    "✅ تم قطع الاتصال بالجلسة: {title}\n\nلم يتم إيقاف جلسة OpenCode. إذا كانت لا تزال تعمل، فستستمر بشكل منفصل. للتحقق منها لاحقًا، اخترها مجددًا باستخدام /sessions.",
+    "✅ تم قطع الاتصال بالجلسة: {title}\n\nلم يتم إيقاف جلسة Reasonix. إذا كانت لا تزال تعمل، فستستمر بشكل منفصل. للتحقق منها لاحقًا، اخترها مجددًا باستخدام /sessions.",
   "detach.error": "🔴 تعذر قطع الاتصال بالجلسة الحالية.",
 
   "new.project_not_selected": "🏗 لم تحدد مشروعًا بعد.\n\nاختر مشروعًا أولًا باستخدام /projects.",
   "new.created": "✅ تم إنشاء جلسة جديدة: {title}",
-  "new.create_error": "🔴 خادم OpenCode غير متاح أو حدث خطأ أثناء إنشاء الجلسة.",
+  "new.create_error": "🔴 خادم Reasonix غير متاح أو حدث خطأ أثناء إنشاء الجلسة.",
 
   "stop.no_active_session":
     "🛑 لم يتم تشغيل الوكيل\n\nأنشئ جلسة باستخدام /new أو اختر جلسة باستخدام /sessions.",
@@ -278,51 +245,31 @@ export const ar: I18nDictionary = {
   "stop.warn_local_only": "⚠️ تم إيقاف تدفق الأحداث محليًا، لكن فشل الإيقاف على الخادم.",
   "stop.error": "🔴 تعذر إيقاف الإجراء.\n\nتم إيقاف تدفق الأحداث، حاول /abort مرة أخرى.",
 
-  "opencode_start.already_running_managed":
-    "⚠️ خادم OpenCode يعمل بالفعل\n\nPID: {pid}\nمدة التشغيل: {seconds} ثانية",
-  "opencode_start.already_running_external":
-    "✅ خادم OpenCode يعمل بالفعل كعملية خارجية\n\nالإصدار: {version}\n\nلم يتم تشغيل هذا الخادم بواسطة البوت، لذلك لا يمكن إيقافه باستخدام /opencode-stop.",
-  "opencode_start.already_running": "✅ خادم OpenCode يعمل بالفعل\n\nالإصدار: {version}",
-  "opencode_start.remote_configured": "⚠️ يعمل /opencode_start فقط مع خادم OpenCode محلي.",
-  "opencode_start.starting": "🔄 جارٍ تشغيل خادم OpenCode...",
-  "opencode_start.start_error":
-    "🔴 تعذر تشغيل خادم OpenCode\n\nالخطأ: {error}\n\nتأكد من تثبيت OpenCode CLI وأنه متاح في PATH:\nopencode --version\nnpm install -g @opencode-ai/cli",
-  "opencode_start.started_not_ready":
-    "⚠️ تم تشغيل خادم OpenCode، لكنه لا يستجيب\n\nPID: {pid}\n\nقد لا يزال الخادم قيد التشغيل. جرّب /status بعد بضع ثوانٍ.",
-  "opencode_start.success": "✅ تم تشغيل خادم OpenCode بنجاح\n\nPID: {pid}\nالإصدار: {version}",
-  "opencode_start.error": "🔴 حدث خطأ أثناء تشغيل الخادم.\n\nراجع سجلات التطبيق للتفاصيل.",
-  "opencode_stop.external_running":
-    "⚠️ خادم OpenCode يعمل كعملية خارجية\n\nلم يتم تشغيل هذا الخادم عبر /opencode-start.\nأوقفه يدويًا أو استخدم /status للتحقق من الحالة.",
-  "opencode_stop.remote_configured": "⚠️ يعمل /opencode_stop فقط مع خادم OpenCode محلي.",
-  "opencode_stop.not_running": "⚠️ خادم OpenCode لا يعمل",
-  "opencode_stop.pid_not_found":
-    "⚠️ يستجيب خادم OpenCode على المنفذ {port}، لكن لم يتم العثور على عملية محلية لإيقافها.",
-  "opencode_stop.stopping": "🛑 جارٍ إيقاف خادم OpenCode...\n\nPID: {pid}",
-  "opencode_stop.stop_error": "🔴 تعذر إيقاف خادم OpenCode\n\nالخطأ: {error}",
-  "opencode_stop.still_running": "لا يزال الخادم يستجيب بعد طلب الإيقاف.",
-  "opencode_stop.success": "✅ تم إيقاف خادم OpenCode بنجاح",
-  "opencode_stop.error": "🔴 حدث خطأ أثناء إيقاف الخادم.\n\nراجع سجلات التطبيق للتفاصيل.",
-  "reload.reloading": "🔄 Reloading OpenCode configuration...",
-  "reload.success": "✅ OpenCode configuration reloaded",
-  "reload.failed": "🔴 Failed to reload OpenCode configuration",
-  "reload.failed_with_error": "🔴 Failed to reload OpenCode configuration\n\nError: {error}",
+  "reasonix_start.already_running": "✅ Reasonix server is already running for this project",
+  "reasonix_start.starting": "🔄 Starting the Reasonix server for this project...",
+  "reasonix_start.start_error":
+    "🔴 Failed to start the Reasonix server\n\nError: {error}\n\nCheck that the Reasonix CLI is installed and on PATH:\nreasonix --version",
+  "reasonix_start.success":
+    "✅ Reasonix server started\n\nProject: {root}\nPort: {port}\nVersion: {version}",
+  "reasonix_start.error":
+    "🔴 An error occurred while starting the server.\n\nCheck application logs for details.",
+  "reasonix_stop.not_running": "⚠️ No Reasonix server started by the bot is running.",
+  "reasonix_stop.stopping": "🛑 Stopping {count} Reasonix server(s)...",
+  "reasonix_stop.success": "✅ Stopped {count} Reasonix server(s). They start again on next use.",
+  "reasonix_stop.error":
+    "🔴 An error occurred while stopping the server.\n\nCheck application logs for details.",
+  "reload.reloading": "🔄 Reloading Reasonix configuration...",
+  "reload.success": "✅ Reasonix configuration reloaded",
+  "reload.failed": "🔴 Failed to reload Reasonix configuration",
+  "reload.failed_with_error": "🔴 Failed to reload Reasonix configuration\n\nError: {error}",
 
-  "agent.changed_message": "✅ تم تغيير الوكيل إلى: {name}",
-  "agent.change_error_callback": "تعذر تغيير الوكيل",
-  "agent.menu.current": "الوكيل الحالي: {name}\n\nاختر وكيلًا:",
-  "agent.menu.select": "اختر وكيلًا:",
-  "agent.menu.empty": "⚠️ لا يوجد وكلاء متاحون",
-  "agent.menu.error": "🔴 تعذر تحميل قائمة الوكلاء",
   "model.changed_message": "✅ تم تغيير النموذج إلى: {name}",
   "model.change_error_callback": "تعذر تغيير النموذج",
-  "model.menu.empty": "⚠️ لا توجد نماذج متاحة",
   "model.menu.select": "اختر نموذجًا:",
-  "model.menu.current": "النموذج الحالي: {name}\n\nاختر نموذجًا:",
-  "model.menu.favorites_title": "⭐ المفضلة (أضف النماذج إلى المفضلة من OpenCode CLI)",
+  "model.menu.favorites_title": "⭐ المفضلة (أضف النماذج إلى المفضلة من Reasonix CLI)",
   "model.menu.favorites_empty": "— لا توجد نماذج في المفضلة.",
   "model.menu.recent_title": "🕘 المستخدمة مؤخرًا",
   "model.menu.recent_empty": "— لا توجد نماذج مستخدمة مؤخرًا.",
-  "model.menu.favorites_hint": "ℹ️ أضف النماذج إلى المفضلة في OpenCode CLI لإبقائها أعلى القائمة.",
   "model.menu.error": "🔴 تعذر تحميل قائمة النماذج",
   "model.search.button": "🔍 بحث",
   "model.search.prompt": "🔍 اكتب اسم النموذج للبحث عنه:",
@@ -380,7 +327,8 @@ export const ar: I18nDictionary = {
   "permission.blocked.command_not_allowed":
     "⚠️ لا يمكن استخدام هذا الأمر قبل الرد على طلب الصلاحية.",
   "permission.header": "{emoji} طلب صلاحية: {name}\n\n",
-  "permission.grouped_count": "\n⚠️ يوجد {count} طلبات متطابقة قيد الانتظار — سيُطبَّق ردك عليها جميعًا.\n",
+  "permission.grouped_count":
+    "\n⚠️ يوجد {count} طلبات متطابقة قيد الانتظار — سيُطبَّق ردك عليها جميعًا.\n",
   "permission.button.allow": "✅ سماح لمرة واحدة",
   "permission.button.always": "🔓 سماح دائم",
   "permission.button.reject": "❌ رفض",
@@ -390,7 +338,7 @@ export const ar: I18nDictionary = {
   "permission.outcome.outside_suffix": " · answered outside Telegram",
   "permission.outcome.settled_outside": "☑️ Answered outside Telegram",
   "permission.outcome.not_answered": "⏹ Not answered",
-  "permission.delivery_failed": "⚠️ The answer did not reach OpenCode — tap again",
+  "permission.delivery_failed": "⚠️ The answer did not reach Reasonix — tap again",
   "permission.name.bash": "تشغيل أمر Bash",
   "permission.name.edit": "تعديل ملف",
   "permission.name.write": "إنشاء أو كتابة ملف",
@@ -424,18 +372,14 @@ export const ar: I18nDictionary = {
   "question.summary.question": "السؤال {index}:\n{question}\n\n",
   "question.summary.answer": "الإجابة:\n{answer}\n\n",
 
-  "keyboard.agent_mode": "{emoji} الوكيل: {name}",
   "keyboard.context": "📊 {used} / {limit} ({percent}%)",
   "keyboard.context_empty": "📊 0",
-  "keyboard.variant": "💭 {name}",
   "keyboard.variant_default": "💡 الإعداد الافتراضي",
   "keyboard.queued_prompt": "❌ {index}. {text}",
   "queue.added": "📥 أُضيفت إلى قائمة الانتظار ({count}/{max}). ستُرسل بعد انتهاء المهمة الحالية.",
   "queue.full": "⚠️ قائمة الانتظار ممتلئة ({max}). احذف رسالة أو انتظر انتهاء المهمة الحالية.",
-  "queue.media_limit": "⚠️ الوسائط في قائمة الانتظار محدودة بـ {maxSizeMb} MiB. انتظر إرسال عنصر ثم أعد المحاولة.",
   "queue.removed": "🗑 تمت إزالة الرسالة من قائمة الانتظار.",
   "queue.not_found": "لم تعد هذه الرسالة في قائمة الانتظار.",
-  "queue.steer_added": "📥 Added to the current task ({count}/{max}).",
   "queue.disabled_hint": "يمكن تفعيل قائمة انتظار الرسائل من /settings.",
   "keyboard.updated": "⌨️ تم تحديث لوحة التحكم",
 
@@ -444,23 +388,13 @@ export const ar: I18nDictionary = {
   "pinned.line.project": "المشروع: {project}",
   "pinned.line.worktree": "نسخة العمل: {worktree}",
   "pinned.line.model": "النموذج: {model}",
-  "pinned.line.attach": "التتبع: {status}",
-  "pinned.attach.status.idle": "نشط، خامل",
-  "pinned.attach.status.busy": "نشط، مشغول",
   "pinned.line.context": "السياق: {used} / {limit} ({percent}%)",
   "pinned.line.cost": "التكلفة: تم إنفاق {cost}",
-  "subagent.header": "وكيل فرعي {agent}: {description}",
-  "subagent.line.status": "الحالة: {status}",
   "subagent.line.task": "المهمة: {task}",
   "subagent.line.agent": "الوكيل: {agent}",
   "subagent.working": "جارٍ العمل...",
-  "subagent.working_with_details": "جارٍ العمل: {details}",
   "subagent.completed": "مكتملة",
   "subagent.failed": "فشلت المهمة",
-  "subagent.status.pending": "قيد الانتظار",
-  "subagent.status.running": "قيد التشغيل",
-  "subagent.status.completed": "مكتملة",
-  "subagent.status.error": "خطأ",
   "pinned.files.title": "الملفات ({count}):",
   "pinned.files.item": "  {path}{diff}",
   "pinned.files.more": "  ... و{count} أخرى",
@@ -482,45 +416,15 @@ export const ar: I18nDictionary = {
   "runtime.wizard.ask_user_id":
     "أدخل معرّف حسابك في Telegram. يمكنك الحصول عليه من @userinfobot.\n> ",
   "runtime.wizard.user_id_invalid": "أدخل رقمًا صحيحًا موجبًا أكبر من صفر.\n",
-  "runtime.wizard.ask_api_url":
-    "أدخل رابط OpenCode API، أو اضغط Enter لاستخدام الرابط الافتراضي: {defaultUrl}\n> ",
-  "runtime.wizard.ask_server_username":
-    "أدخل اسم مستخدم خادم OpenCode (اختياري).\nاضغط Enter لاستخدام القيمة الافتراضية: {defaultUsername}\n> ",
-  "runtime.wizard.ask_server_password":
-    "أدخل كلمة مرور خادم OpenCode (اختياري).\nاضغط Enter لتركها فارغة.\n> ",
-  "runtime.wizard.ask_server_version":
-    "Select OpenCode server version:\n1 - OpenCode V1 (1.x, npm package opencode-ai)\n2 - OpenCode V2 (2.x, npm package @opencode/cli)\nPress Enter to use default: {defaultVersion}\n> ",
-  "runtime.wizard.server_version_invalid": "Enter 1 or 2, or press Enter for default.\n",
-  "runtime.wizard.ask_server_password_required":
-    "Enter OpenCode V2 server password (required).\nShow it with: opencode service get password\n> ",
-  "runtime.wizard.server_password_required":
-    "The password is required for OpenCode V2. Please try again.\n",
-  "runtime.wizard.ask_server_password_keep":
-    "Enter OpenCode server password.\nPress Enter to keep the saved password.\n> ",
-  "runtime.wizard.api_url_invalid":
-    "أدخل رابطًا صالحًا (http/https) أو اضغط Enter لاستخدام الافتراضي.\n",
-  "runtime.wizard.start": "إعداد OpenCode Telegram Bot.\n",
+  "runtime.wizard.start": "إعداد Reasonix Telegram Bot.\n",
   "runtime.wizard.saved": "تم حفظ الإعدادات في:\n- {envPath}\n",
   "runtime.wizard.not_configured_starting":
     "لم يتم إعداد التطبيق بعد. جارٍ تشغيل معالج الإعداد...\n",
   "runtime.wizard.tty_required":
-    "يتطلب معالج الإعداد التفاعلي طرفية TTY. شغّل `opencode-telegram config` في shell تفاعلية.",
-  "runtime.container.command_unavailable":
-    "⚠️ هذا الأمر غير متاح في صورة Docker.",
+    "يتطلب معالج الإعداد التفاعلي طرفية TTY. شغّل `reasonix-telegram config` في shell تفاعلية.",
+  "runtime.container.command_unavailable": "⚠️ هذا الأمر غير متاح في صورة Docker.",
 
-  "rename.no_session": "⚠️ لا توجد جلسة نشطة. أنشئ جلسة أو اختر واحدة أولًا.",
-  "rename.prompt": "📝 أدخل عنوانًا جديدًا للجلسة:\n\nالحالي: {title}",
-  "rename.empty_title": "⚠️ لا يمكن أن يكون العنوان فارغًا.",
-  "rename.success": "✅ تمت إعادة تسمية الجلسة إلى: {title}",
-  "rename.error": "🔴 تعذر تغيير اسم الجلسة.",
   "rename.cancelled": "❌ تم إلغاء تغيير الاسم.",
-  "rename.inactive_callback": "انتهت صلاحية طلب تغيير الاسم",
-  "rename.inactive": "⚠️ طلب تغيير الاسم غير نشط. شغّل /rename مرة أخرى.",
-  "rename.blocked.expected_name":
-    "⚠️ أدخل اسم الجلسة الجديد كنص أو اضغط إلغاء في رسالة تغيير الاسم.",
-  "rename.blocked.command_not_allowed":
-    "⚠️ لا يمكن استخدام هذا الأمر أثناء انتظار اسم جديد للجلسة.",
-  "rename.button.cancel": "❌ إلغاء",
 
   "task.prompt.schedule":
     "⏰ أرسل موعد المهمة بلغة طبيعية.\n\nأمثلة:\n- كل 5 دقائق\n- كل يوم الساعة 17:00\n- غدًا الساعة 12:00",
@@ -566,9 +470,9 @@ export const ar: I18nDictionary = {
   "tasklist.inactive_callback": "انتهت صلاحية قائمة المهام المجدولة",
   "tasklist.load_error": "🔴 تعذر تحميل المهام المجدولة.",
 
-  "commands.select": "اختر أمرًا من OpenCode:",
+  "commands.select": "اختر أمرًا من Reasonix:",
   "commands.empty": "📭 لا توجد أوامر مخصصة لهذا المشروع.",
-  "commands.fetch_error": "🔴 تعذر تحميل أوامر OpenCode.",
+  "commands.fetch_error": "🔴 تعذر تحميل أوامر Reasonix.",
   "commands.no_description": "لا يوجد وصف",
   "commands.button.execute": "✅ تنفيذ",
   "commands.button.cancel": "❌ إلغاء",
@@ -577,13 +481,11 @@ export const ar: I18nDictionary = {
   "commands.execute_callback": "جارٍ تنفيذ الأمر...",
   "commands.executing_prefix": "⚡ جارٍ تنفيذ الأمر:",
   "commands.arguments_empty": "⚠️ لا يمكن أن تكون الوسيطات فارغة. أرسل نصًا أو اضغط تنفيذ.",
-  "commands.execute_error": "🔴 تعذر تنفيذ أمر OpenCode.",
-  "commands.select_page": "اختر أمرًا من OpenCode (الصفحة {page}):",
+  "commands.execute_error": "🔴 تعذر تنفيذ أمر Reasonix.",
+  "commands.select_page": "اختر أمرًا من Reasonix (الصفحة {page}):",
   "commands.button.prev_page": "⬅️ السابق",
   "commands.button.next_page": "التالي ➡️",
   "commands.page_empty_callback": "لا توجد أوامر في هذه الصفحة",
-  "commands.page_load_error_callback": "تعذر تحميل هذه الصفحة. حاول مرة أخرى.",
-  "commands.download.no_roots": "لم يتم إعداد أي مسارات رئيسية مسموح بها للاستعراض.",
   "commands.download.downloading": "جارٍ تنزيل الملف...",
   "commands.download.not_found": "لم يتم العثور على الملف",
   "commands.download.not_file": "المسار ليس ملفًا",
@@ -592,9 +494,9 @@ export const ar: I18nDictionary = {
   "commands.download.modified": "آخر تعديل",
   "commands.download.error": "تعذر تنزيل الملف.",
 
-  "skills.select": "اختر مهارة من OpenCode:",
+  "skills.select": "اختر مهارة من Reasonix:",
   "skills.empty": "📭 لا توجد مهارات متاحة لهذا المشروع.",
-  "skills.fetch_error": "🔴 تعذر تحميل مهارات OpenCode.",
+  "skills.fetch_error": "🔴 تعذر تحميل مهارات Reasonix.",
   "skills.no_description": "لا يوجد وصف",
   "skills.button.execute": "✅ تشغيل",
   "skills.button.cancel": "❌ إلغاء",
@@ -603,37 +505,10 @@ export const ar: I18nDictionary = {
   "skills.execute_callback": "جارٍ تشغيل المهارة...",
   "skills.executing_prefix": "⚡ جارٍ تشغيل المهارة:",
   "skills.arguments_empty": "⚠️ لا يمكن أن تكون الوسيطات فارغة. أرسل نصًا أو اضغط تشغيل.",
-  "skills.select_page": "اختر مهارة من OpenCode (الصفحة {page}):",
+  "skills.select_page": "اختر مهارة من Reasonix (الصفحة {page}):",
   "skills.button.prev_page": "⬅️ السابق",
   "skills.button.next_page": "التالي ➡️",
   "skills.page_empty_callback": "لا توجد مهارات في هذه الصفحة",
-  "skills.page_load_error_callback": "تعذر تحميل هذه الصفحة. حاول مرة أخرى.",
-
-  "mcps.select": "خوادم MCP:",
-  "mcps.empty": "📭 لم تتم إضافة أي خوادم MCP.",
-  "mcps.fetch_error": "🔴 تعذر تحميل خوادم MCP.",
-  "mcps.toggle_error": "🔴 تعذر تغيير حالة خادم MCP.",
-  "mcps.enabling": "جارٍ التفعيل...",
-  "mcps.disabling": "جارٍ التعطيل...",
-  "mcps.status.connected": "🟢 متصل",
-  "mcps.status.disabled": "🔴 معطّل",
-  "mcps.status.failed": "⚠️ تعذر الاتصال",
-  "mcps.status.needs_auth": "🔒 يحتاج إلى تسجيل دخول",
-  "mcps.status.needs_client_registration": "🔒 يحتاج إلى تسجيل عميل",
-  "mcps.detail.title": "الخادم: {name}",
-  "mcps.detail.status": "الحالة: {status}",
-  "mcps.detail.error": "الخطأ: {error}",
-  "mcps.button.enable": "🟢 تفعيل",
-  "mcps.button.disable": "🔴 تعطيل",
-  "mcps.button.back": "⬅️ رجوع",
-  "mcps.auth_required": "هذا الخادم يحتاج إلى تسجيل دخول، ولا يمكن تفعيله من داخل البوت.",
-
-  "legacy.models.fetch_error": "🔴 تعذر تحميل قائمة النماذج. تحقق من حالة الخادم باستخدام /status.",
-  "legacy.models.empty": "📋 لا توجد نماذج متاحة. اضبط المزوّدين في OpenCode.",
-  "legacy.models.header": "📋 النماذج المتاحة:\n\n",
-  "legacy.models.no_provider_models": "  ⚠️ لا توجد نماذج متاحة\n",
-  "legacy.models.env_hint": "💡 لاستخدام النموذج في .env:\n",
-  "legacy.models.error": "🔴 حدث خطأ أثناء تحميل قائمة النماذج.",
 
   "stt.recognizing": "🎤 جارٍ تحويل الصوت إلى نص...",
   "stt.recognized": "🎤 النص المستخرج من الرسالة الصوتية:",
@@ -642,7 +517,6 @@ export const ar: I18nDictionary = {
   "stt.error": "🔴 تعذر تحويل الصوت إلى نص: {error}",
   "stt.empty_result": "🎤 لم يتم التقاط كلام واضح في الرسالة الصوتية.",
 
-  "worktree.branch_detached": "HEAD مفصول",
   "worktree.select_with_current": "اختر نسخة عمل (Git worktree):",
   "worktree.project_not_selected":
     "🏗 لم تحدد مشروعًا بعد.\n\nاختر مشروعًا أولًا باستخدام /projects.",

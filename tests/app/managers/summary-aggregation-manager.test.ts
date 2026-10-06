@@ -2974,7 +2974,7 @@ describe("summary/aggregator", () => {
       expect(onQuestionSettled).toHaveBeenCalledWith("child-session-1", "q-child", "cancelled");
     });
 
-    it("passes OpenCode's decision along with a replied permission", async () => {
+    it("passes Reasonix's decision along with a replied permission", async () => {
       const onPermissionReplied = vi.fn();
       summaryAggregator.setOnPermissionReplied(onPermissionReplied);
       trackChildSession();
@@ -3334,7 +3334,7 @@ describe("summary/aggregator", () => {
       },
     } as unknown as Event);
 
-    // OpenCode expands a file:// attachment into synthetic parts carrying the whole file.
+    // Reasonix expands a file:// attachment into synthetic parts carrying the whole file.
     summaryAggregator.processEvent({
       type: "message.part.updated",
       properties: {

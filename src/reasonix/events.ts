@@ -7,7 +7,7 @@ import type { ReasonixEvent, ReasonixTool } from "./types.js";
  * Turns Reasonix's frames into the SDK event shapes the bot already understands.
  *
  * Reasonix reports a turn as deltas plus one final snapshot per message, while
- * the bot's aggregators expect per-message parts and OpenCode's lifecycle
+ * the bot's aggregators expect per-message parts and Reasonix's lifecycle
  * events. This class is the only place that knows both dialects; it keeps the
  * little state needed to join deltas to their message and to notice the edges
  * of a running turn.

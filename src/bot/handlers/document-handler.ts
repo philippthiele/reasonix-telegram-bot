@@ -58,20 +58,12 @@ export async function handleDocumentMessage(
   const caption = ctx.message.caption || "";
   const mimeType = doc.mime_type || "";
   const filename = doc.file_name || "document";
-  const submitPrompt = async (
-    text: string,
-    fileParts: FilePartInput[] = [],
-    mediaBytes: number | undefined = 0,
-  ): Promise<void> => {
+  const submitPrompt = async (text: string, fileParts: FilePartInput[] = []): Promise<void> => {
     const input = createIncomingPrompt(text, { fileParts });
     if (
       await tryEnqueuePromptIfBusy(
         ctx,
-        {
-          ...input,
-          displayText: caption.trim() || filename,
-          mediaBytes,
-        },
+        { ...input, displayText: caption.trim() || filename },
         ticket,
       )
     ) {
@@ -93,7 +85,7 @@ export async function handleDocumentMessage(
       }
 
       await ctx.reply(t("bot.file_downloading"));
-      if (await rejectQueuedMediaBeforePreparation(ctx, doc.file_size)) {
+      if (await rejectQueuedMediaBeforePreparation(ctx)) {
         return;
       }
       const downloadedFile = await downloadFile(ctx.api, doc.file_id);
@@ -106,7 +98,7 @@ export async function handleDocumentMessage(
         `[Document] Sending text file (${downloadedFile.buffer.length} bytes, ${filename}) as prompt`,
       );
 
-      await submitPrompt(promptWithFile, [], doc.file_size);
+      await submitPrompt(promptWithFile);
       return;
     }
 
@@ -127,7 +119,7 @@ export async function handleDocumentMessage(
       }
 
       await ctx.reply(t("bot.file_downloading"));
-      if (await rejectQueuedMediaBeforePreparation(ctx, doc.file_size)) {
+      if (await rejectQueuedMediaBeforePreparation(ctx)) {
         return;
       }
       const downloadedFile = await downloadFile(ctx.api, doc.file_id);
@@ -145,7 +137,7 @@ export async function handleDocumentMessage(
         `[Document] Sending image (${downloadedFile.buffer.length} bytes, ${filename}, ${mimeType}) with prompt`,
       );
 
-      await submitPrompt(caption, [filePart], doc.file_size);
+      await submitPrompt(caption, [filePart]);
       return;
     }
 
@@ -173,7 +165,7 @@ export async function handleDocumentMessage(
             `[Document] Model doesn't support PDF input, delegating document to DOC_EXTRACTOR_URL`,
           );
           await ctx.reply(t("bot.file_downloading"));
-          if (await rejectQueuedMediaBeforePreparation(ctx, doc.file_size)) {
+          if (await rejectQueuedMediaBeforePreparation(ctx)) {
             return;
           }
           const downloadedFile = await downloadFile(ctx.api, doc.file_id);
@@ -184,7 +176,7 @@ export async function handleDocumentMessage(
             logger.info(
               `[Document] Sending extracted document text from ${filename} (${result.text.length} chars) as prompt`,
             );
-            await submitPrompt(promptWithFile, [], doc.file_size);
+            await submitPrompt(promptWithFile);
           } catch (extractErr) {
             const errMsg = extractErr instanceof Error ? extractErr.message : String(extractErr);
             logger.error(`[Document] Document extraction failed: ${errMsg}`);
@@ -206,7 +198,7 @@ export async function handleDocumentMessage(
       }
 
       await ctx.reply(t("bot.file_downloading"));
-      if (await rejectQueuedMediaBeforePreparation(ctx, doc.file_size)) {
+      if (await rejectQueuedMediaBeforePreparation(ctx)) {
         return;
       }
       const downloadedFile = await downloadFile(ctx.api, doc.file_id);
@@ -224,7 +216,7 @@ export async function handleDocumentMessage(
         `[Document] Sending document (${downloadedFile.buffer.length} bytes, ${filename}, ${mimeType}) with prompt`,
       );
 
-      await submitPrompt(caption, [filePart], doc.file_size);
+      await submitPrompt(caption, [filePart]);
       return;
     }
 

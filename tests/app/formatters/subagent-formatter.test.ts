@@ -10,7 +10,7 @@ describe("summary/subagent-formatter", () => {
     resetRuntimeLocale();
   });
 
-  it("renders subagent cards with requested OpenCode-like layout", async () => {
+  it("renders subagent cards with requested Reasonix-like layout", async () => {
     setRuntimeLocale("en");
 
     const text = await renderSubagentCard({

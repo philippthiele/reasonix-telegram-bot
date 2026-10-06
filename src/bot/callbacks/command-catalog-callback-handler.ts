@@ -23,7 +23,7 @@ import {
   markAttachedSessionBusy,
   markAttachedSessionIdle,
 } from "../../app/services/attach-service.js";
-import { opencodeClient } from "../../opencode/client.js";
+import { reasonixClient } from "../../reasonix/client.js";
 import {
   buildCommandsConfirmKeyboard,
   buildCommandsListKeyboard,
@@ -186,7 +186,7 @@ export function clearCommandsInteraction(
 
 async function isSessionBusy(sessionId: string, directory: string): Promise<boolean> {
   try {
-    const { data, error } = await opencodeClient.session.status({ directory });
+    const { data, error } = await reasonixClient.session.status({ directory });
 
     if (error || !data) {
       logger.warn("[Commands] Failed to check session status before command:", error);
@@ -231,7 +231,7 @@ async function ensureSessionForProject(
 
   await ctx.reply(t("bot.creating_session"));
 
-  const { data: session, error } = await opencodeClient.session.create({
+  const { data: session, error } = await reasonixClient.session.create({
     directory: projectDirectory,
   });
 
@@ -263,6 +263,7 @@ export async function executeCommand(
   }
 
   const args = params.argumentsText.trim();
+  const commandLine = args ? `/${params.commandName} ${args}` : `/${params.commandName}`;
   const executingMessage = formatExecutingCommandMessage(params.commandName, args);
   await ctx.reply(executingMessage.text, { entities: executingMessage.entities });
 
@@ -285,10 +286,6 @@ export async function executeCommand(
 
   const currentAgent = await resolveProjectAgent(getStoredAgent());
   const storedModel = getStoredModel();
-  const model =
-    storedModel.providerID && storedModel.modelID
-      ? `${storedModel.providerID}/${storedModel.modelID}`
-      : undefined;
 
   deps.foregroundSessionState.markBusy(session.id, session.directory);
   await markAttachedSessionBusy(session.id, deps);
@@ -298,29 +295,24 @@ export async function executeCommand(
     configuredProviderID: storedModel.providerID,
     configuredModelID: storedModel.modelID,
   });
-  deps.externalUserInputSuppressionManager.register(
-    session.id,
-    args ? `/${params.commandName} ${args}` : `/${params.commandName}`,
-  );
+  deps.externalUserInputSuppressionManager.register(session.id, commandLine);
 
   safeBackgroundTask({
     taskName: "session.command",
     task: () =>
-      opencodeClient.session.command({
+      // Reasonix runs an in-session command as a slash line of text, so the
+      // command is submitted the same way any other message to it is.
+      reasonixClient.session.promptAsync({
         sessionID: session.id,
         directory: session.directory,
-        command: params.commandName,
-        arguments: args,
-        agent: currentAgent,
-        ...(model !== undefined ? { model } : {}),
-        ...(storedModel.variant !== undefined ? { variant: storedModel.variant } : {}),
+        parts: [{ type: "text", text: commandLine }],
       }),
     onSuccess: ({ error }) => {
       if (error) {
         deps.foregroundSessionState.markIdle(session.id);
         void markAttachedSessionIdle(session.id, deps);
         deps.assistantRunState.clearRun(session.id, "session_command_api_error");
-        logger.error("[Commands] OpenCode API returned an error for session.command", {
+        logger.error("[Commands] Reasonix API returned an error for session.command", {
           sessionId: session.id,
           command: params.commandName,
           args,

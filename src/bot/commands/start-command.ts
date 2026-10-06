@@ -52,7 +52,6 @@ export async function startCommand(ctx: Context, deps: StartCommandDeps): Promis
   }
 
   const keyboard = createMainKeyboard(
-    currentAgent,
     currentModel,
     contextInfo ?? undefined,
     variantName,

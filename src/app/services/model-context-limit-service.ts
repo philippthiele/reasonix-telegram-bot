@@ -1,94 +1,64 @@
-import { opencodeClient } from "../../opencode/client.js";
+import { reasonixClient } from "../../reasonix/client.js";
 import { logger } from "../../utils/logger.js";
-import { isExpectedOpencodeUnavailableError } from "../../utils/opencode-error.js";
-import { getMissingExpectedProviders, readProvidersWhenListed } from "./model-selection-service.js";
+import { isExpectedServerUnavailableError } from "../../utils/reasonix-error.js";
 
 export const DEFAULT_CONTEXT_LIMIT = 200000;
 
-const PROVIDER_CACHE_TTL_MS = 10 * 60 * 1000;
+const WINDOW_CACHE_TTL_MS = 60 * 1000;
 
-const contextLimitCache = new Map<string, number>();
+/**
+ * Reasonix reports the context window of the model it currently runs through
+ * `GET /status`; `GET /models` carries no limit, so the window is cached here
+ * and shared by every caller. A model switch changes it, so the cache is short.
+ */
+let cachedWindow: number | null = null;
+let windowCacheExpiresAt = 0;
+let windowFetchInFlight: Promise<number | null> | null = null;
 
-let providersCacheExpiresAt = 0;
-let providersFetchInFlight: Promise<void> | null = null;
-
-function getModelKey(providerID: string, modelID: string): string {
-  return `${providerID}/${modelID}`;
-}
-
-type ProvidersList = NonNullable<
-  Awaited<ReturnType<typeof readProvidersWhenListed>>["data"]
->["providers"];
-
-async function applyProvidersList(providers: ProvidersList): Promise<void> {
-  if (providers.every((provider) => Object.keys(provider.models).length === 0)) {
-    // A freshly started server lists no models for a moment; do not keep that as its state.
-    logger.warn("[ModelContextLimit] Providers list has no models; not caching it");
-    return;
+async function readContextWindow(force = false): Promise<number | null> {
+  if (!force && cachedWindow !== null && Date.now() < windowCacheExpiresAt) {
+    return cachedWindow;
   }
 
-  contextLimitCache.clear();
-  for (const provider of providers) {
-    for (const [modelID, model] of Object.entries(provider.models)) {
-      if (model?.limit?.context) {
-        contextLimitCache.set(getModelKey(provider.id, modelID), model.limit.context);
-      }
-    }
+  if (windowFetchInFlight) {
+    return windowFetchInFlight;
   }
 
-  const missingProviders = await getMissingExpectedProviders(
-    providers.map((provider) => provider.id),
-  );
-  if (missingProviders.length > 0) {
-    // The server may still be registering these providers; read their models again next time.
-    logger.debug(
-      `[ModelContextLimit] Providers list lacks expected providers, not caching it: missing=${missingProviders.join(",")}`,
-    );
-    return;
-  }
-
-  providersCacheExpiresAt = Date.now() + PROVIDER_CACHE_TTL_MS;
-  logger.debug(
-    `[ModelContextLimit] Cached limits for ${contextLimitCache.size} provider/model pairs`,
-  );
-}
-
-async function refreshContextLimitCache(): Promise<void> {
-  if (Date.now() < providersCacheExpiresAt) {
-    return;
-  }
-
-  if (providersFetchInFlight) {
-    await providersFetchInFlight;
-    return;
-  }
-
-  providersFetchInFlight = (async () => {
+  windowFetchInFlight = (async () => {
     try {
-      const { data, error } = await opencodeClient.config.providers();
+      const { data, error } = await reasonixClient.status.get();
 
       if (error || !data) {
-        if (isExpectedOpencodeUnavailableError(error)) {
-          logger.warn("[ModelContextLimit] OpenCode server unavailable; using default context limit");
+        if (isExpectedServerUnavailableError(error)) {
+          logger.warn("[ModelContextLimit] Reasonix server unavailable; using default context limit");
         } else {
-          logger.warn("[ModelContextLimit] Failed to fetch providers:", error);
+          logger.warn("[ModelContextLimit] Failed to read context window:", error);
         }
-        return;
+        return cachedWindow;
       }
 
-      await applyProvidersList(data.providers);
-    } catch (error) {
-      if (isExpectedOpencodeUnavailableError(error)) {
-        logger.warn("[ModelContextLimit] OpenCode server unavailable; using default context limit");
-      } else {
-        logger.warn("[ModelContextLimit] Error refreshing providers cache:", error);
+      const window = data.window;
+      if (typeof window === "number" && window > 0) {
+        cachedWindow = window;
+        windowCacheExpiresAt = Date.now() + WINDOW_CACHE_TTL_MS;
+        logger.debug(`[ModelContextLimit] Context window: ${window}`);
+        return window;
       }
+
+      return cachedWindow;
+    } catch (error) {
+      if (isExpectedServerUnavailableError(error)) {
+        logger.warn("[ModelContextLimit] Reasonix server unavailable; using default context limit");
+      } else {
+        logger.warn("[ModelContextLimit] Error reading context window:", error);
+      }
+      return cachedWindow;
     } finally {
-      providersFetchInFlight = null;
+      windowFetchInFlight = null;
     }
   })();
 
-  await providersFetchInFlight;
+  return windowFetchInFlight;
 }
 
 export async function getModelContextLimit(
@@ -99,51 +69,28 @@ export async function getModelContextLimit(
     return DEFAULT_CONTEXT_LIMIT;
   }
 
-  const cacheKey = getModelKey(providerID, modelID);
-  const cachedLimit = contextLimitCache.get(cacheKey);
-  if (cachedLimit) {
-    return cachedLimit;
-  }
-
-  await refreshContextLimitCache();
-  return contextLimitCache.get(cacheKey) ?? DEFAULT_CONTEXT_LIMIT;
+  const window = await readContextWindow();
+  return window ?? DEFAULT_CONTEXT_LIMIT;
 }
 
 /**
- * Get the model's own context limit, waiting (bounded) for the server to list its provider.
- * @returns The limit, or null when the model is still not listed or the list cannot be read
+ * Read the context window once more, bypassing the cache. Used to fill in the
+ * limit of a model that was not known when the dashboard was first drawn.
+ * @returns The limit, or null when the server cannot report it
  */
 export async function waitForModelContextLimit(
   providerID: string,
   modelID: string,
 ): Promise<number | null> {
-  const cacheKey = getModelKey(providerID, modelID);
-  const cachedLimit = contextLimitCache.get(cacheKey);
-  if (cachedLimit) {
-    return cachedLimit;
-  }
-
-  try {
-    const { data, error } = await readProvidersWhenListed(providerID);
-    if (error || !data) {
-      logger.warn(
-        "[ModelContextLimit] Failed to fetch providers while waiting for a limit:",
-        error,
-      );
-      return null;
-    }
-
-    await applyProvidersList(data.providers);
-  } catch (error) {
-    logger.warn("[ModelContextLimit] Error waiting for a context limit:", error);
+  if (!providerID || !modelID) {
     return null;
   }
 
-  return contextLimitCache.get(cacheKey) ?? null;
+  return readContextWindow(true);
 }
 
 export function __resetModelContextLimitCacheForTests(): void {
-  contextLimitCache.clear();
-  providersCacheExpiresAt = 0;
-  providersFetchInFlight = null;
+  cachedWindow = null;
+  windowCacheExpiresAt = 0;
+  windowFetchInFlight = null;
 }

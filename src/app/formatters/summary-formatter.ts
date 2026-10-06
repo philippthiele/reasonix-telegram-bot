@@ -209,7 +209,7 @@ export interface PatchFileChange {
   diff: string;
 }
 
-/** Every file a finished apply_patch changed, from the per-file list OpenCode reports. */
+/** Every file a finished apply_patch changed, from the per-file list Reasonix reports. */
 export function getPatchFileChanges(
   metadata: { [key: string]: unknown } | undefined,
 ): PatchFileChange[] {
@@ -230,7 +230,7 @@ export function getPatchFileChanges(
       continue;
     }
 
-    // V1 versions keep a file's own diff under either key
+    // A file's own diff is kept under either key
     const diff =
       typeof entry.diff === "string"
         ? entry.diff

@@ -3,6 +3,24 @@ import type { Context, NextFunction } from "grammy";
 
 const flushPendingPromptMock = vi.hoisted(() => vi.fn());
 
+const mocked = vi.hoisted(() => ({
+  promptAsync: vi.fn(),
+  getCurrentSession: vi.fn(),
+  getMissingFolderNotice: vi.fn(),
+}));
+
+vi.mock("../../../src/reasonix/client.js", () => ({
+  reasonixClient: { session: { promptAsync: mocked.promptAsync } },
+}));
+
+vi.mock("../../../src/app/services/session-service.js", () => ({
+  getCurrentSession: mocked.getCurrentSession,
+}));
+
+vi.mock("../../../src/app/services/missing-folder-notice-service.js", () => ({
+  getMissingFolderNotice: mocked.getMissingFolderNotice,
+}));
+
 vi.mock("../../../src/bot/handlers/message-merger.js", () => ({
   flushPendingPrompt: flushPendingPromptMock,
   __resetMessageMergerForTests: vi.fn(),
@@ -14,7 +32,6 @@ import {
 } from "../../../src/bot/handlers/media-group-handler.js";
 import { t } from "../../../src/i18n/index.js";
 import { promptQueue } from "../../../src/app/managers/prompt-queue-manager.js";
-import { MAX_QUEUED_MEDIA_BYTES } from "../../../src/app/managers/prompt-queue-manager.js";
 import * as settingsStore from "../../../src/app/stores/settings-store.js";
 import { initializePromptQueueDispatch } from "../../../src/bot/handlers/prompt-queue-dispatch.js";
 import { createTestAppContainer } from "../../helpers/app-container.js";
@@ -153,6 +170,12 @@ describe("bot/handlers/media-group", () => {
     vi.restoreAllMocks();
     flushPendingPromptMock.mockClear();
     promptQueue.__resetForTests();
+    mocked.promptAsync.mockReset().mockResolvedValue({
+      data: { inboxID: "inbox-1" },
+      error: undefined,
+    });
+    mocked.getCurrentSession.mockReset().mockReturnValue(null);
+    mocked.getMissingFolderNotice.mockReset().mockResolvedValue(null);
   });
 
   afterEach(() => {
@@ -204,8 +227,13 @@ describe("bot/handlers/media-group", () => {
     );
   });
 
-  it("queues an album as one item while the agent is busy", async () => {
+  it("sends an album to the inbox as one prompt while the agent is busy", async () => {
     vi.spyOn(settingsStore, "getPromptQueueMode").mockReturnValue("queue");
+    mocked.getCurrentSession.mockReturnValue({
+      id: "session-1",
+      title: "Session",
+      directory: "/repo",
+    });
     container.foregroundSessionState.markBusy("session-1", "/repo");
     const first = createPhotoContext({
       messageId: 20,
@@ -226,43 +254,14 @@ describe("bot/handlers/media-group", () => {
     await handler.flushAll();
 
     expect(processPromptMock).not.toHaveBeenCalled();
-    expect(promptQueue.size()).toBe(1);
-    expect(promptQueue.list()[0]).toEqual(
+    expect(mocked.promptAsync).toHaveBeenCalledTimes(1);
+    expect(promptQueue.list()).toEqual([
       expect.objectContaining({
         displayText: "Compare these photos",
-        fileParts: [
-          expect.objectContaining({ filename: "photo-20.jpg" }),
-          expect.objectContaining({ filename: "photo-21.jpg" }),
-        ],
+        text: "",
+        fileParts: [],
       }),
-    );
-  });
-
-  it("rejects an oversized busy album before downloading any item", async () => {
-    vi.spyOn(settingsStore, "getPromptQueueMode").mockReturnValue("queue");
-    container.foregroundSessionState.markBusy("session-1", "/repo");
-    const first = createPhotoContext({
-      messageId: 20,
-      smallFileId: "small-1",
-      largeFileId: "large-1",
-      fileSize: MAX_QUEUED_MEDIA_BYTES,
-    });
-    const second = createPhotoContext({
-      messageId: 21,
-      smallFileId: "small-2",
-      largeFileId: "large-2",
-      fileSize: 1,
-    });
-    const { deps, downloadMock, processPromptMock } = createDeps();
-    const handler = new MediaGroupAttachmentHandler(deps, { debounceMs: 10_000 });
-
-    await addToHandler(handler, first.ctx);
-    await addToHandler(handler, second.ctx);
-    await handler.flushAll();
-
-    expect(downloadMock).not.toHaveBeenCalled();
-    expect(processPromptMock).not.toHaveBeenCalled();
-    expect(promptQueue.mediaSize()).toBe(0);
+    ]);
   });
 
   it("uses the largest photo from each media group item", async () => {

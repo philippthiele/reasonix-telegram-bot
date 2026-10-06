@@ -72,8 +72,8 @@ vi.mock("../../../src/app/services/session-cache-service.js", () => ({
   __resetSessionDirectoryCacheForTests: vi.fn(),
 }));
 
-vi.mock("../../../src/opencode/client.js", () => ({
-  opencodeClient: {
+vi.mock("../../../src/reasonix/client.js", () => ({
+  reasonixClient: {
     session: {
       messages: mocked.sessionMessagesMock,
       get: mocked.sessionGetMock,

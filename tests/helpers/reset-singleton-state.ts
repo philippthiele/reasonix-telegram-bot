@@ -16,7 +16,7 @@ export async function resetSingletonState(): Promise<void> {
     configReloadModule,
     loggerModule,
   ] = await Promise.all([
-    import("../../src/opencode/events.js"),
+    import("../../src/reasonix/event-stream.js"),
     import("../../src/app/services/session-cache-service.js"),
     import("../../src/bot/handlers/message-merger.js"),
     import("../../src/app/managers/prompt-queue-manager.js"),
@@ -25,10 +25,10 @@ export async function resetSingletonState(): Promise<void> {
     import("../../src/app/managers/prompt-attachment-manager.js"),
     import("../../src/bot/streaming/stream-throttle.js"),
     import("../../src/app/services/telegram-outage-notice-service.js"),
-    import("../../src/opencode/server-health.js"),
+    import("../../src/reasonix/health.js"),
     import("../../src/app/services/model-selection-service.js"),
     import("../../src/bot/handlers/prompt-handover.js"),
-    import("../../src/opencode/ready-refresh.js"),
+    import("../../src/reasonix/ready-refresh.js"),
     import("../../src/app/services/config-reload-service.js"),
     import("../../src/utils/logger.js"),
   ]);

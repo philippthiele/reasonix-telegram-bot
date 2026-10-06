@@ -15,17 +15,13 @@ const mocked = vi.hoisted(() => ({
     worktree: "D:/repo",
   } as { id: string; worktree: string } | undefined,
   currentSession: null as { id: string; title: string; directory: string } | null,
-  serverVersion: "v1" as "v1" | "v2",
 }));
 
-vi.mock("../../../src/opencode/client.js", () => ({
-  opencodeClient: {
+vi.mock("../../../src/reasonix/client.js", () => ({
+  reasonixClient: {
     permission: {
       reply: mocked.permissionReplyMock,
     },
-  },
-  get opencodeServerVersion() {
-    return mocked.serverVersion;
   },
 }));
 
@@ -153,7 +149,6 @@ describe("bot permission menu/callbacks", () => {
       worktree: "D:/repo",
     };
     mocked.currentSession = null;
-    mocked.serverVersion = "v1";
   });
 
   it("starts permission interaction and stores message id", async () => {
@@ -485,7 +480,7 @@ describe("bot permission menu/callbacks", () => {
     expect(container.permissionManager.isActive()).toBe(false);
   });
 
-  it("counts OpenCode's own reply event for an answer being sent as the Telegram answer", async () => {
+  it("counts Reasonix's own reply event for an answer being sent as the Telegram answer", async () => {
     const botApi = createBotApi(656);
     await showPermissionRequest(botApi, 777, createPermissionRequest("perm-1"), createDeps());
 
@@ -496,7 +491,7 @@ describe("bot permission menu/callbacks", () => {
     ]);
   });
 
-  it("names an outside answer without a decision when OpenCode does not report one", async () => {
+  it("names an outside answer without a decision when Reasonix does not report one", async () => {
     const botApi = createBotApi(657);
     await showPermissionRequest(botApi, 777, createPermissionRequest("perm-1"), createDeps());
 
@@ -590,8 +585,7 @@ describe("bot permission menu/callbacks", () => {
     expect(container.interactionManager.getSnapshot()).toBeNull();
   });
 
-  it("clears every other prompt of the session when a permission is rejected on V2", async () => {
-    mocked.serverVersion = "v2";
+  it("clears every other prompt of the session when a permission is rejected", async () => {
     const botApi = createBotApi(800);
     await showPermissionRequest(botApi, 777, createPermissionRequest("perm-1"), createDeps());
     const sendMessageMock = botApi.sendMessage as unknown as ReturnType<typeof vi.fn>;
@@ -623,24 +617,6 @@ describe("bot permission menu/callbacks", () => {
     expect(container.permissionManager.isActiveMessage(801)).toBe(false);
     expect(container.permissionManager.isActiveMessage(802)).toBe(true);
     expect(container.permissionManager.isResolved("perm-2")).toBe(true);
-  });
-
-  it("keeps the other prompts of the session when a permission is rejected on V1", async () => {
-    const botApi = createBotApi(810);
-    await showPermissionRequest(botApi, 777, createPermissionRequest("perm-1"), createDeps());
-    const sendMessageMock = botApi.sendMessage as unknown as ReturnType<typeof vi.fn>;
-    sendMessageMock.mockResolvedValueOnce({ message_id: 811 });
-    await showPermissionRequest(
-      botApi,
-      777,
-      createPermissionRequest("perm-2", { patterns: ["npm run build"] }),
-      createDeps(),
-    );
-
-    await handlePermissionCallback(createPermissionCallbackContext("permission:reject", 810), createDeps());
-    await flushMicrotasks();
-
-    expect(container.permissionManager.isActiveMessage(811)).toBe(true);
   });
 
   it("does not report an error when the permission request was already resolved", async () => {

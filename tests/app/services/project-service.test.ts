@@ -3,9 +3,8 @@ import os from "node:os";
 import path from "node:path";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-const { projectListMock, fileListMock, cachedSessionProjectsMock, configMock } = vi.hoisted(() => ({
+const { projectListMock, cachedSessionProjectsMock, configMock } = vi.hoisted(() => ({
   projectListMock: vi.fn(),
-  fileListMock: vi.fn(),
   cachedSessionProjectsMock: vi.fn(),
   configMock: {
     bot: {
@@ -14,10 +13,8 @@ const { projectListMock, fileListMock, cachedSessionProjectsMock, configMock } =
   },
 }));
 
-vi.mock("../../../src/opencode/client.js", () => ({
-  opencodeServerVersion: "v2",
-  opencodeV2Client: { file: { list: fileListMock } },
-  opencodeClient: {
+vi.mock("../../../src/reasonix/client.js", () => ({
+  reasonixClient: {
     project: {
       list: projectListMock,
     },
@@ -79,28 +76,19 @@ describe("project/manager", () => {
     ]);
   });
 
-  it("lists only projects whose folder the server has not confirmed gone", async () => {
+  it("lists only projects whose folder the bot can still see", async () => {
+    tempRoot = await mkdtemp(path.join(os.tmpdir(), "opencode-projects-presence-"));
+    const live = path.join(tempRoot, "live");
+    await mkdir(live);
     projectListMock.mockResolvedValueOnce({
       data: [
         { id: "global", worktree: "/", name: "" },
-        { id: "p1", worktree: "/srv/live", name: "Live" },
-        { id: "p2", worktree: "/srv/gone", name: "Gone" },
+        { id: "p1", worktree: live, name: "Live" },
+        { id: "p2", worktree: path.join(tempRoot, "gone"), name: "Gone" },
       ],
       error: null,
     });
     cachedSessionProjectsMock.mockResolvedValueOnce([]);
-    fileListMock.mockImplementation(async ({ path }: { path: string }) =>
-      path === "/srv/gone"
-        ? {
-            data: undefined,
-            error: Object.assign(new Error("500"), {
-              name: "ClientError",
-              reason: "UnexpectedStatus",
-              cause: { status: 500 },
-            }),
-          }
-        : { data: path === "/srv" ? ["live/"] : [], error: undefined },
-    );
 
     const projects = await getListedProjects();
 

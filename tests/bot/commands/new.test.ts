@@ -17,8 +17,8 @@ vi.mock("../../../src/app/services/missing-folder-notice-service.js", () => ({
   getMissingFolderNotice: mocked.getMissingFolderNoticeMock,
 }));
 
-vi.mock("../../../src/opencode/client.js", () => ({
-  opencodeClient: {
+vi.mock("../../../src/reasonix/client.js", () => ({
+  reasonixClient: {
     session: {
       create: mocked.sessionCreateMock,
     },
@@ -154,7 +154,7 @@ describe("bot/commands/new", () => {
     );
   });
 
-  it("names a session OpenCode has not named yet as a new session and keeps its title empty", async () => {
+  it("names a session Reasonix has not named yet as a new session and keeps its title empty", async () => {
     mocked.sessionCreateMock.mockResolvedValueOnce({
       data: { id: "session-3", title: "" },
       error: null,

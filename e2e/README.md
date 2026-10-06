@@ -3,9 +3,11 @@
 Drives the real bot through Telegram Web with Playwright MCP — no MTProto, no API
 credentials. A persistent browser profile keeps the web session logged in.
 
-Running the checks is the job of the `manual-tester` subagent
-(`.claude/agents/manual-tester.md`). This file covers the one-time setup
-a human does first.
+Running the checks is the job of the `manual-tester` subagent, which follows the
+tracked runbook [`AGENTS.md`](./AGENTS.md). The subagent definition itself lives
+in the agent config (`.claude/agents/`, `~/.config/opencode/agent/`), which is
+gitignored; `AGENTS.md` is the tracked source of truth and is what a fresh clone
+has. This file covers the one-time setup a human does first.
 
 ## Files
 
@@ -14,15 +16,15 @@ a human does first.
 | `.env` | Test config you edit. Copied into the test home on every launch |
 | `.env.example` | Template |
 | `run-test-bot.ps1` / `.sh` | Starts the bot against an isolated home |
-| `stop-test-bot.ps1` / `.sh` | Stops the test bot, its OpenCode server and the fault or forward proxy |
+| `stop-test-bot.ps1` / `.sh` | Stops the test bot, its Reasonix instances and the fault or forward proxy |
 | `fault-proxy.mjs` | Fault-injection proxy in front of the Telegram Bot API |
 | `fault-proxy.md` | How to launch and drive the fault proxy |
 | `forward-proxy.mjs` | Local SOCKS / HTTP(S) forward proxy for `TELEGRAM_PROXY_URL` checks |
 | `forward-proxy-test-only.crt` / `.key` | Public test certificate of the `https` forward proxy |
 | `probes.js` | DOM probes and confirmed Telegram Web selectors |
+| `AGENTS.md` | Agent runbook for running the checks (tracked source of truth) |
 | `scenarios/` | Regression scenarios the subagent runs before any feature check |
-| `.tmp/e2e/home/` | Runtime state: `settings.json`, `logs/` |
-| `.tmp/e2e/opencode-state/` | The stand's OpenCode V2 state: its background server registration |
+| `.tmp/e2e/home/` | Runtime state: `settings.json`, `logs/`, the Reasonix instance port/token map |
 | `.tmp/e2e/fault-proxy/` | Fault proxy call logs and pid file |
 | `.tmp/e2e/forward-proxy/` | Forward proxy connection logs and pid file |
 | `.tmp/e2e/browser-profile/` | Persistent Telegram Web login |
@@ -70,41 +72,19 @@ Everything stays inside `.tmp/e2e/home`, so your real `.env`, `settings.json`
 and `logs/` are untouched. Logs land in `.tmp/e2e/home/logs/`, one file per
 launch.
 
-OpenCode runs on the port from `OPENCODE_API_URL` in `e2e/.env` (4097 by
-default) so test runs never collide with your own OpenCode (V1 on 4096, the V2
-background server on 49374).
+The bot starts its own `reasonix serve` for the stand's root, so `reasonix` has
+to be on PATH (or named by `REASONIX_SERVE_BINARY` in `e2e/.env`). The launcher
+warns up front when it is not. The instance lands on the stable port derived from
+the root, in `47610`-`47809`, recorded with its token in
+`.tmp/e2e/home/run/reasonix-instances.json`; `stop-test-bot` reads that file, so
+it only ever stops instances this stand started.
 
-### OpenCode V1 and V2
+A real bot on the same machine that already serves the same root uses the same
+port. If the two would collide, give the stand its own root with `REASONIX_ROOTS`
+in `e2e/.env`.
 
-The stand runs OpenCode V2 by default (`OPENCODE_SERVER_VERSION=v2` in
-`e2e/.env`). One launch runs V1 instead with:
-
-```powershell
-.\e2e\run-test-bot.ps1 -OpencodeVersion v1       # Windows
-```
-
-```bash
-./e2e/run-test-bot.sh --opencode-version v1      # macOS / Linux
-```
-
-Both versions use the same test port and are started from the chat with
-`/opencode_start`. For the bot process only, the launcher:
-
-- puts the chosen version's global npm `bin` first on PATH (`@opencode/cli` for
-  V2, `opencode-ai` for V1), since both install an `opencode` command and the bot
-  starts whichever comes first. Without that install it warns and leaves PATH as is;
-- on V2, sets `XDG_STATE_HOME=.tmp/e2e/opencode-state`. V2 keeps one registered
-  background server per user, recorded there; a registration of the stand's own
-  keeps `/opencode_start` on 4097 from replacing your server on 49374. The
-  sessions database stays the shared one in `~/.local/share/opencode`, as on V1;
-- on V2, gives the bot `OPENCODE_SERVER_PASSWORD` from
-  `~/.config/opencode/service.json`, the file the V2 background server takes its
-  password from, and clears `OPENCODE_CONFIG_DIR`, which V2 reads instead of
-  `~/.config/opencode` rather than on top of it. The launch is refused when that
-  file has no password: set one with `opencode service set password <value>`.
-
-`/status` names the running version. Sessions are not shared between the
-versions, so after a switch the bot may drop its saved session.
+Start and stop the instance from the chat with `/reasonix_start` and
+`/reasonix_stop`. `/status` names the running version and instance.
 
 When done:
 
@@ -117,10 +97,10 @@ When done:
 ```
 
 The subagent runs this itself at the end of every session. It only stops what
-the test setup started: the OpenCode server on the configured test port, bot
-processes whose pid appears in a `.tmp/e2e/home/logs` file name, and the fault
-or forward proxy named in `.tmp/e2e/fault-proxy/proxy.pid` or
-`.tmp/e2e/forward-proxy/proxy.pid`.
+the test setup started: the Reasonix instances listed in
+`.tmp/e2e/home/run/reasonix-instances.json`, bot processes whose pid appears in a
+`.tmp/e2e/home/logs` file name, and the fault or forward proxy named in
+`.tmp/e2e/fault-proxy/proxy.pid` or `.tmp/e2e/forward-proxy/proxy.pid`.
 
 The `.sh` scripts need the executable bit once they are committed:
 `git update-index --chmod=+x e2e/run-test-bot.sh e2e/stop-test-bot.sh`
@@ -196,7 +176,7 @@ goes to `proxy-output.log` in the same folder on macOS / Linux.
 `forward-proxy-test-only.crt`, a self-signed leaf for `127.0.0.1` only. It is not a
 CA, so its committed private key cannot sign anything else. The launcher trusts it
 through `NODE_EXTRA_CA_CERTS` for the test-bot process only; a value you had there
-is replaced for that launch and restored afterwards. The OpenCode server the test
+is replaced for that launch and restored afterwards. The Reasonix instance the test
 bot starts inherits the variable, as it inherits `TELEGRAM_PROXY_URL`. The pair was
 generated once, valid until 2126, with:
 
@@ -207,7 +187,7 @@ distinguished_name = dn
 x509_extensions = ext
 prompt = no
 [dn]
-CN = opencode-telegram-bot e2e forward proxy (TEST ONLY)
+CN = reasonix-telegram-bot e2e forward proxy (TEST ONLY)
 [ext]
 basicConstraints = critical, CA:FALSE
 keyUsage = critical, digitalSignature
@@ -241,8 +221,8 @@ the constants there. The selectors were last calibrated on 2026-07-27.
 `@playwright/mcp` is pinned in the subagent's `mcpServers` frontmatter because a
 newer release may require a newer Chromium revision than the one installed
 locally. Screenshots go to `e2e/output/` (gitignored). Claude sets `--output-dir`
-on the tester's `mcpServers`; OpenCode uses `.opencode/opencode.json`; OMP
-picks Codex `.codex/config.toml` over OpenCode for the same server name.
+on the tester's `mcpServers`; Reasonix uses `.reasonix/config.json`; OMP
+picks Codex `.codex/config.toml` over Reasonix for the same server name.
 
 ## What to test
 

@@ -7,7 +7,7 @@ import { logger } from "../../utils/logger.js";
 import type { VariantInfo } from "../types/variant.js";
 
 /**
- * Get available variants for a model from OpenCode API
+ * Get available variants for a model from Reasonix API
  * @param providerID Provider ID
  * @param modelID Model ID
  * @returns Array of available variants

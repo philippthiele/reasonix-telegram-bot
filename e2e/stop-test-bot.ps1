@@ -1,9 +1,9 @@
-# Stops the test bot, the OpenCode server it started and the stand's proxies.
+# Stops the test bot, the Reasonix instances it started and the stand's proxies.
 #
 # Deliberately narrow: it only touches processes that provably belong to the
 # test setup.
-#   - OpenCode: whatever listens on the port from e2e/.env (OPENCODE_API_URL).
-#     Your working OpenCode on another port is never touched.
+#   - Reasonix: the instances recorded in the stand's own
+#     .tmp\e2e\home\run\reasonix-instances.json. Another bot's instances are untouched.
 #   - Bot: node processes whose pid appears in a log file name inside
 #     .tmp/e2e/home/logs. A production bot started from the same dist/ writes to
 #     a different home, so it is not matched.
@@ -23,35 +23,45 @@ $ErrorActionPreference = "Stop"
 $projectRoot = Split-Path -Parent $PSScriptRoot
 $testHome = Join-Path $projectRoot ".tmp\e2e\home"
 $logsDir = Join-Path $testHome "logs"
-$sourceEnv = Join-Path $PSScriptRoot ".env"
 $proxyPidFile = Join-Path $projectRoot ".tmp\e2e\fault-proxy\proxy.pid"
 $forwardPidFile = Join-Path $projectRoot ".tmp\e2e\forward-proxy\proxy.pid"
 
-# --- OpenCode -------------------------------------------------------------
+# --- Reasonix instances ---------------------------------------------------
 
-$port = 4096
-if (Test-Path $sourceEnv) {
-    $apiUrl = (Get-Content $sourceEnv | Where-Object { $_ -match '^\s*OPENCODE_API_URL\s*=' } | Select-Object -Last 1)
-    if ($apiUrl -and $apiUrl -match ':(\d+)') {
-        $port = [int]$Matches[1]
+# Ports the stand's bot actually started, from the instance state it persisted.
+# Anything else listening on 47610-47809 belongs to another bot and is untouched.
+$instancesFile = Join-Path $testHome "run\reasonix-instances.json"
+$ports = @()
+if (Test-Path $instancesFile) {
+    try {
+        $state = Get-Content $instancesFile -Raw | ConvertFrom-Json
+        $ports = @($state.PSObject.Properties.Value | ForEach-Object { [int]$_.port })
+    } catch {
+        Write-Warning "  could not read $instancesFile: $($_.Exception.Message)"
     }
 }
 
-Write-Host "OpenCode port from config: $port"
+if ($ports.Count -eq 0) {
+    Write-Host "No Reasonix instances recorded in $instancesFile"
+} else {
+    Write-Host "Reasonix ports from instance state: $($ports -join ' ')"
+}
 
-$listener = Get-NetTCPConnection -LocalPort $port -State Listen -ErrorAction SilentlyContinue | Select-Object -First 1
-if ($listener) {
-    $ocPid = $listener.OwningProcess
-    $ocProc = Get-Process -Id $ocPid -ErrorAction SilentlyContinue
-    Write-Host "  stopping OpenCode: PID $ocPid ($($ocProc.ProcessName))"
+foreach ($port in $ports) {
+    $listener = Get-NetTCPConnection -LocalPort $port -State Listen -ErrorAction SilentlyContinue | Select-Object -First 1
+    if (-not $listener) {
+        Write-Host "  nothing listening on $port"
+        continue
+    }
+    $instPid = $listener.OwningProcess
+    $instProc = Get-Process -Id $instPid -ErrorAction SilentlyContinue
+    Write-Host "  stopping reasonix serve on $port : PID $instPid ($($instProc.ProcessName))"
     try {
-        Stop-Process -Id $ocPid -Force -ErrorAction Stop
+        Stop-Process -Id $instPid -Force -ErrorAction Stop
         Write-Host "  stopped"
     } catch {
-        Write-Warning "  failed to stop PID ${ocPid}: $($_.Exception.Message)"
+        Write-Warning "  failed to stop PID ${instPid}: $($_.Exception.Message)"
     }
-} else {
-    Write-Host "  nothing listening on $port"
 }
 
 # --- Test bot -------------------------------------------------------------

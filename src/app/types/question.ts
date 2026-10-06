@@ -1,11 +1,13 @@
 export interface QuestionOption {
   label: string;
   description: string;
-  /** What is sent to OpenCode for this choice when it differs from the text shown (V2 only). */
+  /** What is sent to Reasonix for this choice when it differs from the text shown. */
   value?: string;
 }
 
 export interface Question {
+  /** Reasonix correlates an answer back to a question by this id. */
+  id?: string;
   question: string;
   header: string;
   options: QuestionOption[];
@@ -30,13 +32,13 @@ export interface QuestionState {
   messageIds: number[];
   requestID: string | null;
   sessionId: string;
-  /** The poll's answers are on their way to OpenCode. */
+  /** The poll's answers are on their way to Reasonix. */
   answeredFromTelegram: boolean;
-  /** Cancel was tapped and the dismissal is on its way to OpenCode. */
+  /** Cancel was tapped and the dismissal is on its way to Reasonix. */
   dismissing: boolean;
-  /** How OpenCode reported the question settled while the answers or the dismissal were on their way. */
+  /** How Reasonix reported the question settled while the answers or the dismissal were on their way. */
   settledWhileSending: QuestionSettledOutcome | null;
-  /** The last Cancel did not reach OpenCode and nothing was tapped since. */
+  /** The last Cancel did not reach Reasonix and nothing was tapped since. */
   lastCancelFailed: boolean;
 }
 

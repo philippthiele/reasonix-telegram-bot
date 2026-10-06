@@ -19,7 +19,7 @@ const mocked = vi.hoisted(() => ({
   },
 }));
 
-vi.mock("../../../src/opencode/events.js", () => ({
+vi.mock("../../../src/reasonix/event-stream.js", () => ({
   subscribeToEvents: mocked.subscribeToEvents,
   stopEventListening: mocked.stopEventListening,
 }));
@@ -238,13 +238,13 @@ describe("bot/services/event-subscription-service lifecycle", () => {
   beforeEach(async () => {
     vi.stubEnv("TELEGRAM_BOT_TOKEN", "test-telegram-token");
     vi.stubEnv("TELEGRAM_ALLOWED_USER_ID", "123456789");
-    vi.stubEnv("OPENCODE_MODEL_PROVIDER", "test-provider");
-    vi.stubEnv("OPENCODE_MODEL_ID", "test-model");
+    vi.stubEnv("REASONIX_MODEL_PROVIDER", "test-provider");
+    vi.stubEnv("REASONIX_MODEL_ID", "test-model");
     vi.stubEnv(
-      "OPENCODE_TELEGRAM_HOME",
+      "REASONIX_TELEGRAM_HOME",
       await mkdtemp(path.join(os.tmpdir(), "event-service-lifecycle-")),
     );
-    tempHome = process.env.OPENCODE_TELEGRAM_HOME!;
+    tempHome = process.env.REASONIX_TELEGRAM_HOME!;
     setRuntimeMode("installed");
 
     mocked.subscribeToEvents.mockReset();
@@ -1068,12 +1068,12 @@ describe("bot/services/event-subscription-service lifecycle", () => {
     });
   });
 
-  describe("prompt picked up from the OpenCode V2 inbox", () => {
-    async function mirrorInboxPrompt(delivery: "steer" | "queue"): Promise<void> {
+  describe("prompt picked up from the Reasonix inbox", () => {
+    async function mirrorInboxPrompt(): Promise<void> {
       const { promptQueue } = await import("../../../src/app/managers/prompt-queue-manager.js");
       promptQueue.confirmReservation(promptQueue.reserve()!, {
         displayText: "photo caption",
-        inbox: { sessionId: "session-1", inboxId: "user-message-1", delivery },
+        inbox: { sessionId: "session-1", inboxId: "user-message-1" },
       });
     }
 
@@ -1082,7 +1082,7 @@ describe("bot/services/event-subscription-service lifecycle", () => {
         startAssistantRun: true,
         showAssistantRunFooter: true,
       });
-      await mirrorInboxPrompt("steer");
+      await mirrorInboxPrompt();
       const { promptQueue } = await import("../../../src/app/managers/prompt-queue-manager.js");
 
       emitExternalUserMessage(summaryAggregator, "See attached file");
@@ -1104,7 +1104,7 @@ describe("bot/services/event-subscription-service lifecycle", () => {
         startAssistantRun: true,
         showAssistantRunFooter: true,
       });
-      await mirrorInboxPrompt("queue");
+      await mirrorInboxPrompt();
       const { assistantRunState } = activeContainer;
       assistantRunState.markResponseCompleted("session-1", {
         agent: "test-agent",
@@ -1130,7 +1130,7 @@ describe("bot/services/event-subscription-service lifecycle", () => {
       const { summaryAggregator } = await setupService({ showAssistantRunFooter: true });
       const { assistantRunState, foregroundSessionState } = activeContainer;
       assistantRunState.startObservedRun("session-1", Date.now());
-      await mirrorInboxPrompt("steer");
+      await mirrorInboxPrompt();
 
       emitExternalUserMessage(summaryAggregator, "Hi");
       await vi.waitFor(
@@ -1152,7 +1152,7 @@ describe("bot/services/event-subscription-service lifecycle", () => {
         providerID: "test-provider",
         modelID: "test-model",
       });
-      await mirrorInboxPrompt("queue");
+      await mirrorInboxPrompt();
 
       emitExternalUserMessage(summaryAggregator, "Next task");
       await vi.waitFor(

@@ -1,5 +1,5 @@
 /**
- * Agent information from OpenCode API
+ * Agent information from Reasonix API
  */
 export interface AgentInfo {
   name: string;

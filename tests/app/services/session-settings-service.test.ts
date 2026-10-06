@@ -96,7 +96,7 @@ describe("app/services/session-settings-service", () => {
     expect(selectModel).not.toHaveBeenCalled();
   });
 
-  it("stores the config model at the default variant instead of one OpenCode no longer offers", async () => {
+  it("stores the config model at the default variant instead of one Reasonix no longer offers", async () => {
     resolveModelToAdopt.mockResolvedValue({ providerID: "opencode", modelID: "big-pickle" });
 
     await applySessionSettings(

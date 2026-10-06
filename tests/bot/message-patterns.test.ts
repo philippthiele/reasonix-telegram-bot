@@ -16,7 +16,7 @@ function getButtonText(button: string | { text: string }): string {
 
 describe("bot/message-patterns", () => {
   it("matches model button text from main keyboard", () => {
-    const keyboard = createMainKeyboard("build", {
+    const keyboard = createMainKeyboard({
       providerID: "openrouter",
       modelID: "openai/gpt-4o",
     });
@@ -29,12 +29,8 @@ describe("bot/message-patterns", () => {
     expect("🧠 cliproxyapi2/gpt-5.3-codex").toMatch(MODEL_BUTTON_TEXT_PATTERN);
   });
 
-  it("does not treat custom agent labels as model buttons", () => {
-    expect("🤖 Reviewer Agent").not.toMatch(MODEL_BUTTON_TEXT_PATTERN);
-  });
-
   it("matches current and legacy variant button prefixes", () => {
-    const keyboard = createMainKeyboard("build", {
+    const keyboard = createMainKeyboard({
       providerID: "openrouter",
       modelID: "openai/gpt-4o",
     });
@@ -48,12 +44,6 @@ describe("bot/message-patterns", () => {
     expect("Create a migration plan").not.toMatch(MODEL_BUTTON_TEXT_PATTERN);
     expect("Create a migration plan").not.toMatch(AGENT_MODE_BUTTON_TEXT_PATTERN);
     expect("Create a migration plan").not.toMatch(VARIANT_BUTTON_TEXT_PATTERN);
-  });
-
-  it("matches current and legacy agent button labels with extra descriptors", () => {
-    expect("🤖 Sisyphus (Ultraworker) Agent").toMatch(AGENT_MODE_BUTTON_TEXT_PATTERN);
-    expect("🤖 Sisyphus (Ultraworker) Mode").toMatch(AGENT_MODE_BUTTON_TEXT_PATTERN);
-    expect("🤖 Sisyphus (Ultraworker) Agent").not.toMatch(MODEL_BUTTON_TEXT_PATTERN);
   });
 
   it("matches queued prompt button labels", () => {
@@ -76,13 +66,12 @@ describe("bot/message-patterns", () => {
 
   it("recognises every reply keyboard button label", () => {
     const keyboard = createMainKeyboard(
-      "build",
       { providerID: "openrouter", modelID: "openai/gpt-4o" },
       { tokensUsed: 150000, tokensLimit: 1500000 },
     );
 
+    // Row 1 holds the context button, row 2 the model and the variant.
     expect(isReplyKeyboardButtonText(getButtonText(defined(keyboard.keyboard[0]?.[0])))).toBe(true);
-    expect(isReplyKeyboardButtonText(getButtonText(defined(keyboard.keyboard[0]?.[1])))).toBe(true);
     expect(isReplyKeyboardButtonText(getButtonText(defined(keyboard.keyboard[1]?.[0])))).toBe(true);
     expect(isReplyKeyboardButtonText(getButtonText(defined(keyboard.keyboard[1]?.[1])))).toBe(true);
     expect(isReplyKeyboardButtonText(formatQueuedPromptButtonLabel(1, "queued"))).toBe(true);

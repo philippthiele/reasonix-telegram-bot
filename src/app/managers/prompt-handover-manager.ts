@@ -1,5 +1,4 @@
 import { logger } from "../../utils/logger.js";
-import type { IncomingPrompt } from "../types/prompt.js";
 import type { QueuedPromptInbox } from "./prompt-queue-manager.js";
 
 /** Agent, model and variant the chat had when the session was detached. */
@@ -10,20 +9,13 @@ export interface HandoverSelection {
   variant?: string | undefined;
 }
 
-/** A V1 prompt the bot still holds for a detached session. */
-export interface HandedOverPrompt extends IncomingPrompt {
-  selection: HandoverSelection;
-}
-
 /** What waits for one session the bot was detached from. */
 export interface SessionHandover {
   sessionId: string;
   directory: string;
   selection: HandoverSelection;
-  prompts: HandedOverPrompt[];
   inboxEntries: QueuedPromptInbox[];
   detachSeq: number;
-  turnInFlight: boolean;
 }
 
 /** The busy session a message arrived for, taken before the message is prepared. */
@@ -33,9 +25,10 @@ export interface ArrivalTicket {
 }
 
 /**
- * Prompt Handover - messages that waited for a running turn when the bot was detached
- * from the session. They are no longer the chat's queue: no buttons, no cap, and session
- * switches do not withdraw them. Only /abort in that session and /opencode_stop do.
+ * Prompt Handover - prompts that waited for a running turn in a session the bot was
+ * detached from. They stay in the Reasonix inbox of that session, and the bot only
+ * remembers them so /abort in that session and /reasonix_stop can withdraw them.
+ * No buttons, no cap, and session switches do not withdraw them.
  * Kept in memory only, like the prompt queue.
  * Singleton pattern
  */
@@ -61,10 +54,8 @@ class PromptHandoverManager {
       sessionId: session.id,
       directory: session.directory,
       selection: { ...selection },
-      prompts: [],
       inboxEntries: [],
       detachSeq: this.detachSeq,
-      turnInFlight: false,
     };
     this.sessions.set(session.id, record);
     return record;
@@ -84,18 +75,6 @@ class PromptHandoverManager {
     return Boolean(record && record.detachSeq > ticket.detachSeq);
   }
 
-  addPrompt(sessionId: string, prompt: HandedOverPrompt): boolean {
-    const record = this.sessions.get(sessionId);
-    if (!record) {
-      return false;
-    }
-    record.prompts.push(prompt);
-    logger.debug(
-      `[PromptHandover] Prompt handed over: session=${sessionId}, size=${record.prompts.length}`,
-    );
-    return true;
-  }
-
   addInboxEntry(inbox: QueuedPromptInbox): boolean {
     const record = this.sessions.get(inbox.sessionId);
     if (!record) {
@@ -108,24 +87,13 @@ class PromptHandoverManager {
     return true;
   }
 
-  takeNextPrompt(sessionId: string): HandedOverPrompt | null {
-    return this.sessions.get(sessionId)?.prompts.shift() ?? null;
-  }
-
-  setTurnInFlight(sessionId: string, inFlight: boolean): void {
-    const record = this.sessions.get(sessionId);
-    if (record) {
-      record.turnInFlight = inFlight;
-    }
-  }
-
-  /** Whether V1 prompts handed over to the session are still to be sent or answered. */
+  /** Whether Reasonix still holds prompts handed over to the session. */
   hasPendingPrompts(sessionId: string): boolean {
     const record = this.sessions.get(sessionId);
-    return Boolean(record && (record.prompts.length > 0 || record.turnInFlight));
+    return Boolean(record && record.inboxEntries.length > 0);
   }
 
-  /** OpenCode picked the prompt up: it can no longer be withdrawn. */
+  /** Reasonix picked the prompt up: it can no longer be withdrawn. */
   forgetInboxId(inboxId: string): void {
     for (const record of this.sessions.values()) {
       record.inboxEntries = record.inboxEntries.filter((entry) => entry.inboxId !== inboxId);
@@ -140,7 +108,7 @@ class PromptHandoverManager {
     }
     this.sessions.delete(sessionId);
     logger.info(
-      `[PromptHandover] Withdrew handed-over prompts: session=${sessionId}, reason=${reason}, prompts=${record.prompts.length}, inbox=${record.inboxEntries.length}`,
+      `[PromptHandover] Withdrew handed-over prompts: session=${sessionId}, reason=${reason}, inbox=${record.inboxEntries.length}`,
     );
     return record.inboxEntries;
   }

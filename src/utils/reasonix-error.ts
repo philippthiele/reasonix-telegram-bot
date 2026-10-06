@@ -7,7 +7,7 @@ const SERVER_UNAVAILABLE_ERROR_MARKERS = [
   "connect refused",
 ];
 
-export function isExpectedOpencodeUnavailableError(error: unknown): boolean {
+export function isExpectedServerUnavailableError(error: unknown): boolean {
   if (!error) {
     return false;
   }
@@ -25,8 +25,8 @@ export function isExpectedOpencodeUnavailableError(error: unknown): boolean {
   );
 }
 
-/** A "not found" answer from OpenCode (V1 body, or the V2 adapter's equivalent). */
-export function isOpencodeNotFoundError(error: unknown): boolean {
+/** A "not found" answer from Reasonix. */
+export function isServerNotFoundError(error: unknown): boolean {
   return isRecord(error) && error.name === "NotFoundError";
 }
 

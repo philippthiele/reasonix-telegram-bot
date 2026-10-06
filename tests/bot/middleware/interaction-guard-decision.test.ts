@@ -175,7 +175,7 @@ describe("interaction guard", () => {
 
   it("blocks voice input when text input is expected", () => {
     startInteractionForTest(deps.interactionManager, {
-      kind: "rename",
+      kind: "task",
       expectedInput: "text",
     });
 
@@ -239,24 +239,9 @@ describe("interaction guard", () => {
     expect(decision.state?.kind).toBe("question");
   });
 
-  it("allows rename cancel callback when rename expects text", () => {
+  it("blocks an unrelated callback while text is expected", () => {
     startInteractionForTest(deps.interactionManager, {
-      kind: "rename",
-      expectedInput: "text",
-    });
-
-    const decision = resolveInteractionGuardDecision(
-      createContext({ callbackData: "rename:cancel" }), deps,
-    );
-
-    expect(decision.allow).toBe(true);
-    expect(decision.inputType).toBe("callback");
-    expect(decision.state?.kind).toBe("rename");
-  });
-
-  it("blocks non-rename callback while rename expects text", () => {
-    startInteractionForTest(deps.interactionManager, {
-      kind: "rename",
+      kind: "task",
       expectedInput: "text",
     });
 
@@ -266,12 +251,12 @@ describe("interaction guard", () => {
 
     expect(decision.allow).toBe(false);
     expect(decision.reason).toBe("expected_text");
-    expect(decision.state?.kind).toBe("rename");
+    expect(decision.state?.kind).toBe("task");
   });
 
-  it("blocks photo input when text input is expected (rename)", () => {
+  it("blocks photo input when text input is expected (task creation)", () => {
     startInteractionForTest(deps.interactionManager, {
-      kind: "rename",
+      kind: "task",
       expectedInput: "text",
     });
 
@@ -280,7 +265,7 @@ describe("interaction guard", () => {
     expect(decision.allow).toBe(false);
     expect(decision.reason).toBe("expected_text");
     expect(decision.inputType).toBe("other");
-    expect(decision.state?.kind).toBe("rename");
+    expect(decision.state?.kind).toBe("task");
   });
 
   it("blocks photo input when mixed input is expected (question)", () => {
@@ -305,18 +290,18 @@ describe("interaction guard", () => {
     expect(decision.inputType).toBe("other");
   });
 
-  it("allows abort, detach, status, help, and opencode_stop while busy without interaction", () => {
+  it("allows abort, detach, status, help, and reasonix_stop while busy without interaction", () => {
     deps.foregroundSessionState.markBusy("session-1", "D:\\Projects\\Repo");
 
     expect(resolveInteractionGuardDecision(createContext({ text: "/abort" }), deps).allow).toBe(true);
     expect(resolveInteractionGuardDecision(createContext({ text: "/detach" }), deps).allow).toBe(true);
     expect(resolveInteractionGuardDecision(createContext({ text: "/status" }), deps).allow).toBe(true);
     expect(resolveInteractionGuardDecision(createContext({ text: "/help" }), deps).allow).toBe(true);
-    expect(resolveInteractionGuardDecision(createContext({ text: "/opencode_stop" }), deps).allow).toBe(
+    expect(resolveInteractionGuardDecision(createContext({ text: "/reasonix_stop" }), deps).allow).toBe(
       true,
     );
 
-    const startDecision = resolveInteractionGuardDecision(createContext({ text: "/opencode_start" }), deps);
+    const startDecision = resolveInteractionGuardDecision(createContext({ text: "/reasonix_start" }), deps);
     expect(startDecision.allow).toBe(false);
     expect(startDecision.reason).toBe("command_not_allowed");
     expect(startDecision.busy).toBe(true);
@@ -327,16 +312,16 @@ describe("interaction guard", () => {
     expect(blockedDecision.busy).toBe(true);
   });
 
-  it("allows opencode_stop during an active interaction without busy", () => {
+  it("allows reasonix_stop during an active interaction without busy", () => {
     startInteractionForTest(deps.interactionManager, {
       kind: "inline",
       expectedInput: "callback",
     });
 
-    const decision = resolveInteractionGuardDecision(createContext({ text: "/opencode_stop" }), deps);
+    const decision = resolveInteractionGuardDecision(createContext({ text: "/reasonix_stop" }), deps);
 
     expect(decision.allow).toBe(true);
-    expect(decision.command).toBe("/opencode_stop");
+    expect(decision.command).toBe("/reasonix_stop");
     expect(decision.state?.kind).toBe("inline");
   });
 
@@ -411,15 +396,15 @@ describe("interaction guard", () => {
     expect(textDecision.busy).toBe(true);
   });
 
-  it("does not allow rename callback to bypass busy state", () => {
+  it("does not let a task callback bypass busy state", () => {
     deps.foregroundSessionState.markBusy("session-1", "D:\\Projects\\Repo");
     startInteractionForTest(deps.interactionManager, {
-      kind: "rename",
+      kind: "task",
       expectedInput: "text",
     });
 
     const decision = resolveInteractionGuardDecision(
-      createContext({ callbackData: "rename:cancel" }), deps,
+      createContext({ callbackData: "task:cancel" }), deps,
     );
 
     expect(decision.allow).toBe(false);

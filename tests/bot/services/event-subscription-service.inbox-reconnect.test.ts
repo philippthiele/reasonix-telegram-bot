@@ -7,7 +7,7 @@ import { setRuntimeMode } from "../../../src/runtime/mode.js";
 import { resetSingletonState } from "../../helpers/reset-singleton-state.js";
 import { createTestAppContainer } from "../../helpers/app-container.js";
 import { promptQueue } from "../../../src/app/managers/prompt-queue-manager.js";
-import type { ReconnectInfo } from "../../../src/opencode/events.js";
+import type { ReconnectInfo } from "../../../src/reasonix/event-stream.js";
 import type { BotEventSubscriptionService } from "../../../src/bot/services/event-subscription-service.js";
 
 const mocked = vi.hoisted(() => ({
@@ -17,15 +17,16 @@ const mocked = vi.hoisted(() => ({
   inboxList: vi.fn(),
 }));
 
-vi.mock("../../../src/opencode/events.js", () => ({
+vi.mock("../../../src/reasonix/event-stream.js", () => ({
   subscribeToEvents: mocked.subscribeToEvents,
   stopEventListening: mocked.stopEventListening,
 }));
 
-vi.mock("../../../src/opencode/client.js", async (importOriginal) => ({
-  ...(await importOriginal<typeof import("../../../src/opencode/client.js")>()),
-  opencodeServerVersion: "v2",
-  opencodeV2Client: { session: { inbox: { list: mocked.inboxList, cancel: vi.fn() } } },
+vi.mock("../../../src/reasonix/client.js", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("../../../src/reasonix/client.js")>()),
+  reasonixClient: {
+    session: { inbox: { list: mocked.inboxList, cancel: vi.fn() } },
+  },
 }));
 
 vi.mock("../../../src/app/services/attach-service.js", async (importOriginal) => ({
@@ -36,7 +37,7 @@ vi.mock("../../../src/app/services/attach-service.js", async (importOriginal) =>
 function mirror(inboxId: string): void {
   promptQueue.confirmReservation(promptQueue.reserve()!, {
     displayText: inboxId,
-    inbox: { sessionId: "session-1", inboxId, delivery: "steer" },
+    inbox: { sessionId: "session-1", inboxId },
   });
 }
 
@@ -58,10 +59,10 @@ describe("bot/services/event-subscription-service inbox after reconnect", () => 
   beforeEach(async () => {
     vi.stubEnv("TELEGRAM_BOT_TOKEN", "test-telegram-token");
     vi.stubEnv("TELEGRAM_ALLOWED_USER_ID", "123456789");
-    vi.stubEnv("OPENCODE_MODEL_PROVIDER", "test-provider");
-    vi.stubEnv("OPENCODE_MODEL_ID", "test-model");
-    vi.stubEnv("OPENCODE_TELEGRAM_HOME", await mkdtemp(path.join(os.tmpdir(), "inbox-reconnect-")));
-    tempHome = process.env.OPENCODE_TELEGRAM_HOME!;
+    vi.stubEnv("REASONIX_MODEL_PROVIDER", "test-provider");
+    vi.stubEnv("REASONIX_MODEL_ID", "test-model");
+    vi.stubEnv("REASONIX_TELEGRAM_HOME", await mkdtemp(path.join(os.tmpdir(), "inbox-reconnect-")));
+    tempHome = process.env.REASONIX_TELEGRAM_HOME!;
     setRuntimeMode("installed");
 
     mocked.subscribeToEvents.mockReset().mockResolvedValue(undefined);
@@ -99,7 +100,7 @@ describe("bot/services/event-subscription-service inbox after reconnect", () => 
     ["a restarted server", true],
     ["a server it cannot tell", null],
   ])(
-    "drops the buttons of messages OpenCode no longer holds after a reconnect to %s",
+    "drops the buttons of messages Reasonix no longer holds after a reconnect to %s",
     async (_label, serverRestarted) => {
       mirror("msg-picked");
       mirror("msg-waiting");
@@ -124,7 +125,7 @@ describe("bot/services/event-subscription-service inbox after reconnect", () => 
     expect(mirroredInboxIds()).toEqual(["msg-1", "msg-2"]);
   });
 
-  it("leaves a message still on its way to OpenCode to its admission", async () => {
+  it("leaves a message still on its way to Reasonix to its admission", async () => {
     mirror("msg-picked");
     const reservationId = promptQueue.reserve()!;
 
@@ -133,12 +134,12 @@ describe("bot/services/event-subscription-service inbox after reconnect", () => 
     await vi.waitFor(() => expect(mirroredInboxIds()).toEqual([]));
     const confirmed = promptQueue.confirmReservation(reservationId, {
       displayText: "late",
-      inbox: { sessionId: "session-1", inboxId: "msg-late", delivery: "steer" },
+      inbox: { sessionId: "session-1", inboxId: "msg-late" },
     });
     expect(confirmed).not.toBeNull();
   });
 
-  it("asks OpenCode nothing without a current session", async () => {
+  it("asks Reasonix nothing without a current session", async () => {
     const sessionService = await import("../../../src/app/services/session-service.js");
     sessionService.clearSession();
 

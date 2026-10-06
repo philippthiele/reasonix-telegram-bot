@@ -8,9 +8,9 @@ import { logger } from "../../utils/logger.js";
 import { isFileSizeAllowed } from "./file-download-service.js";
 import { isWithinProjectRootSafe } from "./file-browser-service.js";
 
-// OpenCode resolves a file: part by reading the path with its own read tool, but only when
+// Reasonix resolves a file: part by reading the path with its own read tool, but only when
 // the MIME type is exactly this - anything else takes the binary branch.
-const OPENCODE_TEXT_MIME = "text/plain";
+const REASONIX_TEXT_MIME = "text/plain";
 
 /**
  * Validates the pending attachment and turns it into a file part.
@@ -67,7 +67,7 @@ export async function resolvePendingAttachment(worktree: string): Promise<FilePa
 
   return {
     type: "file",
-    mime: OPENCODE_TEXT_MIME,
+    mime: REASONIX_TEXT_MIME,
     filename: toRelativePath(absolutePath, worktree),
     url: pathToFileURL(absolutePath).href,
   };

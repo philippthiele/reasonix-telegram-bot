@@ -3,9 +3,9 @@ import { createBot, restoreFollowedSessionOnPollingStart } from "../../bot/index
 import { createScheduledTaskDeliverySender } from "../../bot/messages/scheduled-task-delivery.js";
 import { config } from "../../config.js";
 import {
-  notifyOpencodeReadyIfHealthy,
-  registerOpenCodeReadyRefreshHandler,
-} from "../../opencode/ready-refresh.js";
+  notifyReasonixReadyIfHealthy,
+  registerReasonixReadyRefreshHandler,
+} from "../../reasonix/ready-refresh.js";
 import { flushSettings, loadSettings } from "../stores/settings-store.js";
 import { LocalCommandRegistry } from "../services/local-command-registry.js";
 import { BUILT_IN_COMMAND_NAMES } from "../../bot/commands/definitions.js";
@@ -136,7 +136,7 @@ export async function startBotApp(): Promise<void> {
   const version = await getBotVersion();
   const logFilePath = getLogFilePath();
 
-  logger.info(`Starting OpenCode Telegram Bot v${version}...`);
+  logger.info(`Starting Reasonix Telegram Bot v${version}...`);
   logger.info(`Node.js ${process.version} on ${process.platform} ${process.arch}`);
   logger.info(`Config loaded from ${runtimePaths.envFilePath}`);
   if (logFilePath) {
@@ -210,8 +210,8 @@ export async function startBotApp(): Promise<void> {
   startModelCatalogWarmup();
   await reconcileStoredModelSelection();
   const container = createAppContainer();
-  registerOpenCodeReadyRefreshHandler(container);
-  const { opencodeAutoRestartService, scheduledTaskRuntime } = container;
+  registerReasonixReadyRefreshHandler(container);
+  const { scheduledTaskRuntime } = container;
   const localCommandRegistry = await LocalCommandRegistry.load({
     directoryPath: runtimePaths.localCommandsDirPath,
     builtInCommands: BUILT_IN_COMMAND_NAMES,
@@ -222,10 +222,9 @@ export async function startBotApp(): Promise<void> {
     createScheduledTaskDeliverySender(bot.api, config.telegram.allowedUserId),
   );
   safeBackgroundTask({
-    taskName: "app.opencodeStartup",
+    taskName: "app.reasonixStartup",
     task: async () => {
-      await opencodeAutoRestartService.start();
-      await notifyOpencodeReadyIfHealthy("startup", container);
+      await notifyReasonixReadyIfHealthy("startup", container);
     },
   });
 
@@ -240,7 +239,6 @@ export async function startBotApp(): Promise<void> {
     shutdownStarted = true;
     logger.info(`[App] Received ${signal}, shutting down...`);
     container.cleanupProcess(`app_shutdown_${signal.toLowerCase()}`);
-    opencodeAutoRestartService.stop();
     scheduledTaskRuntime.shutdown();
 
     shutdownTimeout = setTimeout(() => {
@@ -324,7 +322,6 @@ export async function startBotApp(): Promise<void> {
       shutdownTimeout = null;
     }
     container.cleanupProcess("app_shutdown_complete");
-    opencodeAutoRestartService.stop();
     scheduledTaskRuntime.shutdown();
     await clearManagedServiceState().catch((error) => {
       logger.warn("[App] Failed to clear managed service state", error);

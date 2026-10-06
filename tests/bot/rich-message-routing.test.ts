@@ -5,7 +5,6 @@ import { config } from "../../src/config.js";
 import { t } from "../../src/i18n/index.js";
 import { promptQueue } from "../../src/app/managers/prompt-queue-manager.js";
 import { promptHandover } from "../../src/app/managers/prompt-handover-manager.js";
-import { createIncomingPrompt } from "../../src/app/types/prompt.js";
 import type { AppContainer } from "../../src/app/bootstrap/app-container.js";
 
 const mocked = vi.hoisted(() => ({
@@ -13,11 +12,13 @@ const mocked = vi.hoisted(() => ({
   handleQuestionTextAnswer: vi.fn(),
   handleTaskTextInput: vi.fn(),
   handleModelSearchTextInput: vi.fn(),
-  handleRenameTextAnswer: vi.fn(),
   handleCatalogTextArguments: vi.fn(),
   statusCommand: vi.fn(),
   getPromptQueueMode: vi.fn(),
   getCurrentSession: vi.fn(),
+  promptAsync: vi.fn(),
+  getMissingFolderNotice: vi.fn(),
+  supportsInput: vi.fn(),
 }));
 
 vi.mock("../../src/bot/handlers/message-merger.js", () => ({
@@ -39,8 +40,17 @@ vi.mock("../../src/bot/callbacks/model-selection-callback-handler.js", () => ({
   handleModelSearchTextInput: mocked.handleModelSearchTextInput,
 }));
 
-vi.mock("../../src/bot/callbacks/rename-callback-handler.js", () => ({
-  handleRenameTextAnswer: mocked.handleRenameTextAnswer,
+vi.mock("../../src/app/services/missing-folder-notice-service.js", () => ({
+  getMissingFolderNotice: mocked.getMissingFolderNotice,
+}));
+
+vi.mock("../../src/app/services/model-capabilities-service.js", () => ({
+  supportsInput: mocked.supportsInput,
+  getModelCapabilities: vi.fn().mockResolvedValue({}),
+}));
+
+vi.mock("../../src/reasonix/client.js", () => ({
+  reasonixClient: { session: { promptAsync: mocked.promptAsync } },
 }));
 
 vi.mock("../../src/bot/handlers/text-message-handler.js", () => ({
@@ -143,11 +153,13 @@ describe("bot/rich-message-routing", () => {
     mocked.handleQuestionTextAnswer.mockReset().mockResolvedValue(undefined);
     mocked.handleTaskTextInput.mockReset().mockResolvedValue(false);
     mocked.handleModelSearchTextInput.mockReset().mockResolvedValue(false);
-    mocked.handleRenameTextAnswer.mockReset().mockResolvedValue(false);
     mocked.handleCatalogTextArguments.mockReset().mockResolvedValue(false);
     mocked.statusCommand.mockReset().mockResolvedValue(undefined);
     mocked.getPromptQueueMode.mockReset().mockReturnValue("off");
     mocked.getCurrentSession.mockReset().mockReturnValue(undefined);
+    mocked.promptAsync.mockReset().mockResolvedValue({ data: { inboxID: "inbox-1" } });
+    mocked.getMissingFolderNotice.mockReset().mockResolvedValue(null);
+    mocked.supportsInput.mockReset().mockReturnValue(true);
     promptQueue.__resetForTests();
     promptHandover.__resetForTests();
   });
@@ -157,14 +169,15 @@ describe("bot/rich-message-routing", () => {
     const selection = { agent: "build", providerID: "p", modelID: "m" };
     mocked.getPromptQueueMode.mockReturnValue("queue");
     mocked.getCurrentSession.mockReturnValue(session);
+    container.foregroundSessionState.markBusy(session.id, session.directory);
     promptHandover.recordDetach(session, selection);
-    promptHandover.addPrompt("ses-1", { ...createIncomingPrompt("handed over"), selection });
+    promptHandover.addInboxEntry({ sessionId: "ses-1", inboxId: "msg-1" });
     const { bot } = createRoutingBot();
 
     await bot.handleUpdate(richUpdate([{ type: "paragraph", text: "Sent after re-attaching" }]));
 
     expect(mocked.queuePromptForMerging).not.toHaveBeenCalled();
-    expect(promptQueue.list().map((item) => item.text)).toEqual(["Sent after re-attaching"]);
+    expect(promptQueue.list().map((item) => item.displayText)).toEqual(["Sent after re-attaching"]);
   });
 
   it("routes a converted rich sentence as an ordinary prompt", async () => {
@@ -220,18 +233,6 @@ describe("bot/rich-message-routing", () => {
     expect(mocked.queuePromptForMerging).not.toHaveBeenCalled();
   });
 
-  it("sends empty rich input to rename instead of OpenCode", async () => {
-    mocked.handleRenameTextAnswer.mockResolvedValue(true);
-    const { bot } = createRoutingBot();
-
-    await bot.handleUpdate(richUpdate([]));
-
-    expect(mocked.handleRenameTextAnswer).toHaveBeenCalledOnce();
-    const ctx = mocked.handleRenameTextAnswer.mock.calls[0]?.[0] as Context;
-    expect(ctx.message?.text).toBe("");
-    expect(mocked.queuePromptForMerging).not.toHaveBeenCalled();
-  });
-
   it("sends empty rich input through task and catalog argument handlers", async () => {
     mocked.handleTaskTextInput.mockResolvedValueOnce(true);
     const { bot } = createRoutingBot();
@@ -276,9 +277,12 @@ describe("bot/rich-message-routing", () => {
     );
   });
 
-  it("queues a photo-only rich prompt while busy without downloading", async () => {
+  it("sends a photo-only rich prompt to the inbox while busy", async () => {
+    const session = { id: "session-1", title: "Session", directory: "D:/Projects/Repo" };
     mocked.getPromptQueueMode.mockReturnValue("queue");
-    container.foregroundSessionState.markBusy("session-1", "D:\\Projects\\Repo");
+    mocked.getCurrentSession.mockReturnValue(session);
+    mocked.supportsInput.mockReturnValue(false);
+    container.foregroundSessionState.markBusy(session.id, session.directory);
     const { bot } = createRoutingBot();
 
     await bot.handleUpdate(
@@ -298,13 +302,11 @@ describe("bot/rich-message-routing", () => {
       ]),
     );
 
-    expect(promptQueue.list()).toEqual([
-      expect.objectContaining({
-        text: "",
-        photos: [expect.objectContaining({ fileId: "photo-1", source: "rich" })],
-        mediaBytes: 512,
-      }),
-    ]);
+    // The model cannot read images, so nothing is downloaded and nothing is sent:
+    // the bot tells the user instead of keeping the photo in the queue mirror.
+    expect(mocked.supportsInput).toHaveBeenCalled();
+    expect(mocked.promptAsync).not.toHaveBeenCalled();
+    expect(promptQueue.size()).toBe(0);
     expect(mocked.queuePromptForMerging).not.toHaveBeenCalled();
   });
 

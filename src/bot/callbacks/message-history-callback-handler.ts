@@ -2,7 +2,7 @@ import type { Bot, Context } from "grammy";
 import type { AppContainer } from "../../app/bootstrap/app-container.js";
 import { config } from "../../config.js";
 import type { InteractionState } from "../../app/types/interaction.js";
-import { opencodeClient } from "../../opencode/client.js";
+import { reasonixClient } from "../../reasonix/client.js";
 import { setCurrentSession } from "../../app/services/session-service.js";
 import { applySessionSettings } from "../../app/services/session-settings-service.js";
 import { getStoredAgent } from "../../app/services/agent-selection-service.js";
@@ -235,7 +235,7 @@ export async function handleMessagesCallback(
       await ctx.answerCallbackQuery();
 
       try {
-        await opencodeClient.session.revert({
+        await reasonixClient.session.revert({
           sessionID: metadata.sessionId,
           directory: metadata.projectDirectory,
           messageID: selectedMessage.id,
@@ -268,7 +268,7 @@ export async function handleMessagesCallback(
       await ctx.answerCallbackQuery();
 
       try {
-        const { data: forkedSession, error: forkError } = await opencodeClient.session.fork({
+        const { data: forkedSession, error: forkError } = await reasonixClient.session.fork({
           sessionID: metadata.sessionId,
           messageID: selectedMessage.id,
           directory: metadata.projectDirectory,

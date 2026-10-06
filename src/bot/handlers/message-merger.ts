@@ -14,7 +14,7 @@ interface PendingPrompt {
 
 // Buffered plain-text prompts, keyed by chat id. Telegram delivers one long
 // message (or one paste) as several consecutive updates; merging them here
-// turns those chunks into a single OpenCode prompt.
+// turns those chunks into a single Reasonix prompt.
 const pendingByChat = new Map<number, PendingPrompt>();
 
 function flushPending(chatId: number): void {
@@ -42,7 +42,7 @@ function flushPending(chatId: number): void {
 
 /**
  * Buffers a near-limit plain-text prompt so Telegram-split chunks are merged
- * into a single OpenCode prompt. Short messages are processed immediately
+ * into a single Reasonix prompt. Short messages are processed immediately
  * unless they follow a buffered chunk. Each new chunk restarts the wait window.
  *
  * Pass `mergeWindowMs <= 0` to disable merging and process the message

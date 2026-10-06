@@ -10,7 +10,7 @@ const mocked = vi.hoisted(() => ({
   currentProject: null as { worktree: string } | null,
 }));
 vi.mock("../../../src/app/services/recent-sessions-service.js", () => ({ loadRecentSessions: mocked.rows }));
-vi.mock("../../../src/opencode/client.js", () => ({ opencodeClient: { session: { get: mocked.get } } }));
+vi.mock("../../../src/reasonix/client.js", () => ({ reasonixClient: { session: { get: mocked.get } } }));
 vi.mock("../../../src/app/services/project-switch-service.js", () => ({ switchToProject: mocked.switch }));
 vi.mock("../../../src/app/stores/settings-store.js", () => ({ getCurrentProject: () => mocked.currentProject }));
 vi.mock("../../../src/bot/callbacks/session-callback-handler.js", () => ({ selectSessionById: mocked.select }));

@@ -1,7 +1,7 @@
 import type { I18nDictionary } from "./en.js";
 
 /**
- * Korean localization for OpenCode Telegram Bot.
+ * Korean localization for Reasonix Telegram Bot.
  *
  * Keep upstream emoji and technical terms where they help recognition.
  * Prefer natural Korean wording over literal translation.
@@ -28,17 +28,15 @@ export const ko: I18nDictionary = {
   "cmd.description.tasklist": "예약 작업 목록 보기",
   "cmd.description.commands": "사용자 지정 명령어",
   "cmd.description.skills": "스킬 카탈로그",
-  "cmd.description.mcps": "MCP 서버",
-  "cmd.description.opencode_start": "OpenCode 서버 시작",
-  "cmd.description.opencode_stop": "OpenCode 서버 중지",
-  "cmd.description.reload": "Reload OpenCode configuration",
+  "cmd.description.reasonix_start": "Reasonix 서버 시작",
+  "cmd.description.reasonix_stop": "Reasonix 서버 중지",
+  "cmd.description.reload": "Reload Reasonix configuration",
   "cmd.description.ls": "디렉터리 내용 보기",
   "cmd.description.help": "도움말",
 
   "callback.unknown_command": "알 수 없는 명령어",
   "callback.processing_error": "처리 오류",
 
-  "error.load_agents": "❌ 에이전트 목록을 불러오지 못했습니다",
   "error.load_models": "❌ 모델 목록을 불러오지 못했습니다",
   "error.load_variants": "❌ 변형 목록을 불러오지 못했습니다",
   "error.context_button": "❌ 컨텍스트 버튼을 처리하지 못했습니다",
@@ -49,8 +47,7 @@ export const ko: I18nDictionary = {
     "⚠️ 이 단계에서는 인라인 버튼을 사용하거나 취소를 눌러 주세요.",
   "interaction.blocked.expected_text": "⚠️ 이 단계에서는 텍스트 메시지를 보내 주세요.",
   "interaction.blocked.expected_command": "⚠️ 이 단계에서는 명령어를 보내 주세요.",
-  "interaction.blocked.command_not_allowed":
-    "⚠️ 현재 단계에서는 이 명령어를 사용할 수 없습니다.",
+  "interaction.blocked.command_not_allowed": "⚠️ 현재 단계에서는 이 명령어를 사용할 수 없습니다.",
   "interaction.blocked.finish_current":
     "⚠️ 먼저 현재 상호작용을 마친(답변 또는 취소) 뒤에 다른 메뉴를 열어 주세요.",
 
@@ -58,8 +55,7 @@ export const ko: I18nDictionary = {
   "inline.blocked.command_not_allowed":
     "⚠️ 인라인 메뉴가 활성화된 동안에는 이 명령어를 사용할 수 없습니다.",
 
-  "question.blocked.expected_answer":
-    "⚠️ 버튼, 직접 입력, 또는 취소로 현재 질문에 답해 주세요.",
+  "question.blocked.expected_answer": "⚠️ 버튼, 직접 입력, 또는 취소로 현재 질문에 답해 주세요.",
   "question.blocked.command_not_allowed":
     "⚠️ 현재 질문 흐름이 끝날 때까지는 이 명령어를 사용할 수 없습니다.",
 
@@ -72,11 +68,9 @@ export const ko: I18nDictionary = {
   "common.unknown_error": "알 수 없는 오류",
 
   "start.welcome":
-    "👋 OpenCode Telegram Bot에 오신 것을 환영합니다!\n\n사용 가능한 명령어:\n/projects — 프로젝트 선택\n/sessions — 세션 목록\n/new — 새 세션\n/commands — 사용자 지정 명령어\n/skills — 스킬 카탈로그\n/task — 예약 작업\n/tasklist — 예약 작업 목록\n/status — 상태\n/help — 도움말\n\n아래 버튼으로 에이전트, 모델, 변형을 선택하세요.",
+    "👋 Reasonix Telegram Bot에 오신 것을 환영합니다!\n\n사용 가능한 명령어:\n/projects — 프로젝트 선택\n/sessions — 세션 목록\n/new — 새 세션\n/commands — 사용자 지정 명령어\n/skills — 스킬 카탈로그\n/task — 예약 작업\n/tasklist — 예약 작업 목록\n/status — 상태\n/help — 도움말\n\n아래 버튼으로 에이전트, 모델, 변형을 선택하세요.",
   "help.keyboard_hint":
     "💡 아래 키보드 버튼으로 에이전트, 모델, 변형 및 컨텍스트 작업을 사용할 수 있습니다.",
-  "help.text":
-    "📖 **도움말**\n\n/status - 서버 상태 확인\n/sessions - 세션 목록\n/new - 새 세션 만들기\n/help - 도움말",
 
   "bot.thinking": "💭 생각하는 중...",
   "progress.compact.activity": "{header}\n{activity}",
@@ -84,7 +78,6 @@ export const ko: I18nDictionary = {
   "progress.compact.finished_header": "✅ 작업 완료",
   "progress.compact.thinking": "💭 생각하는 중...",
   "progress.compact.responding": "✍️ 답변 작성 중...",
-  "progress.compact.waiting_question": "❓ 답변을 기다리는 중...",
   "progress.compact.waiting_permission": "🔐 권한 승인을 기다리는 중...",
   "progress.compact.retrying": "🔁 다시 시도하는 중...",
   "progress.compact.task": "🤖 작업 실행 중",
@@ -99,12 +92,12 @@ export const ko: I18nDictionary = {
     "⏳ 에이전트가 이미 작업을 실행 중입니다. 완료될 때까지 기다리거나 /abort로 현재 실행을 중단하세요.",
   "bot.session_reset_project_mismatch":
     "⚠️ 활성 세션이 선택한 프로젝트와 일치하지 않아 초기화되었습니다. /sessions에서 세션을 선택하거나 /new로 새 세션을 만들어 주세요.",
-  "bot.prompt_send_error": "OpenCode에 요청을 보내지 못했습니다.",
+  "bot.prompt_send_error": "Reasonix에 요청을 보내지 못했습니다.",
   "bot.project_folder_missing":
     "🚫 The project folder no longer exists: {path}. Choose another project in /projects.",
   "bot.project_folder_missing_worktree":
     "🚫 The project folder no longer exists: {path}. Choose another worktree in /worktree.",
-  "bot.session_error": "🔴 OpenCode 오류가 발생했습니다: {message}",
+  "bot.session_error": "🔴 Reasonix 오류가 발생했습니다: {message}",
   "bot.assistant_reply_undelivered":
     "⚠️ The last assistant reply could not be delivered. Send your message again if you still need it.",
   "bot.stale_messages_skipped":
@@ -117,41 +110,32 @@ export const ko: I18nDictionary = {
   "background.question_asked": "❓ 백그라운드 세션에서 답변이 필요합니다: {session}",
   "background.permission_asked": "🔐 백그라운드 세션에서 권한을 요청했습니다: {session}",
   "background.open_session_button": "세션 열기",
-  "bot.unknown_command": "⚠️ 알 수 없는 명령어입니다: {command}. /help로 사용 가능한 명령어를 확인하세요.",
+  "bot.unknown_command":
+    "⚠️ 알 수 없는 명령어입니다: {command}. /help로 사용 가능한 명령어를 확인하세요.",
   "bot.photo_downloading": "⏳ 사진을 다운로드하는 중...",
-  "bot.photo_too_large": "⚠️ 사진이 너무 큽니다 (최대 {maxSizeMb}MB)",
-  "bot.photo_model_no_image": "⚠️ 현재 모델은 이미지 입력을 지원하지 않습니다. 텍스트만 전송합니다.",
+  "bot.photo_model_no_image":
+    "⚠️ 현재 모델은 이미지 입력을 지원하지 않습니다. 텍스트만 전송합니다.",
   "bot.photo_download_error": "🔴 사진 다운로드에 실패했습니다",
-  "bot.photo_no_caption": "💡 팁: 이 사진으로 무엇을 할지 설명하는 캡션을 추가해 보세요.",
   "bot.file_downloading": "⏳ 파일을 다운로드하는 중...",
   "bot.files_downloading": "⏳ 파일들을 다운로드하는 중...",
-  "bot.file_too_large": "⚠️ 파일이 너무 큽니다 (최대 {maxSizeMb}MB)",
   "bot.file_download_error": "🔴 파일 다운로드에 실패했습니다",
   "bot.file_type_unsupported":
     "⚠️ 지원되지 않는 파일 형식입니다. 이미지, 문서(PDF, DOCX, PPTX) 또는 텍스트/코드 파일을 보내 주세요.",
   "bot.rich_message_media_skipped": "⚠️ 지원되지 않는 미디어 {count}개를 건너뛰었습니다.",
   "bot.message_type_unsupported": "⚠️ 지원되지 않는 메시지 형식입니다.",
   "bot.media_group_not_processed":
-    "⚠️ 이 앨범의 일부 파일은 처리할 수 없습니다. OpenCode에 아무것도 전송되지 않았습니다.",
+    "⚠️ 이 앨범의 일부 파일은 처리할 수 없습니다. Reasonix에 아무것도 전송되지 않았습니다.",
   "bot.media_group_download_error":
-    "🔴 파일 중 하나를 다운로드하지 못했습니다. OpenCode에 아무것도 전송되지 않았습니다.",
+    "🔴 파일 중 하나를 다운로드하지 못했습니다. Reasonix에 아무것도 전송되지 않았습니다.",
   "bot.model_no_pdf": "⚠️ 현재 모델은 PDF 입력을 지원하지 않습니다. 텍스트만 전송합니다.",
   "bot.document_extraction_error": "🔴 문서 텍스트 추출에 실패했습니다.",
   "bot.text_file_too_large": "⚠️ 텍스트 파일이 너무 큽니다 (최대 {maxSizeKb}KB)",
 
-  "status.header_running": "🟢 OpenCode 서버 실행 중",
-  "status.health.healthy": "정상",
-  "status.health.unhealthy": "비정상",
-  "status.line.health": "상태: {health}",
-  "status.line.version": "OpenCode 버전: {version}",
+  "status.header_running": "🟢 Reasonix 서버 실행 중",
+  "status.line.version": "Reasonix 버전: {version}",
   "status.line.bot_version": "Bot version: {version}",
-  "status.line.managed_yes": "봇이 시작함: 예",
-  "status.line.managed_no": "봇이 시작함: 아니요",
-  "status.line.pid": "PID: {pid}",
-  "status.line.uptime_sec": "가동 시간: {seconds}초",
   "status.line.mode": "에이전트: {mode}",
   "status.line.model": "모델: {model}",
-  "status.line.tts": "음성 답변: {tts}",
   "status.tts.off": "꺼짐",
   "status.tts.all": "전체",
   "status.tts.auto": "자동",
@@ -163,8 +147,8 @@ export const ko: I18nDictionary = {
   "status.session_selected": "현재 세션: {title}",
   "status.session_not_selected": "현재 세션: 선택 안 됨",
   "status.session_hint": "/sessions에서 선택하거나 /new로 새로 만들어 주세요",
-  "status.header_unavailable": "🔴 OpenCode 서버에 연결할 수 없습니다",
-  "status.unavailable_hint": "/opencode_start로 서버를 시작해 주세요.",
+  "status.header_unavailable": "🔴 Reasonix 서버에 연결할 수 없습니다",
+  "status.unavailable_hint": "/reasonix_start로 서버를 시작해 주세요.",
 
   "tts.off": "🔇 음성 답변이 비활성화되었습니다.",
   "tts.all": "🔊 모든 메시지에 음성 답변이 활성화되었습니다.",
@@ -187,19 +171,18 @@ export const ko: I18nDictionary = {
   "settings.prompt_queue.label": "메시지 대기열",
   "settings.value.on": "켜기",
   "settings.value.off": "끄기",
-  "settings.prompt_queue.queue": "Queue",
-  "settings.prompt_queue.steer": "Steer",
+  "settings.prompt_queue.queue": "대기열",
   "settings.saved": "✅ 설정이 저장되었습니다.",
 
   "projects.empty":
-    "📭 프로젝트가 없습니다.\n\nOpenCode에서 디렉터리를 열고 세션을 하나 이상 만들면 여기에 표시됩니다.",
+    "📭 프로젝트가 없습니다.\n\nReasonix에서 디렉터리를 열고 세션을 하나 이상 만들면 여기에 표시됩니다.",
   "projects.select": "프로젝트를 선택하세요:",
   "projects.select_with_current": "프로젝트를 선택하세요:\n\n현재: 🏗 {project}",
   "projects.page_indicator": "{current}/{total} 페이지",
   "projects.prev_page": "⬅️ 이전",
   "projects.next_page": "다음 ➡️",
   "projects.fetch_error":
-    "🔴 OpenCode 서버에 연결할 수 없거나 프로젝트를 불러오는 중 오류가 발생했습니다.",
+    "🔴 Reasonix 서버에 연결할 수 없거나 프로젝트를 불러오는 중 오류가 발생했습니다.",
   "projects.page_load_error": "이 페이지를 불러올 수 없습니다. 다시 시도해 주세요.",
   "projects.selected":
     "✅ 프로젝트 선택됨: {project}\n\n📋 세션이 초기화되었습니다. 이 프로젝트에서 /sessions 또는 /new를 사용해 주세요.",
@@ -211,7 +194,7 @@ export const ko: I18nDictionary = {
   "sessions.select": "세션을 선택하세요:",
   "sessions.select_page": "세션을 선택하세요 ({page} 페이지):",
   "sessions.fetch_error":
-    "🔴 OpenCode 서버에 연결할 수 없거나 세션을 불러오는 중 오류가 발생했습니다.",
+    "🔴 Reasonix 서버에 연결할 수 없거나 세션을 불러오는 중 오류가 발생했습니다.",
   "sessions.select_project_first": "🔴 프로젝트가 선택되지 않았습니다. /projects를 사용해 주세요.",
   "sessions.page_empty_callback": "이 페이지에는 세션이 없습니다",
   "sessions.page_load_error_callback": "이 페이지를 불러올 수 없습니다. 다시 시도해 주세요.",
@@ -234,7 +217,7 @@ export const ko: I18nDictionary = {
   "messages.select": "메시지를 선택하세요:",
   "messages.select_page": "메시지를 선택하세요 ({page} 페이지):",
   "messages.fetch_error":
-    "🔴 OpenCode 서버에 연결할 수 없거나 메시지를 불러오는 중 오류가 발생했습니다.",
+    "🔴 Reasonix 서버에 연결할 수 없거나 메시지를 불러오는 중 오류가 발생했습니다.",
   "messages.inactive_callback": "이 메시지 메뉴는 비활성 상태입니다",
   "messages.page_empty_callback": "이 페이지에는 메시지가 없습니다",
   "messages.button.prev_page": "⬅️ 이전",
@@ -248,33 +231,17 @@ export const ko: I18nDictionary = {
   "messages.fork_success": "🔀 이 메시지에서 포크를 만들었습니다:\n\n{text}",
   "messages.fork_error": "❌ 포크 생성에 실패했습니다. 다시 시도해 주세요.",
 
-  "attach.project_not_selected":
-    "🏗 프로젝트가 선택되지 않았습니다.\n\n먼저 /projects로 프로젝트를 선택해 주세요.",
-  "attach.session_not_selected":
-    "💬 세션이 선택되지 않았습니다.\n\n먼저 /sessions에서 세션을 선택해 주세요.",
-  "attach.session_project_mismatch":
-    "⚠️ 선택한 세션이 현재 프로젝트와 일치하지 않습니다. /sessions에서 세션을 다시 선택해 주세요.",
-  "attach.connected": "✅ 세션에 연결됨: {title}",
-  "attach.already_connected": "ℹ️ 이미 세션에 연결되어 있습니다: {title}",
-  "attach.status.idle_message": "상태: 대기 중. 새 이벤트를 기다리고 있습니다.",
-  "attach.status.busy_message": "상태: 작업 중. 새 요청은 일시적으로 차단됩니다.",
-  "attach.restored_question": "이 세션의 미응답 질문을 복구했습니다.",
-  "attach.restored_permissions": "대기 중이던 권한 요청을 복구했습니다: {count}건.",
-  "attach.disconnect_hint": "연결을 해제하려면 다른 세션이나 프로젝트로 전환하세요.",
-  "attach.error": "🔴 현재 세션에 연결하지 못했습니다.",
-
   "detach.project_not_selected":
     "🏗 프로젝트가 선택되지 않았습니다.\n\n먼저 /projects로 프로젝트를 선택해 주세요.",
   "detach.no_active_session": "ℹ️ 봇은 이미 어떤 세션에도 연결되어 있지 않습니다.",
   "detach.success":
-    "✅ 세션에서 분리됨: {title}\n\nOpenCode 세션은 중지되지 않았습니다. 아직 실행 중이라면 별도로 계속 진행됩니다. 나중에 확인하려면 /sessions에서 다시 선택하세요.",
+    "✅ 세션에서 분리됨: {title}\n\nReasonix 세션은 중지되지 않았습니다. 아직 실행 중이라면 별도로 계속 진행됩니다. 나중에 확인하려면 /sessions에서 다시 선택하세요.",
   "detach.error": "🔴 현재 세션에서 분리하지 못했습니다.",
 
   "new.project_not_selected":
     "🏗 프로젝트가 선택되지 않았습니다.\n\n먼저 /projects로 프로젝트를 선택해 주세요.",
   "new.created": "✅ 새 세션이 생성되었습니다: {title}",
-  "new.create_error":
-    "🔴 OpenCode 서버에 연결할 수 없거나 세션을 만드는 중 오류가 발생했습니다.",
+  "new.create_error": "🔴 Reasonix 서버에 연결할 수 없거나 세션을 만드는 중 오류가 발생했습니다.",
 
   "stop.no_active_session":
     "🛑 에이전트가 시작되지 않았습니다\n\n/new로 세션을 만들거나 /sessions에서 선택해 주세요.",
@@ -282,65 +249,44 @@ export const ko: I18nDictionary = {
     "🛑 이벤트 스트림이 중지되었으며 중단 신호를 보내는 중...\n\n에이전트가 멈출 때까지 기다려 주세요.",
   "stop.warn_unconfirmed":
     "⚠️ 이벤트 스트림은 중지되었지만 서버가 중단을 확인하지 않았습니다.\n\n/status를 확인하고 몇 초 후 /abort를 다시 시도해 주세요.",
-  "stop.warn_maybe_finished": "⚠️ 이벤트 스트림이 중지되었지만 에이전트가 이미 작업을 마쳤을 수도 있습니다.",
-  "stop.success": "✅ 에이전트 작업이 중단되었습니다. 이 실행의 추가 메시지는 더 이상 전송되지 않습니다.",
+  "stop.warn_maybe_finished":
+    "⚠️ 이벤트 스트림이 중지되었지만 에이전트가 이미 작업을 마쳤을 수도 있습니다.",
+  "stop.success":
+    "✅ 에이전트 작업이 중단되었습니다. 이 실행의 추가 메시지는 더 이상 전송되지 않습니다.",
   "stop.warn_still_busy":
     "⚠️ 신호를 보냈지만 에이전트가 아직 작업 중입니다.\n\n이벤트 스트림이 이미 비활성화되어 중간 메시지는 전송되지 않습니다.",
   "stop.warn_timeout":
     "⚠️ 중단 요청 시간이 초과되었습니다.\n\n이벤트 스트림은 이미 비활성화되어 있습니다. 몇 초 후 /abort를 다시 시도해 주세요.",
-  "stop.warn_local_only": "⚠️ 로컬에서는 이벤트 스트림이 중지되었지만 서버 측 중단에는 실패했습니다.",
-  "stop.error": "🔴 작업 중지에 실패했습니다.\n\n이벤트 스트림은 중지되었습니다. /abort를 다시 시도해 주세요.",
+  "stop.warn_local_only":
+    "⚠️ 로컬에서는 이벤트 스트림이 중지되었지만 서버 측 중단에는 실패했습니다.",
+  "stop.error":
+    "🔴 작업 중지에 실패했습니다.\n\n이벤트 스트림은 중지되었습니다. /abort를 다시 시도해 주세요.",
 
-  "opencode_start.already_running_managed":
-    "⚠️ OpenCode 서버가 이미 실행 중입니다\n\nPID: {pid}\n가동 시간: {seconds}초",
-  "opencode_start.already_running_external":
-    "✅ OpenCode 서버가 외부 프로세스로 이미 실행 중입니다\n\n버전: {version}\n\n이 서버는 봇이 시작한 것이 아니므로 /opencode-stop으로 중지할 수 없습니다.",
-  "opencode_start.already_running": "✅ OpenCode 서버가 이미 실행 중입니다\n\n버전: {version}",
-  "opencode_start.remote_configured": "⚠️ /opencode_start는 로컬 OpenCode 서버에서만 동작합니다.",
-  "opencode_start.starting": "🔄 OpenCode 서버를 시작하는 중...",
-  "opencode_start.start_error":
-    "🔴 OpenCode 서버 시작에 실패했습니다\n\n오류: {error}\n\nOpenCode CLI가 설치되어 있고 PATH에서 사용 가능한지 확인해 주세요:\nopencode --version\nnpm install -g @opencode-ai/cli",
-  "opencode_start.started_not_ready":
-    "⚠️ OpenCode 서버가 시작되었지만 응답하지 않습니다\n\nPID: {pid}\n\n서버가 아직 시작 중일 수 있습니다. 몇 초 후 /status를 시도해 주세요.",
-  "opencode_start.success":
-    "✅ OpenCode 서버가 성공적으로 시작되었습니다\n\nPID: {pid}\n버전: {version}",
-  "opencode_start.error":
-    "🔴 서버 시작 중 오류가 발생했습니다.\n\n자세한 내용은 애플리케이션 로그를 확인해 주세요.",
-  "opencode_stop.external_running":
-    "⚠️ OpenCode 서버가 외부 프로세스로 실행 중입니다\n\n이 서버는 /opencode-start로 시작된 것이 아닙니다.\n직접 중지하거나 /status로 상태를 확인해 주세요.",
-  "opencode_stop.remote_configured": "⚠️ /opencode_stop은 로컬 OpenCode 서버에서만 동작합니다.",
-  "opencode_stop.not_running": "⚠️ OpenCode 서버가 실행 중이지 않습니다",
-  "opencode_stop.pid_not_found":
-    "⚠️ OpenCode 서버가 포트 {port}에서 응답하고 있지만 중지할 로컬 프로세스를 찾을 수 없습니다.",
-  "opencode_stop.stopping": "🛑 OpenCode 서버를 중지하는 중...\n\nPID: {pid}",
-  "opencode_stop.stop_error": "🔴 OpenCode 서버 중지에 실패했습니다\n\n오류: {error}",
-  "opencode_stop.still_running": "중지 요청 후에도 서버가 응답하고 있습니다.",
-  "opencode_stop.success": "✅ OpenCode 서버가 성공적으로 중지되었습니다",
-  "opencode_stop.error":
-    "🔴 서버 중지 중 오류가 발생했습니다.\n\n자세한 내용은 애플리케이션 로그를 확인해 주세요.",
-  "reload.reloading": "🔄 Reloading OpenCode configuration...",
-  "reload.success": "✅ OpenCode configuration reloaded",
-  "reload.failed": "🔴 Failed to reload OpenCode configuration",
-  "reload.failed_with_error": "🔴 Failed to reload OpenCode configuration\n\nError: {error}",
-
-  "agent.changed_message": "✅ 에이전트가 변경되었습니다: {name}",
-  "agent.change_error_callback": "에이전트 변경 실패",
-  "agent.menu.current": "현재 에이전트: {name}\n\n에이전트를 선택하세요:",
-  "agent.menu.select": "에이전트를 선택하세요:",
-  "agent.menu.empty": "⚠️ 사용 가능한 에이전트가 없습니다",
-  "agent.menu.error": "🔴 에이전트 목록을 가져오지 못했습니다",
+  "reasonix_start.already_running": "✅ Reasonix server is already running for this project",
+  "reasonix_start.starting": "🔄 Starting the Reasonix server for this project...",
+  "reasonix_start.start_error":
+    "🔴 Failed to start the Reasonix server\n\nError: {error}\n\nCheck that the Reasonix CLI is installed and on PATH:\nreasonix --version",
+  "reasonix_start.success":
+    "✅ Reasonix server started\n\nProject: {root}\nPort: {port}\nVersion: {version}",
+  "reasonix_start.error":
+    "🔴 An error occurred while starting the server.\n\nCheck application logs for details.",
+  "reasonix_stop.not_running": "⚠️ No Reasonix server started by the bot is running.",
+  "reasonix_stop.stopping": "🛑 Stopping {count} Reasonix server(s)...",
+  "reasonix_stop.success": "✅ Stopped {count} Reasonix server(s). They start again on next use.",
+  "reasonix_stop.error":
+    "🔴 An error occurred while stopping the server.\n\nCheck application logs for details.",
+  "reload.reloading": "🔄 Reloading Reasonix configuration...",
+  "reload.success": "✅ Reasonix configuration reloaded",
+  "reload.failed": "🔴 Failed to reload Reasonix configuration",
+  "reload.failed_with_error": "🔴 Failed to reload Reasonix configuration\n\nError: {error}",
 
   "model.changed_message": "✅ 모델이 변경되었습니다: {name}",
   "model.change_error_callback": "모델 변경 실패",
-  "model.menu.empty": "⚠️ 사용 가능한 모델이 없습니다",
   "model.menu.select": "모델을 선택하세요:",
-  "model.menu.current": "현재 모델: {name}\n\n모델을 선택하세요:",
-  "model.menu.favorites_title": "⭐ 즐겨찾기 (OpenCode CLI에서 모델을 즐겨찾기에 추가하세요)",
+  "model.menu.favorites_title": "⭐ 즐겨찾기 (Reasonix CLI에서 모델을 즐겨찾기에 추가하세요)",
   "model.menu.favorites_empty": "— 비어 있음.",
   "model.menu.recent_title": "🕘 최근 사용",
   "model.menu.recent_empty": "— 비어 있음.",
-  "model.menu.favorites_hint":
-    "ℹ️ OpenCode CLI에서 모델을 즐겨찾기에 추가하면 목록 상단에 고정됩니다.",
   "model.menu.error": "🔴 모델 목록을 가져오지 못했습니다",
   "model.search.button": "🔍 검색",
   "model.search.prompt": "🔍 검색할 모델 이름을 입력하세요:",
@@ -394,12 +340,12 @@ export const ko: I18nDictionary = {
   "permission.reply.once": "한 번 허용됨",
   "permission.reply.always": "항상 허용됨",
   "permission.reply.reject": "거부됨",
-  "permission.blocked.expected_reply":
-    "⚠️ 먼저 위의 버튼으로 권한 요청에 답해 주세요.",
+  "permission.blocked.expected_reply": "⚠️ 먼저 위의 버튼으로 권한 요청에 답해 주세요.",
   "permission.blocked.command_not_allowed":
     "⚠️ 권한 요청에 답하기 전까지는 이 명령어를 사용할 수 없습니다.",
   "permission.header": "{emoji} 권한 요청: {name}\n\n",
-  "permission.grouped_count": "\n⚠️ 동일한 요청 {count}건이 대기 중입니다 — 답변은 모든 요청에 적용됩니다.\n",
+  "permission.grouped_count":
+    "\n⚠️ 동일한 요청 {count}건이 대기 중입니다 — 답변은 모든 요청에 적용됩니다.\n",
   "permission.button.allow": "✅ 한 번 허용",
   "permission.button.always": "🔓 항상 허용",
   "permission.button.reject": "❌ 거부",
@@ -409,7 +355,7 @@ export const ko: I18nDictionary = {
   "permission.outcome.outside_suffix": " · answered outside Telegram",
   "permission.outcome.settled_outside": "☑️ Answered outside Telegram",
   "permission.outcome.not_answered": "⏹ Not answered",
-  "permission.delivery_failed": "⚠️ The answer did not reach OpenCode — tap again",
+  "permission.delivery_failed": "⚠️ The answer did not reach Reasonix — tap again",
   "permission.name.bash": "Bash",
   "permission.name.edit": "편집",
   "permission.name.write": "쓰기",
@@ -443,18 +389,15 @@ export const ko: I18nDictionary = {
   "question.summary.question": "질문 {index}:\n{question}\n\n",
   "question.summary.answer": "답변:\n{answer}\n\n",
 
-  "keyboard.agent_mode": "{emoji} {name} 에이전트",
   "keyboard.context": "📊 {used} / {limit} ({percent}%)",
   "keyboard.context_empty": "📊 0",
-  "keyboard.variant": "💭 {name}",
   "keyboard.variant_default": "💡 기본값",
   "keyboard.queued_prompt": "❌ {index}. {text}",
   "queue.added": "📥 대기열에 추가되었습니다 ({count}/{max}). 현재 작업이 끝나면 전송됩니다.",
-  "queue.full": "⚠️ 대기열이 가득 찼습니다 ({max}). 메시지를 삭제하거나 현재 작업이 끝날 때까지 기다려 주세요.",
-  "queue.media_limit": "⚠️ 대기열 미디어는 총 {maxSizeMb} MiB로 제한됩니다. 항목이 전송된 후 다시 시도하세요.",
+  "queue.full":
+    "⚠️ 대기열이 가득 찼습니다 ({max}). 메시지를 삭제하거나 현재 작업이 끝날 때까지 기다려 주세요.",
   "queue.removed": "🗑 대기열에서 메시지를 삭제했습니다.",
   "queue.not_found": "이 메시지는 더 이상 대기열에 없습니다.",
-  "queue.steer_added": "📥 Added to the current task ({count}/{max}).",
   "queue.disabled_hint": "메시지 대기열은 /settings에서 활성화할 수 있습니다.",
   "keyboard.updated": "⌨️ 키보드가 업데이트되었습니다",
 
@@ -463,23 +406,13 @@ export const ko: I18nDictionary = {
   "pinned.line.project": "프로젝트: {project}",
   "pinned.line.worktree": "워크트리: {worktree}",
   "pinned.line.model": "모델: {model}",
-  "pinned.line.attach": "추적: {status}",
-  "pinned.attach.status.idle": "활성, 대기 중",
-  "pinned.attach.status.busy": "활성, 작업 중",
   "pinned.line.context": "컨텍스트: {used} / {limit} ({percent}%)",
   "pinned.line.cost": "비용: {cost} 사용",
-  "subagent.header": "서브에이전트 {agent}: {description}",
-  "subagent.line.status": "상태: {status}",
   "subagent.line.task": "작업: {task}",
   "subagent.line.agent": "에이전트: {agent}",
   "subagent.working": "작업 중...",
-  "subagent.working_with_details": "작업 중: {details}",
   "subagent.completed": "완료됨",
   "subagent.failed": "작업 실패",
-  "subagent.status.pending": "대기 중",
-  "subagent.status.running": "실행 중",
-  "subagent.status.completed": "완료됨",
-  "subagent.status.error": "오류",
   "pinned.files.title": "파일 ({count}):",
   "pinned.files.item": "  {path}{diff}",
   "pinned.files.more": "  ... 외 {count}개",
@@ -493,8 +426,7 @@ export const ko: I18nDictionary = {
   "runtime.wizard.ask_token": "텔레그램 봇 토큰을 입력하세요 (@BotFather에서 발급).\n> ",
   "runtime.wizard.ask_language":
     "인터페이스 언어를 선택하세요.\n목록의 번호 또는 로케일 코드를 입력하세요.\nEnter를 누르면 기본 언어({defaultLocale})가 유지됩니다.\n{options}\n> ",
-  "runtime.wizard.language_invalid":
-    "목록의 언어 번호 또는 지원되는 로케일 코드를 입력하세요.\n",
+  "runtime.wizard.language_invalid": "목록의 언어 번호 또는 지원되는 로케일 코드를 입력하세요.\n",
   "runtime.wizard.language_selected": "선택한 언어: {language}\n",
   "runtime.wizard.token_required": "토큰은 필수입니다. 다시 시도해 주세요.\n",
   "runtime.wizard.token_invalid":
@@ -502,45 +434,15 @@ export const ko: I18nDictionary = {
   "runtime.wizard.ask_user_id":
     "텔레그램 사용자 ID를 입력하세요 (@userinfobot에서 확인할 수 있습니다).\n> ",
   "runtime.wizard.user_id_invalid": "양의 정수를 입력하세요 (> 0).\n",
-  "runtime.wizard.ask_api_url":
-    "OpenCode API URL을 입력하세요 (선택 사항).\nEnter를 누르면 기본값({defaultUrl})이 사용됩니다.\n> ",
-  "runtime.wizard.ask_server_username":
-    "OpenCode 서버 사용자 이름을 입력하세요 (선택 사항).\nEnter를 누르면 기본값({defaultUsername})이 사용됩니다.\n> ",
-  "runtime.wizard.ask_server_password":
-    "OpenCode 서버 비밀번호를 입력하세요 (선택 사항).\nEnter를 누르면 비워 둡니다.\n> ",
-  "runtime.wizard.ask_server_version":
-    "Select OpenCode server version:\n1 - OpenCode V1 (1.x, npm package opencode-ai)\n2 - OpenCode V2 (2.x, npm package @opencode/cli)\nPress Enter to use default: {defaultVersion}\n> ",
-  "runtime.wizard.server_version_invalid": "Enter 1 or 2, or press Enter for default.\n",
-  "runtime.wizard.ask_server_password_required":
-    "Enter OpenCode V2 server password (required).\nShow it with: opencode service get password\n> ",
-  "runtime.wizard.server_password_required":
-    "The password is required for OpenCode V2. Please try again.\n",
-  "runtime.wizard.ask_server_password_keep":
-    "Enter OpenCode server password.\nPress Enter to keep the saved password.\n> ",
-  "runtime.wizard.api_url_invalid":
-    "유효한 URL(http/https)을 입력하거나 Enter를 눌러 기본값을 사용하세요.\n",
-  "runtime.wizard.start": "OpenCode Telegram Bot 설정을 시작합니다.\n",
+  "runtime.wizard.start": "Reasonix Telegram Bot 설정을 시작합니다.\n",
   "runtime.wizard.saved": "설정이 저장되었습니다:\n- {envPath}\n",
   "runtime.wizard.not_configured_starting":
     "아직 구성되지 않았습니다. 설정 마법사를 시작합니다...\n",
   "runtime.wizard.tty_required":
-    "대화형 마법사에는 TTY 터미널이 필요합니다. 대화형 셸에서 `opencode-telegram config`를 실행해 주세요.",
-  "runtime.container.command_unavailable":
-    "⚠️ 이 명령은 Docker 이미지에서 사용할 수 없습니다.",
+    "대화형 마법사에는 TTY 터미널이 필요합니다. 대화형 셸에서 `reasonix-telegram config`를 실행해 주세요.",
+  "runtime.container.command_unavailable": "⚠️ 이 명령은 Docker 이미지에서 사용할 수 없습니다.",
 
-  "rename.no_session": "⚠️ 활성 세션이 없습니다. 먼저 세션을 만들거나 선택해 주세요.",
-  "rename.prompt": "📝 세션의 새 제목을 입력하세요:\n\n현재: {title}",
-  "rename.empty_title": "⚠️ 제목은 비워 둘 수 없습니다.",
-  "rename.success": "✅ 세션 이름이 변경되었습니다: {title}",
-  "rename.error": "🔴 세션 이름 변경에 실패했습니다.",
   "rename.cancelled": "❌ 이름 변경이 취소되었습니다.",
-  "rename.inactive_callback": "이름 변경 요청이 비활성 상태입니다",
-  "rename.inactive": "⚠️ 이름 변경 요청이 활성 상태가 아닙니다. /rename을 다시 실행해 주세요.",
-  "rename.blocked.expected_name":
-    "⚠️ 새 세션 이름을 텍스트로 입력하거나 이름 변경 메시지에서 취소를 탭해 주세요.",
-  "rename.blocked.command_not_allowed":
-    "⚠️ 새 이름을 기다리는 동안에는 이 명령어를 사용할 수 없습니다.",
-  "rename.button.cancel": "❌ 취소",
 
   "task.prompt.schedule":
     "⏰ 작업 일정을 자연어로 입력하세요.\n\n예시:\n- 5분마다\n- 매일 17:00\n- 내일 12:00",
@@ -565,7 +467,8 @@ export const ko: I18nDictionary = {
     "⚠️ 텍스트를 보내거나 일정 메시지의 버튼을 사용하여 현재 예약 작업 설정을 먼저 마쳐 주세요.",
   "task.blocked.command_not_allowed":
     "⚠️ 예약 작업 생성이 진행 중인 동안에는 이 명령어를 사용할 수 없습니다.",
-  "task.limit_reached": "⚠️ 작업 개수 한도에 도달했습니다 ({limit}). 먼저 기존 예약 작업을 삭제해 주세요.",
+  "task.limit_reached":
+    "⚠️ 작업 개수 한도에 도달했습니다 ({limit}). 먼저 기존 예약 작업을 삭제해 주세요.",
   "task.schedule_too_frequent":
     "반복 일정이 너무 잦습니다. 허용되는 최소 간격은 5분마다 한 번입니다.",
   "task.kind.cron": "반복",
@@ -589,9 +492,9 @@ export const ko: I18nDictionary = {
   "tasklist.inactive_callback": "이 예약 작업 메뉴는 비활성 상태입니다",
   "tasklist.load_error": "🔴 예약 작업을 불러오지 못했습니다.",
 
-  "commands.select": "OpenCode 명령어를 선택하세요:",
-  "commands.empty": "📭 이 프로젝트에서 사용 가능한 OpenCode 명령어가 없습니다.",
-  "commands.fetch_error": "🔴 OpenCode 명령어를 불러오지 못했습니다.",
+  "commands.select": "Reasonix 명령어를 선택하세요:",
+  "commands.empty": "📭 이 프로젝트에서 사용 가능한 Reasonix 명령어가 없습니다.",
+  "commands.fetch_error": "🔴 Reasonix 명령어를 불러오지 못했습니다.",
   "commands.no_description": "설명 없음",
   "commands.button.execute": "✅ 실행",
   "commands.button.cancel": "❌ 취소",
@@ -600,14 +503,13 @@ export const ko: I18nDictionary = {
   "commands.inactive_callback": "이 명령어 메뉴는 비활성 상태입니다",
   "commands.execute_callback": "명령어를 실행하는 중...",
   "commands.executing_prefix": "⚡ 명령어 실행 중:",
-  "commands.arguments_empty": "⚠️ 인자는 비워 둘 수 없습니다. 텍스트를 보내거나 실행을 탭해 주세요.",
-  "commands.execute_error": "🔴 OpenCode 명령어 실행에 실패했습니다.",
-  "commands.select_page": "OpenCode 명령어를 선택하세요 ({page} 페이지):",
+  "commands.arguments_empty":
+    "⚠️ 인자는 비워 둘 수 없습니다. 텍스트를 보내거나 실행을 탭해 주세요.",
+  "commands.execute_error": "🔴 Reasonix 명령어 실행에 실패했습니다.",
+  "commands.select_page": "Reasonix 명령어를 선택하세요 ({page} 페이지):",
   "commands.button.prev_page": "⬅️ 이전",
   "commands.button.next_page": "다음 ➡️",
   "commands.page_empty_callback": "이 페이지에는 명령어가 없습니다",
-  "commands.page_load_error_callback": "이 페이지를 불러올 수 없습니다. 다시 시도해 주세요.",
-  "commands.download.no_roots": "허용된 탐색 루트가 설정되지 않았습니다.",
   "commands.download.downloading": "파일을 다운로드하는 중...",
   "commands.download.not_found": "파일을 찾을 수 없습니다",
   "commands.download.not_file": "경로가 파일이 아닙니다",
@@ -616,9 +518,9 @@ export const ko: I18nDictionary = {
   "commands.download.modified": "수정됨",
   "commands.download.error": "파일 다운로드에 실패했습니다.",
 
-  "skills.select": "OpenCode 스킬을 선택하세요:",
-  "skills.empty": "📭 이 프로젝트에서 사용 가능한 OpenCode 스킬이 없습니다.",
-  "skills.fetch_error": "🔴 OpenCode 스킬을 불러오지 못했습니다.",
+  "skills.select": "Reasonix 스킬을 선택하세요:",
+  "skills.empty": "📭 이 프로젝트에서 사용 가능한 Reasonix 스킬이 없습니다.",
+  "skills.fetch_error": "🔴 Reasonix 스킬을 불러오지 못했습니다.",
   "skills.no_description": "설명 없음",
   "skills.button.execute": "✅ 실행",
   "skills.button.cancel": "❌ 취소",
@@ -628,39 +530,10 @@ export const ko: I18nDictionary = {
   "skills.execute_callback": "스킬을 사용하는 중...",
   "skills.executing_prefix": "⚡ 스킬 사용 중:",
   "skills.arguments_empty": "⚠️ 인자는 비워 둘 수 없습니다. 텍스트를 보내거나 실행을 탭해 주세요.",
-  "skills.select_page": "OpenCode 스킬을 선택하세요 ({page} 페이지):",
+  "skills.select_page": "Reasonix 스킬을 선택하세요 ({page} 페이지):",
   "skills.button.prev_page": "⬅️ 이전",
   "skills.button.next_page": "다음 ➡️",
   "skills.page_empty_callback": "이 페이지에는 스킬이 없습니다",
-  "skills.page_load_error_callback": "이 페이지를 불러올 수 없습니다. 다시 시도해 주세요.",
-
-  "mcps.select": "MCP 서버:",
-  "mcps.empty": "📭 설정된 MCP 서버가 없습니다.",
-  "mcps.fetch_error": "🔴 MCP 서버를 불러오지 못했습니다.",
-  "mcps.toggle_error": "🔴 MCP 서버 전환에 실패했습니다.",
-  "mcps.enabling": "활성화하는 중...",
-  "mcps.disabling": "비활성화하는 중...",
-  "mcps.status.connected": "🟢 연결됨",
-  "mcps.status.disabled": "🔴 비활성화됨",
-  "mcps.status.failed": "⚠️ 실패",
-  "mcps.status.needs_auth": "🔒 인증 필요",
-  "mcps.status.needs_client_registration": "🔒 등록 필요",
-  "mcps.detail.title": "서버: {name}",
-  "mcps.detail.status": "상태: {status}",
-  "mcps.detail.error": "오류: {error}",
-  "mcps.button.enable": "🟢 활성화",
-  "mcps.button.disable": "🔴 비활성화",
-  "mcps.button.back": "⬅️ 뒤로",
-  "mcps.auth_required": "이 서버는 인증이 필요하여 봇에서 활성화할 수 없습니다.",
-
-  "cmd.description.rename": "현재 세션 이름 변경",
-
-  "legacy.models.fetch_error": "🔴 모델 목록을 가져오지 못했습니다. /status로 서버 상태를 확인해 주세요.",
-  "legacy.models.empty": "📋 사용 가능한 모델이 없습니다. OpenCode에서 프로바이더를 설정해 주세요.",
-  "legacy.models.header": "📋 사용 가능한 모델:\n\n",
-  "legacy.models.no_provider_models": "  ⚠️ 사용 가능한 모델이 없습니다\n",
-  "legacy.models.env_hint": "💡 .env에서 이 모델을 사용하려면:\n",
-  "legacy.models.error": "🔴 모델 목록을 불러오는 중 오류가 발생했습니다.",
 
   "stt.recognizing": "🎤 오디오를 인식하는 중...",
   "stt.recognized": "🎤 인식 결과:",
@@ -670,7 +543,6 @@ export const ko: I18nDictionary = {
   "stt.empty_result": "🎤 오디오 메시지에서 음성을 감지하지 못했습니다.",
 
   "cmd.description.open": "디렉터리를 탐색하여 프로젝트 추가",
-  "worktree.branch_detached": "detached HEAD",
   "worktree.select_with_current": "워크트리를 선택하세요:",
   "worktree.project_not_selected":
     "🏗 프로젝트가 선택되지 않았습니다.\n\n먼저 /projects로 프로젝트를 선택해 주세요.",
@@ -694,7 +566,8 @@ export const ko: I18nDictionary = {
   "open.access_denied": "⛔ 접근이 거부되었습니다: 허용된 루트 밖의 경로입니다",
   "open.scan_error": "🔴 디렉터리를 탐색할 수 없습니다: {error}",
   "open.open_error": "🔴 디렉터리 탐색기를 열지 못했습니다.",
-  "open.selected": "✅ 프로젝트가 추가되었습니다: {project}\n\n📋 /sessions 또는 /new로 작업을 시작하세요.",
+  "open.selected":
+    "✅ 프로젝트가 추가되었습니다: {project}\n\n📋 /sessions 또는 /new로 작업을 시작하세요.",
   "open.select_error": "🔴 프로젝트 추가에 실패했습니다.",
   "open.no_subfolders": "📭 하위 폴더 없음",
   "open.subfolder_count": "하위 폴더 {count}개",

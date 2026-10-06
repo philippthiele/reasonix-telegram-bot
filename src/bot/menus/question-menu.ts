@@ -1,6 +1,6 @@
 import { Context, InlineKeyboard } from "grammy";
 import type { AppContainer } from "../../app/bootstrap/app-container.js";
-import { opencodeClient } from "../../opencode/client.js";
+import { reasonixClient } from "../../reasonix/client.js";
 import { getCurrentProject } from "../../app/stores/settings-store.js";
 import { getCurrentSession } from "../../app/services/session-service.js";
 import { logger } from "../../utils/logger.js";
@@ -14,7 +14,7 @@ import type {
   QuestionSettledOutcome,
   QuestionState,
 } from "../../app/types/question.js";
-import { isOpencodeNotFoundError } from "../../utils/opencode-error.js";
+import { isServerNotFoundError } from "../../utils/reasonix-error.js";
 import { isRecord } from "../../utils/type-guards.js";
 
 const MAX_BUTTON_LENGTH = 60;
@@ -40,16 +40,16 @@ interface QuestionProgress {
   total: number;
 }
 
-/** How OpenCode took a reply of the poll: accepted, gone (already settled) or not reached. */
+/** How Reasonix took a reply of the poll: accepted, gone (already settled) or not reached. */
 export type QuestionReplyResult = "accepted" | "gone" | "failed";
 
 /**
- * A reply to a request OpenCode no longer has pending: not found on either version, or a V2
- * form that was already settled.
+ * A reply to a request Reasonix no longer has pending: either form of not-found, or a
+ * request that was already settled.
  */
 export function isQuestionRequestGone(error: unknown): boolean {
   return (
-    isOpencodeNotFoundError(error) ||
+    isServerNotFoundError(error) ||
     (isRecord(error) &&
       (error._tag === "QuestionNotFoundError" || error._tag === "FormAlreadySettledError"))
   );
@@ -314,8 +314,8 @@ export async function closeDroppedPoll(
 }
 
 /**
- * The last step of the poll was taken: its answers go to OpenCode in the background and the
- * poll stays on screen, its buttons doing nothing, until OpenCode answers.
+ * The last step of the poll was taken: its answers go to Reasonix in the background and the
+ * poll stays on screen, its buttons doing nothing, until Reasonix answers.
  */
 export async function submitPollAnswers(
   bot: Context["api"],
@@ -342,9 +342,12 @@ export async function submitPollAnswers(
   }
 
   const totalQuestions = questionManager.getTotalQuestions();
-  const allAnswers: string[][] = [];
+  const allAnswers: Array<{ questionId: string; selected: string[] }> = [];
   for (let i = 0; i < totalQuestions; i++) {
-    allAnswers.push(questionManager.getReplyItems(i));
+    allAnswers.push({
+      questionId: questionManager.getQuestionId(i),
+      selected: questionManager.getReplyItems(i),
+    });
   }
 
   logger.info(
@@ -356,7 +359,7 @@ export async function submitPollAnswers(
   safeBackgroundTask({
     taskName: "question.reply",
     task: async (): Promise<QuestionReplyResult> => {
-      const { error } = await opencodeClient.question.reply({
+      const { error } = await reasonixClient.question.reply({
         requestID,
         directory,
         answers: allAnswers,
@@ -382,7 +385,7 @@ export async function submitPollAnswers(
 }
 
 /**
- * Ends the poll once OpenCode answered its reply, or leaves it answerable with a warning when
+ * Ends the poll once Reasonix answered its reply, or leaves it answerable with a warning when
  * the answers did not get through. A poll something else already ended stays as it is.
  */
 async function finishPollAnswers(
@@ -404,7 +407,7 @@ async function finishPollAnswers(
   );
 
   if (result === "accepted" || (result === "failed" && settled === "answered")) {
-    // A lost reply still counts when OpenCode reported the question answered.
+    // A lost reply still counts when Reasonix reported the question answered.
     await completePoll(bot, chatId, deps);
   } else if (result === "gone" || settled === "cancelled") {
     await closeQuestionSettledOutside(bot, chatId, settled ?? "answered", deps);
@@ -414,7 +417,7 @@ async function finishPollAnswers(
   }
 }
 
-/** OpenCode took the answers: the poll gives way to the summary of what was answered. */
+/** Reasonix took the answers: the poll gives way to the summary of what was answered. */
 async function completePoll(
   bot: Context["api"],
   chatId: number,
@@ -451,7 +454,7 @@ async function completePoll(
 }
 
 /**
- * Closes the poll on screen after OpenCode settled it outside Telegram: the question
+ * Closes the poll on screen after Reasonix settled it outside Telegram: the question
  * message keeps its text, loses its buttons and gets the outcome line, and the slot
  * is released.
  */
@@ -478,7 +481,7 @@ export async function closeQuestionSettledOutside(
 }
 
 /**
- * Closes the poll on screen that OpenCode lost with its server (stopped or restarted): it
+ * Closes the poll on screen that Reasonix lost with its server (stopped or restarted): it
  * keeps its text, loses its buttons and says it was not answered.
  */
 export async function closeQuestionNotAnswered(
@@ -487,7 +490,7 @@ export async function closeQuestionNotAnswered(
   deps: QuestionStateDeps,
 ): Promise<void> {
   logger.info(
-    `[QuestionHandler] Poll lost with the OpenCode server: requestID=${deps.questionManager.getRequestID()}`,
+    `[QuestionHandler] Poll lost with the Reasonix server: requestID=${deps.questionManager.getRequestID()}`,
   );
   await closeQuestionWithLine(
     bot,
@@ -523,7 +526,7 @@ async function closeQuestionWithLine(
 }
 
 /**
- * Closes the poll after OpenCode took the dismissal sent by its Cancel button: the question
+ * Closes the poll after Reasonix took the dismissal sent by its Cancel button: the question
  * message is replaced by the cancelled line, and the slot is released.
  */
 export async function closeQuestionCancelled(
@@ -545,7 +548,7 @@ export async function closeQuestionCancelled(
 }
 
 /**
- * The answers or the dismissal did not reach OpenCode: the question keeps its text and
+ * The answers or the dismissal did not reach Reasonix: the question keeps its text and
  * buttons and says so.
  */
 export async function showQuestionDeliveryWarning(

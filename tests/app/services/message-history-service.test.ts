@@ -1,8 +1,8 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const messages = vi.hoisted(() => vi.fn());
-vi.mock("../../../src/opencode/client.js", () => ({
-  opencodeClient: { session: { messages } },
+vi.mock("../../../src/reasonix/client.js", () => ({
+  reasonixClient: { session: { messages } },
 }));
 
 import { loadLatestAssistantMetrics } from "../../../src/app/services/message-history-service.js";

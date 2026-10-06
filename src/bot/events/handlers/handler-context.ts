@@ -29,7 +29,7 @@ export function getReplyKeyboard(deps: Pick<AppContainer, "keyboardManager">) {
   return deps.keyboardManager.getKeyboard();
 }
 
-/** An error or retry text from OpenCode, trimmed to fit one Telegram message. */
+/** An error or retry text from Reasonix, trimmed to fit one Telegram message. */
 export function formatSessionMessage(message: string): string {
   const normalizedMessage = message.trim() || t("common.unknown_error");
   return normalizedMessage.length > SESSION_MESSAGE_MAX_LENGTH

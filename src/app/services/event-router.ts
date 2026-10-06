@@ -1,7 +1,7 @@
 import type { Event } from "@opencode-ai/sdk/v2";
 import { config } from "../../config.js";
 import type { AppContainer } from "../bootstrap/app-container.js";
-import type { EventEnvelope } from "../../opencode/events.js";
+import type { EventEnvelope } from "../../reasonix/event-stream.js";
 import { safeBackgroundTask } from "../../utils/safe-background-task.js";
 import { markAttachedSessionBusy } from "./attach-service.js";
 import { reconcileBusyState } from "./busy-reconciliation-service.js";

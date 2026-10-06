@@ -21,17 +21,15 @@ export const pt: I18nDictionary = {
   "cmd.description.tasklist": "Listar tarefas agendadas",
   "cmd.description.commands": "Comandos personalizados",
   "cmd.description.skills": "Catálogo de skills",
-  "cmd.description.mcps": "MCP servers",
-  "cmd.description.opencode_start": "Iniciar servidor OpenCode",
-  "cmd.description.opencode_stop": "Parar servidor OpenCode",
-  "cmd.description.reload": "Reload OpenCode configuration",
+  "cmd.description.reasonix_start": "Iniciar servidor Reasonix",
+  "cmd.description.reasonix_stop": "Parar servidor Reasonix",
+  "cmd.description.reload": "Reload Reasonix configuration",
   "cmd.description.ls": "Listar conteúdo do diretório",
   "cmd.description.help": "Ajuda",
 
   "callback.unknown_command": "Comando desconhecido",
   "callback.processing_error": "Erro de processamento",
 
-  "error.load_agents": "❌ Não foi possível carregar a lista de agentes",
   "error.load_models": "❌ Não foi possível carregar a lista de modelos",
   "error.load_variants": "❌ Não foi possível carregar a lista de variantes",
   "error.context_button": "❌ Não foi possível processar o botão de contexto",
@@ -65,11 +63,9 @@ export const pt: I18nDictionary = {
   "common.unknown_error": "erro desconhecido",
 
   "start.welcome":
-    "👋 Bem-vindo ao OpenCode Telegram Bot!\n\nUse os comandos:\n/projects — selecionar projeto\n/sessions — lista de sessões\n/new — nova sessão\n/commands — comandos personalizados\n/skills — catálogo de skills\n/task — tarefa agendada\n/tasklist — tarefas agendadas\n/status — status\n/help — ajuda\n\nUse os botões inferiores para escolher o agente, o modelo e a variante.",
+    "👋 Bem-vindo ao Reasonix Telegram Bot!\n\nUse os comandos:\n/projects — selecionar projeto\n/sessions — lista de sessões\n/new — nova sessão\n/commands — comandos personalizados\n/skills — catálogo de skills\n/task — tarefa agendada\n/tasklist — tarefas agendadas\n/status — status\n/help — ajuda\n\nUse os botões inferiores para escolher o agente, o modelo e a variante.",
   "help.keyboard_hint":
     "💡 Use os botões do teclado inferior para o agente, o modelo, a variante e as ações de contexto.",
-  "help.text":
-    "📖 **Ajuda**\n\n/status - Ver o status do servidor\n/sessions - Lista de sessões\n/new - Criar nova sessão\n/help - Ajuda",
 
   "bot.thinking": "💭 Pensando...",
   "progress.compact.activity": "{header}\n{activity}",
@@ -77,7 +73,6 @@ export const pt: I18nDictionary = {
   "progress.compact.finished_header": "✅ Trabalho concluído",
   "progress.compact.thinking": "💭 Pensando...",
   "progress.compact.responding": "✍️ Escrevendo resposta...",
-  "progress.compact.waiting_question": "❓ Aguardando sua resposta...",
   "progress.compact.waiting_permission": "🔐 Aguardando permissão...",
   "progress.compact.retrying": "🔁 Tentando novamente...",
   "progress.compact.task": "🤖 Executando tarefa",
@@ -93,12 +88,12 @@ export const pt: I18nDictionary = {
     "⏳ O agente já está executando uma tarefa. Aguarde a conclusão ou use /abort para interromper a execução atual.",
   "bot.session_reset_project_mismatch":
     "⚠️ A sessão ativa não corresponde ao projeto selecionado, então ela foi redefinida. Use /sessions para escolher uma ou /new para criar uma nova sessão.",
-  "bot.prompt_send_error": "Não foi possível enviar a solicitação ao OpenCode.",
+  "bot.prompt_send_error": "Não foi possível enviar a solicitação ao Reasonix.",
   "bot.project_folder_missing":
     "🚫 The project folder no longer exists: {path}. Choose another project in /projects.",
   "bot.project_folder_missing_worktree":
     "🚫 The project folder no longer exists: {path}. Choose another worktree in /worktree.",
-  "bot.session_error": "🔴 O OpenCode retornou um erro: {message}",
+  "bot.session_error": "🔴 O Reasonix retornou um erro: {message}",
   "bot.assistant_reply_undelivered":
     "⚠️ The last assistant reply could not be delivered. Send your message again if you still need it.",
   "bot.stale_messages_skipped":
@@ -115,42 +110,29 @@ export const pt: I18nDictionary = {
   "bot.unknown_command":
     "⚠️ Comando desconhecido: {command}. Use /help para ver os comandos disponíveis.",
   "bot.photo_downloading": "⏳ Baixando foto...",
-  "bot.photo_too_large": "⚠️ A foto é muito grande (máx {maxSizeMb}MB)",
   "bot.photo_model_no_image":
     "⚠️ O modelo atual não aceita entrada de imagem. Enviando apenas o texto.",
   "bot.photo_download_error": "🔴 Não foi possível baixar a foto",
-  "bot.photo_no_caption":
-    "💡 Dica: adicione uma legenda para descrever o que você quer fazer com esta foto.",
   "bot.file_downloading": "⏳ Baixando arquivo...",
   "bot.files_downloading": "⏳ Baixando arquivos...",
-  "bot.file_too_large": "⚠️ O arquivo é muito grande (máx {maxSizeMb}MB)",
   "bot.file_download_error": "🔴 Não foi possível baixar o arquivo",
   "bot.file_type_unsupported":
     "⚠️ Este tipo de arquivo não é compatível. Envie uma imagem, documento (PDF, DOCX, PPTX) ou arquivo de texto/código.",
-  "bot.rich_message_media_skipped":
-    "⚠️ {count} partes de mídia não compatíveis foram ignoradas.",
+  "bot.rich_message_media_skipped": "⚠️ {count} partes de mídia não compatíveis foram ignoradas.",
   "bot.message_type_unsupported": "⚠️ Este tipo de mensagem não é compatível.",
   "bot.media_group_not_processed":
-    "⚠️ Um ou mais arquivos deste álbum não podem ser processados. Nada foi enviado ao OpenCode.",
+    "⚠️ Um ou mais arquivos deste álbum não podem ser processados. Nada foi enviado ao Reasonix.",
   "bot.media_group_download_error":
-    "🔴 Não foi possível baixar um dos arquivos. Nada foi enviado ao OpenCode.",
+    "🔴 Não foi possível baixar um dos arquivos. Nada foi enviado ao Reasonix.",
   "bot.model_no_pdf": "⚠️ O modelo atual não aceita entrada de PDF. Enviando apenas o texto.",
   "bot.document_extraction_error": "🔴 Não foi possível extrair o texto do documento.",
   "bot.text_file_too_large": "⚠️ O arquivo de texto é muito grande (máx {maxSizeKb}KB)",
 
-  "status.header_running": "🟢 O OpenCode Server está em execução",
-  "status.health.healthy": "Saudável",
-  "status.health.unhealthy": "Não saudável",
-  "status.line.health": "Status: {health}",
-  "status.line.version": "Versão do OpenCode: {version}",
+  "status.header_running": "🟢 O Reasonix Server está em execução",
+  "status.line.version": "Versão do Reasonix: {version}",
   "status.line.bot_version": "Bot version: {version}",
-  "status.line.managed_yes": "Iniciado pelo bot: Sim",
-  "status.line.managed_no": "Iniciado pelo bot: Não",
-  "status.line.pid": "PID: {pid}",
-  "status.line.uptime_sec": "Tempo ativo: {seconds} s",
   "status.line.mode": "Agente: {mode}",
   "status.line.model": "Modelo: {model}",
-  "status.line.tts": "Respostas em áudio: {tts}",
   "status.tts.off": "Desligado",
   "status.tts.all": "Todas",
   "status.tts.auto": "Auto",
@@ -162,8 +144,8 @@ export const pt: I18nDictionary = {
   "status.session_selected": "Sessão atual: {title}",
   "status.session_not_selected": "Sessão atual: não selecionada",
   "status.session_hint": "Use /sessions para escolher uma ou /new para criar uma",
-  "status.header_unavailable": "🔴 O OpenCode Server está indisponível",
-  "status.unavailable_hint": "Use /opencode_start para iniciar o servidor.",
+  "status.header_unavailable": "🔴 O Reasonix Server está indisponível",
+  "status.unavailable_hint": "Use /reasonix_start para iniciar o servidor.",
 
   "tts.off": "🔇 Respostas em áudio desativadas.",
   "tts.all": "🔊 Respostas em áudio ativadas para todas as mensagens.",
@@ -187,19 +169,18 @@ export const pt: I18nDictionary = {
   "settings.prompt_queue.label": "Fila de mensagens",
   "settings.value.on": "Ligado",
   "settings.value.off": "Desligado",
-  "settings.prompt_queue.queue": "Queue",
-  "settings.prompt_queue.steer": "Steer",
+  "settings.prompt_queue.queue": "Fila",
   "settings.saved": "✅ Configuração salva.",
 
   "projects.empty":
-    "📭 Nenhum projeto encontrado.\n\nAbra um diretório no OpenCode e crie pelo menos uma sessão; então ele aparecerá aqui.",
+    "📭 Nenhum projeto encontrado.\n\nAbra um diretório no Reasonix e crie pelo menos uma sessão; então ele aparecerá aqui.",
   "projects.select": "Selecione um projeto:",
   "projects.select_with_current": "Selecione um projeto:\n\nAtual: 🏗 {project}",
   "projects.page_indicator": "Página {current}/{total}",
   "projects.prev_page": "⬅️ Anterior",
   "projects.next_page": "Próximo ➡️",
   "projects.fetch_error":
-    "🔴 O OpenCode Server está indisponível ou ocorreu um erro ao carregar os projetos.",
+    "🔴 O Reasonix Server está indisponível ou ocorreu um erro ao carregar os projetos.",
   "projects.page_load_error": "Não foi possível carregar esta página. Tente novamente.",
   "projects.selected":
     "✅ Projeto selecionado: {project}\n\n📋 A sessão foi redefinida. Use /sessions ou /new para este projeto.",
@@ -211,7 +192,7 @@ export const pt: I18nDictionary = {
   "sessions.select": "Selecione uma sessão:",
   "sessions.select_page": "Selecione uma sessão (página {page}):",
   "sessions.fetch_error":
-    "🔴 O OpenCode Server está indisponível ou ocorreu um erro ao carregar as sessões.",
+    "🔴 O Reasonix Server está indisponível ou ocorreu um erro ao carregar as sessões.",
   "sessions.select_project_first": "🔴 Nenhum projeto selecionado. Use /projects.",
   "sessions.page_empty_callback": "Nenhuma sessão nesta página",
   "sessions.page_load_error_callback": "Não foi possível carregar esta página. Tente novamente.",
@@ -234,7 +215,7 @@ export const pt: I18nDictionary = {
   "messages.select": "Escolha uma mensagem:",
   "messages.select_page": "Escolha uma mensagem (página {page}):",
   "messages.fetch_error":
-    "🔴 O OpenCode Server está indisponível ou ocorreu um erro ao carregar as mensagens.",
+    "🔴 O Reasonix Server está indisponível ou ocorreu um erro ao carregar as mensagens.",
   "messages.inactive_callback": "Este menu de mensagens está inativo",
   "messages.page_empty_callback": "Nenhuma mensagem nesta página",
   "messages.button.prev_page": "⬅️ Anterior",
@@ -248,33 +229,18 @@ export const pt: I18nDictionary = {
   "messages.fork_success": "🔀 Fork criado a partir da mensagem:\n\n{text}",
   "messages.fork_error": "❌ Não foi possível criar o fork. Tente novamente.",
 
-  "attach.project_not_selected":
-    "🏗 Nenhum projeto selecionado.\n\nPrimeiro selecione um projeto com /projects.",
-  "attach.session_not_selected":
-    "💬 Nenhuma sessão selecionada.\n\nPrimeiro escolha uma sessão com /sessions.",
-  "attach.session_project_mismatch":
-    "⚠️ A sessão selecionada não corresponde ao projeto atual. Escolha a sessão novamente com /sessions.",
-  "attach.connected": "✅ Conectado à sessão: {title}",
-  "attach.already_connected": "ℹ️ Você já está conectado à sessão: {title}",
-  "attach.status.idle_message": "Status: ocioso. Aguardando novos eventos.",
-  "attach.status.busy_message": "Status: ocupado. Novos prompts estão temporariamente bloqueados.",
-  "attach.restored_question": "Recuperamos uma pergunta pendente para esta sessão.",
-  "attach.restored_permissions": "Solicitações de permissão pendentes recuperadas: {count}.",
-  "attach.disconnect_hint": "Para desconectar, mude para outra sessão ou projeto.",
-  "attach.error": "🔴 Não foi possível conectar à sessão atual.",
-
   "detach.project_not_selected":
     "🏗 Nenhum projeto selecionado.\n\nPrimeiro selecione um projeto com /projects.",
   "detach.no_active_session": "ℹ️ O bot já está desconectado de qualquer sessão.",
   "detach.success":
-    "✅ Desconectado da sessão: {title}\n\nA sessão do OpenCode não foi encerrada. Se ainda estiver em execução, continuará separadamente. Para verificá-la mais tarde, selecione-a novamente com /sessions.",
+    "✅ Desconectado da sessão: {title}\n\nA sessão do Reasonix não foi encerrada. Se ainda estiver em execução, continuará separadamente. Para verificá-la mais tarde, selecione-a novamente com /sessions.",
   "detach.error": "🔴 Não foi possível desconectar da sessão atual.",
 
   "new.project_not_selected":
     "🏗 Nenhum projeto selecionado.\n\nPrimeiro selecione um projeto com /projects.",
   "new.created": "✅ Nova sessão criada: {title}",
   "new.create_error":
-    "🔴 O OpenCode Server está indisponível ou ocorreu um erro ao criar a sessão.",
+    "🔴 O Reasonix Server está indisponível ou ocorreu um erro ao criar a sessão.",
 
   "stop.no_active_session":
     "🛑 O agente não foi iniciado\n\nCrie uma sessão com /new ou selecione uma com /sessions.",
@@ -295,59 +261,31 @@ export const pt: I18nDictionary = {
   "stop.error":
     "🔴 Não foi possível parar a ação.\n\nO fluxo de eventos está interrompido, tente /abort novamente.",
 
-  "opencode_start.already_running_managed":
-    "⚠️ O OpenCode Server já está em execução\n\nPID: {pid}\nTempo ativo: {seconds} segundos",
-  "opencode_start.already_running_external":
-    "✅ O OpenCode Server já está em execução como um processo externo\n\nVersão: {version}\n\nEste servidor não foi iniciado pelo bot, então /opencode-stop não pode encerrá-lo.",
-  "opencode_start.already_running": "✅ O OpenCode Server já está em execução\n\nVersão: {version}",
-  "opencode_start.remote_configured":
-    "⚠️ O /opencode_start funciona apenas com um OpenCode Server local.",
-  "opencode_start.starting": "🔄 Iniciando o OpenCode Server...",
-  "opencode_start.start_error":
-    "🔴 Não foi possível iniciar o OpenCode Server\n\nErro: {error}\n\nVerifique se o OpenCode CLI está instalado e disponível no PATH:\nopencode --version\nnpm install -g @opencode-ai/cli",
-  "opencode_start.started_not_ready":
-    "⚠️ O OpenCode Server foi iniciado, mas não está respondendo\n\nPID: {pid}\n\nO servidor ainda pode estar iniciando. Tente /status em alguns segundos.",
-  "opencode_start.success":
-    "✅ OpenCode Server iniciado com sucesso\n\nPID: {pid}\nVersão: {version}",
-  "opencode_start.error":
-    "🔴 Ocorreu um erro ao iniciar o servidor.\n\nVerifique os logs do aplicativo para mais detalhes.",
-  "opencode_stop.external_running":
-    "⚠️ O OpenCode Server está em execução como um processo externo\n\nEste servidor não foi iniciado com /opencode-start.\nEncerre-o manualmente ou use /status para verificar o estado.",
-  "opencode_stop.remote_configured":
-    "⚠️ O /opencode_stop funciona apenas com um OpenCode Server local.",
-  "opencode_stop.not_running": "⚠️ O OpenCode Server não está em execução",
-  "opencode_stop.pid_not_found":
-    "⚠️ O OpenCode Server responde na porta {port}, mas nenhum processo local foi encontrado para encerrar.",
-  "opencode_stop.stopping": "🛑 Encerrando o OpenCode Server...\n\nPID: {pid}",
-  "opencode_stop.stop_error": "🔴 Não foi possível encerrar o OpenCode Server\n\nErro: {error}",
-  "opencode_stop.still_running":
-    "O servidor ainda está respondendo após a solicitação de encerramento.",
-  "opencode_stop.success": "✅ OpenCode Server encerrado com sucesso",
-  "opencode_stop.error":
-    "🔴 Ocorreu um erro ao encerrar o servidor.\n\nVerifique os logs do aplicativo para mais detalhes.",
-  "reload.reloading": "🔄 Reloading OpenCode configuration...",
-  "reload.success": "✅ OpenCode configuration reloaded",
-  "reload.failed": "🔴 Failed to reload OpenCode configuration",
-  "reload.failed_with_error": "🔴 Failed to reload OpenCode configuration\n\nError: {error}",
-
-  "agent.changed_message": "✅ Agente alterado para: {name}",
-  "agent.change_error_callback": "Não foi possível alterar o agente",
-  "agent.menu.current": "Agente atual: {name}\n\nSelecione o agente:",
-  "agent.menu.select": "Selecione o agente:",
-  "agent.menu.empty": "⚠️ Nenhum agente disponível",
-  "agent.menu.error": "🔴 Não foi possível obter a lista de agentes",
+  "reasonix_start.already_running": "✅ Reasonix server is already running for this project",
+  "reasonix_start.starting": "🔄 Starting the Reasonix server for this project...",
+  "reasonix_start.start_error":
+    "🔴 Failed to start the Reasonix server\n\nError: {error}\n\nCheck that the Reasonix CLI is installed and on PATH:\nreasonix --version",
+  "reasonix_start.success":
+    "✅ Reasonix server started\n\nProject: {root}\nPort: {port}\nVersion: {version}",
+  "reasonix_start.error":
+    "🔴 An error occurred while starting the server.\n\nCheck application logs for details.",
+  "reasonix_stop.not_running": "⚠️ No Reasonix server started by the bot is running.",
+  "reasonix_stop.stopping": "🛑 Stopping {count} Reasonix server(s)...",
+  "reasonix_stop.success": "✅ Stopped {count} Reasonix server(s). They start again on next use.",
+  "reasonix_stop.error":
+    "🔴 An error occurred while stopping the server.\n\nCheck application logs for details.",
+  "reload.reloading": "🔄 Reloading Reasonix configuration...",
+  "reload.success": "✅ Reasonix configuration reloaded",
+  "reload.failed": "🔴 Failed to reload Reasonix configuration",
+  "reload.failed_with_error": "🔴 Failed to reload Reasonix configuration\n\nError: {error}",
 
   "model.changed_message": "✅ Modelo alterado para: {name}",
   "model.change_error_callback": "Não foi possível alterar o modelo",
-  "model.menu.empty": "⚠️ Nenhum modelo disponível",
   "model.menu.select": "Selecione o modelo:",
-  "model.menu.current": "Modelo atual: {name}\n\nSelecione o modelo:",
-  "model.menu.favorites_title": "⭐ Favoritos (Adicione modelos aos favoritos no OpenCode CLI)",
+  "model.menu.favorites_title": "⭐ Favoritos (Adicione modelos aos favoritos no Reasonix CLI)",
   "model.menu.favorites_empty": "— Vazio.",
   "model.menu.recent_title": "🕘 Recentes",
   "model.menu.recent_empty": "— Vazio.",
-  "model.menu.favorites_hint":
-    "ℹ️ Adicione modelos aos favoritos no OpenCode CLI para mantê-los no topo.",
   "model.menu.error": "🔴 Não foi possível obter a lista de modelos",
   "model.search.button": "🔍 Buscar",
   "model.search.prompt": "🔍 Digite o nome do modelo para buscar:",
@@ -417,7 +355,7 @@ export const pt: I18nDictionary = {
   "permission.outcome.outside_suffix": " · answered outside Telegram",
   "permission.outcome.settled_outside": "☑️ Answered outside Telegram",
   "permission.outcome.not_answered": "⏹ Not answered",
-  "permission.delivery_failed": "⚠️ The answer did not reach OpenCode — tap again",
+  "permission.delivery_failed": "⚠️ The answer did not reach Reasonix — tap again",
   "permission.name.bash": "Bash",
   "permission.name.edit": "Editar",
   "permission.name.write": "Escrever",
@@ -451,20 +389,16 @@ export const pt: I18nDictionary = {
   "question.summary.question": "Pergunta {index}:\n{question}\n\n",
   "question.summary.answer": "Resposta:\n{answer}\n\n",
 
-  "keyboard.agent_mode": "{emoji} Agente {name}",
   "keyboard.context": "📊 {used} / {limit} ({percent}%)",
   "keyboard.context_empty": "📊 0",
-  "keyboard.variant": "💭 {name}",
   "keyboard.variant_default": "💡 Padrão",
   "keyboard.queued_prompt": "❌ {index}. {text}",
   "queue.added":
     "📥 Adicionado à fila ({count}/{max}). Será enviado quando a tarefa atual terminar.",
-  "queue.media_limit": "⚠️ A mídia na fila está limitada a {maxSizeMb} MiB. Aguarde o envio de um item.",
   "queue.full":
     "⚠️ A fila está cheia ({max}). Remova uma mensagem ou aguarde o término da tarefa atual.",
   "queue.removed": "🗑 Mensagem removida da fila.",
   "queue.not_found": "Esta mensagem não está mais na fila.",
-  "queue.steer_added": "📥 Added to the current task ({count}/{max}).",
   "queue.disabled_hint": "A fila de mensagens pode ser ativada em /settings.",
   "keyboard.updated": "⌨️ Teclado atualizado",
 
@@ -473,23 +407,13 @@ export const pt: I18nDictionary = {
   "pinned.line.project": "Projeto: {project}",
   "pinned.line.worktree": "Worktree: {worktree}",
   "pinned.line.model": "Modelo: {model}",
-  "pinned.line.attach": "Acompanhamento: {status}",
-  "pinned.attach.status.idle": "ativo, ocioso",
-  "pinned.attach.status.busy": "ativo, ocupado",
   "pinned.line.context": "Contexto: {used} / {limit} ({percent}%)",
   "pinned.line.cost": "Custo: {cost} gasto",
-  "subagent.header": "Subagente {agent}: {description}",
-  "subagent.line.status": "Status: {status}",
   "subagent.line.task": "Tarefa: {task}",
   "subagent.line.agent": "Agente: {agent}",
   "subagent.working": "Trabalhando...",
-  "subagent.working_with_details": "Trabalhando: {details}",
   "subagent.completed": "Concluído",
   "subagent.failed": "A tarefa falhou",
-  "subagent.status.pending": "pendente",
-  "subagent.status.running": "em execução",
-  "subagent.status.completed": "concluído",
-  "subagent.status.error": "erro",
   "pinned.files.title": "Arquivos ({count}):",
   "pinned.files.item": "  {path}{diff}",
   "pinned.files.more": "  ... e mais {count}",
@@ -512,45 +436,15 @@ export const pt: I18nDictionary = {
   "runtime.wizard.ask_user_id":
     "Digite seu Telegram User ID (você pode obtê-lo em @userinfobot).\n> ",
   "runtime.wizard.user_id_invalid": "Digite um número inteiro positivo (> 0).\n",
-  "runtime.wizard.ask_api_url":
-    "Digite a URL da API do OpenCode (opcional).\nPressione Enter para usar o padrão: {defaultUrl}\n> ",
-  "runtime.wizard.ask_server_username":
-    "Digite o nome de usuário do servidor OpenCode (opcional).\nPressione Enter para usar o padrão: {defaultUsername}\n> ",
-  "runtime.wizard.ask_server_password":
-    "Digite a senha do servidor OpenCode (opcional).\nPressione Enter para deixá-la vazia.\n> ",
-  "runtime.wizard.ask_server_version":
-    "Select OpenCode server version:\n1 - OpenCode V1 (1.x, npm package opencode-ai)\n2 - OpenCode V2 (2.x, npm package @opencode/cli)\nPress Enter to use default: {defaultVersion}\n> ",
-  "runtime.wizard.server_version_invalid": "Enter 1 or 2, or press Enter for default.\n",
-  "runtime.wizard.ask_server_password_required":
-    "Enter OpenCode V2 server password (required).\nShow it with: opencode service get password\n> ",
-  "runtime.wizard.server_password_required":
-    "The password is required for OpenCode V2. Please try again.\n",
-  "runtime.wizard.ask_server_password_keep":
-    "Enter OpenCode server password.\nPress Enter to keep the saved password.\n> ",
-  "runtime.wizard.api_url_invalid":
-    "Digite uma URL válida (http/https) ou pressione Enter para usar o padrão.\n",
-  "runtime.wizard.start": "Configuração do OpenCode Telegram Bot.\n",
+  "runtime.wizard.start": "Configuração do Reasonix Telegram Bot.\n",
   "runtime.wizard.saved": "Configuração salva:\n- {envPath}\n",
   "runtime.wizard.not_configured_starting":
     "O aplicativo ainda não foi configurado. Iniciando o assistente...\n",
   "runtime.wizard.tty_required":
-    "O assistente interativo requer um terminal TTY. Execute `opencode-telegram config` em um shell interativo.",
-  "runtime.container.command_unavailable":
-    "⚠️ Este comando não está disponível na imagem Docker.",
+    "O assistente interativo requer um terminal TTY. Execute `reasonix-telegram config` em um shell interativo.",
+  "runtime.container.command_unavailable": "⚠️ Este comando não está disponível na imagem Docker.",
 
-  "rename.no_session": "⚠️ Nenhuma sessão ativa. Crie ou selecione uma sessão primeiro.",
-  "rename.prompt": "📝 Digite o novo título da sessão:\n\nAtual: {title}",
-  "rename.empty_title": "⚠️ O título não pode ficar vazio.",
-  "rename.success": "✅ Sessão renomeada para: {title}",
-  "rename.error": "🔴 Não foi possível renomear a sessão.",
   "rename.cancelled": "❌ Renomeação cancelada.",
-  "rename.inactive_callback": "A solicitação de renomeação está inativa",
-  "rename.inactive": "⚠️ A solicitação de renomeação não está ativa. Execute /rename novamente.",
-  "rename.blocked.expected_name":
-    "⚠️ Digite um novo nome de sessão como texto ou toque em Cancelar na mensagem de renomeação.",
-  "rename.blocked.command_not_allowed":
-    "⚠️ Este comando não está disponível enquanto a renomeação aguarda um novo nome.",
-  "rename.button.cancel": "❌ Cancelar",
 
   "task.prompt.schedule":
     "⏰ Envie o agendamento da tarefa em linguagem natural.\n\nExemplos:\n- a cada 5 minutos\n- todo dia às 17:00\n- amanhã às 12:00",
@@ -600,9 +494,9 @@ export const pt: I18nDictionary = {
   "tasklist.inactive_callback": "Este menu de tarefas agendadas está inativo",
   "tasklist.load_error": "🔴 Não foi possível carregar as tarefas agendadas.",
 
-  "commands.select": "Escolha um comando do OpenCode:",
-  "commands.empty": "📭 Nenhum comando do OpenCode disponível para este projeto.",
-  "commands.fetch_error": "🔴 Não foi possível carregar os comandos do OpenCode.",
+  "commands.select": "Escolha um comando do Reasonix:",
+  "commands.empty": "📭 Nenhum comando do Reasonix disponível para este projeto.",
+  "commands.fetch_error": "🔴 Não foi possível carregar os comandos do Reasonix.",
   "commands.no_description": "Sem descrição",
   "commands.button.execute": "✅ Executar",
   "commands.button.cancel": "❌ Cancelar",
@@ -613,13 +507,11 @@ export const pt: I18nDictionary = {
   "commands.executing_prefix": "⚡ Executando comando:",
   "commands.arguments_empty":
     "⚠️ Os argumentos não podem ficar vazios. Envie texto ou toque em Executar.",
-  "commands.execute_error": "🔴 Não foi possível executar o comando do OpenCode.",
-  "commands.select_page": "Escolha um comando do OpenCode (página {page}):",
+  "commands.execute_error": "🔴 Não foi possível executar o comando do Reasonix.",
+  "commands.select_page": "Escolha um comando do Reasonix (página {page}):",
   "commands.button.prev_page": "⬅️ Anterior",
   "commands.button.next_page": "Próximo ➡️",
   "commands.page_empty_callback": "Nenhum comando nesta página",
-  "commands.page_load_error_callback": "Não foi possível carregar esta página. Tente novamente.",
-  "commands.download.no_roots": "Nenhum diretório raiz de navegação permitido está configurado.",
   "commands.download.downloading": "Baixando arquivo...",
   "commands.download.not_found": "Arquivo não encontrado",
   "commands.download.not_file": "O caminho não é um arquivo",
@@ -628,9 +520,9 @@ export const pt: I18nDictionary = {
   "commands.download.modified": "Modificado",
   "commands.download.error": "Não foi possível baixar o arquivo.",
 
-  "skills.select": "Escolha um skill do OpenCode:",
-  "skills.empty": "📭 Nenhum skill do OpenCode disponível para este projeto.",
-  "skills.fetch_error": "🔴 Não foi possível carregar os skills do OpenCode.",
+  "skills.select": "Escolha um skill do Reasonix:",
+  "skills.empty": "📭 Nenhum skill do Reasonix disponível para este projeto.",
+  "skills.fetch_error": "🔴 Não foi possível carregar os skills do Reasonix.",
   "skills.no_description": "Sem descrição",
   "skills.button.execute": "✅ Executar",
   "skills.button.cancel": "❌ Cancelar",
@@ -641,40 +533,10 @@ export const pt: I18nDictionary = {
   "skills.executing_prefix": "⚡ Usando skill:",
   "skills.arguments_empty":
     "⚠️ Os argumentos não podem ficar vazios. Envie texto ou toque em Executar.",
-  "skills.select_page": "Escolha um skill do OpenCode (página {page}):",
+  "skills.select_page": "Escolha um skill do Reasonix (página {page}):",
   "skills.button.prev_page": "⬅️ Anterior",
   "skills.button.next_page": "Próximo ➡️",
   "skills.page_empty_callback": "Nenhum skill nesta página",
-  "skills.page_load_error_callback": "Não foi possível carregar esta página. Tente novamente.",
-
-  "mcps.select": "Servidores MCP:",
-  "mcps.empty": "📭 Nenhum servidor MCP configurado.",
-  "mcps.fetch_error": "🔴 Não foi possível carregar os servidores MCP.",
-  "mcps.toggle_error": "🔴 Não foi possível alternar o servidor MCP.",
-  "mcps.enabling": "Ativando...",
-  "mcps.disabling": "Desativando...",
-  "mcps.status.connected": "🟢 Conectado",
-  "mcps.status.disabled": "🔴 Desativado",
-  "mcps.status.failed": "⚠️ Falhou",
-  "mcps.status.needs_auth": "🔒 Requer autenticação",
-  "mcps.status.needs_client_registration": "🔒 Requer registro",
-  "mcps.detail.title": "Servidor: {name}",
-  "mcps.detail.status": "Status: {status}",
-  "mcps.detail.error": "Erro: {error}",
-  "mcps.button.enable": "🟢 Ativar",
-  "mcps.button.disable": "🔴 Desativar",
-  "mcps.button.back": "⬅️ Voltar",
-  "mcps.auth_required": "Este servidor requer autorização e não pode ser ativado pelo bot.",
-
-  "cmd.description.rename": "Renomear a sessão atual",
-
-  "legacy.models.fetch_error":
-    "🔴 Não foi possível obter a lista de modelos. Verifique o status do servidor com /status.",
-  "legacy.models.empty": "📋 Nenhum modelo disponível. Configure os provedores no OpenCode.",
-  "legacy.models.header": "📋 Modelos disponíveis:\n\n",
-  "legacy.models.no_provider_models": "  ⚠️ Nenhum modelo disponível\n",
-  "legacy.models.env_hint": "💡 Para usar o modelo no .env:\n",
-  "legacy.models.error": "🔴 Ocorreu um erro ao carregar a lista de modelos.",
 
   "stt.recognizing": "🎤 Reconhecendo áudio...",
   "stt.recognized": "🎤 Reconhecido:",
@@ -684,7 +546,6 @@ export const pt: I18nDictionary = {
   "stt.empty_result": "🎤 Nenhuma fala detectada na mensagem de áudio.",
 
   "cmd.description.open": "Adicionar um projeto navegando pelos diretórios",
-  "worktree.branch_detached": "detached HEAD",
   "worktree.select_with_current": "Selecione um worktree:",
   "worktree.project_not_selected":
     "🏗 Nenhum projeto selecionado.\n\nPrimeiro selecione um projeto com /projects.",

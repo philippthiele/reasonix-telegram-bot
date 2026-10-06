@@ -1,5 +1,5 @@
 import { restartAllInstances } from "../../reasonix/instance.js";
-import { refreshModelCatalogAfterConfigReload } from "../../opencode/ready-refresh.js";
+import { refreshModelCatalogAfterConfigReload } from "../../reasonix/ready-refresh.js";
 import type { ModelInfo } from "../types/model.js";
 import { logger } from "../../utils/logger.js";
 import { getStoredModel } from "./model-selection-service.js";

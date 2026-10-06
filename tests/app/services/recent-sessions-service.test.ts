@@ -4,9 +4,14 @@ import { loadRecentSessions } from "../../../src/app/services/recent-sessions-se
 const mocked = vi.hoisted(() => ({
   list: vi.fn(), get: vi.fn(), status: vi.fn(), questions: vi.fn(), permissions: vi.fn(),
   attached: null as { id: string; directory: string } | null, warn: vi.fn(),
-  fileList: vi.fn(), missing: new Set<string>(),
+  stat: vi.fn(), missing: new Set<string>(), unreadable: new Set<string>(),
 }));
-vi.mock("../../../src/opencode/client.js", () => ({ opencodeServerVersion: "v2", opencodeV2Client: { file: { list: mocked.fileList } }, opencodeClient: {
+vi.mock("node:fs/promises", () => {
+  const fs = { stat: mocked.stat };
+  return { ...fs, default: fs };
+});
+
+vi.mock("../../../src/reasonix/client.js", () => ({ reasonixClient: {
   experimental: { session: { list: mocked.list } },
   session: { get: mocked.get, status: mocked.status },
   question: { list: mocked.questions }, permission: { list: mocked.permissions },
@@ -26,11 +31,14 @@ describe("cross-project recent session snapshot", () => {
     mocked.questions.mockResolvedValue({ data: [], error: null });
     mocked.permissions.mockResolvedValue({ data: [], error: null });
     mocked.status.mockResolvedValue({ data: {}, error: null });
-    // A folder in `missing` fails its own listing with a 500 and is absent from its parent's.
+    // A folder in `missing` is gone; one in `unreadable` cannot be told apart from present.
     mocked.missing = new Set();
-    mocked.fileList.mockReset().mockImplementation(async ({ path }: { path: string }) => mocked.missing.has(path)
-      ? { data: undefined, error: Object.assign(new Error("500"), { name: "ClientError", reason: "UnexpectedStatus", cause: { status: 500 } }) }
-      : { data: [], error: undefined });
+    mocked.unreadable = new Set();
+    mocked.stat.mockReset().mockImplementation(async (folder: string) => {
+      if (mocked.missing.has(folder)) throw Object.assign(new Error("no such file"), { code: "ENOENT" });
+      if (mocked.unreadable.has(folder)) throw Object.assign(new Error("denied"), { code: "EACCES" });
+      return { isDirectory: () => true };
+    });
   });
 
   it("leaves out sessions whose folder is gone without letting them take places", async () => {
@@ -60,10 +68,8 @@ describe("cross-project recent session snapshot", () => {
     expect((await loadRecentSessions(2)).map(({ session }) => session.id)).toEqual(["new", "next"]);
   });
 
-  it("keeps a session whose folder fails to answer but is still listed by its parent", async () => {
-    mocked.fileList.mockImplementation(async ({ path }: { path: string }) => path === "/flaky"
-      ? { data: undefined, error: Object.assign(new Error("500"), { name: "ClientError", reason: "UnexpectedStatus", cause: { status: 500 } }) }
-      : { data: path === "/" ? ["flaky/"] : [], error: undefined });
+  it("keeps a session whose folder cannot be checked but is still listed by its parent", async () => {
+    mocked.unreadable = new Set(["/flaky"]);
     mocked.list.mockResolvedValue({ data: [session("f", "/flaky", 1)], error: null });
 
     expect((await loadRecentSessions(10)).map(({ session }) => session.id)).toEqual(["f"]);

@@ -5,12 +5,12 @@ const mocked = vi.hoisted(() => ({
   stopModelCatalogWait: vi.fn(),
 }));
 
-vi.mock("../../../src/opencode/events.js", () => ({
+vi.mock("../../../src/reasonix/event-stream.js", () => ({
   subscribeToEvents: vi.fn(),
   stopEventListening: mocked.stopEventListening,
 }));
 
-vi.mock("../../../src/opencode/ready-refresh.js", () => ({
+vi.mock("../../../src/reasonix/ready-refresh.js", () => ({
   stopModelCatalogWait: mocked.stopModelCatalogWait,
 }));
 
@@ -38,8 +38,7 @@ describe("app/bootstrap/app-container", () => {
     expect(other.summaryAggregator).not.toBe(container.summaryAggregator);
     expect(other.pinnedMessageManager).not.toBe(container.pinnedMessageManager);
     expect(other.scheduledTaskRuntime).not.toBe(container.scheduledTaskRuntime);
-    expect(other.opencodeAutoRestartService).not.toBe(container.opencodeAutoRestartService);
-    expect(other.opencodeReadyLifecycle).not.toBe(container.opencodeReadyLifecycle);
+    expect(other.reasonixReadyLifecycle).not.toBe(container.reasonixReadyLifecycle);
   });
 
   it("opens every stateful interaction on its own interaction slot", () => {
@@ -64,10 +63,6 @@ describe("app/bootstrap/app-container", () => {
     expect(container.interactionManager.getSnapshot()?.kind).toBe("permission");
     container.interactionManager.reset("test_reset");
 
-    container.renameManager.startWaiting("session-1", "D:/repo", "Old title");
-    expect(container.interactionManager.getSnapshot()?.kind).toBe("rename");
-    container.interactionManager.reset("test_reset");
-
     container.taskCreationManager.start(
       "project-1",
       "D:/repo",
@@ -77,13 +72,9 @@ describe("app/bootstrap/app-container", () => {
     expect(container.interactionManager.getSnapshot()?.kind).toBe("task");
   });
 
-  it("wires auto-restart to its ready lifecycle and the runtime to its foreground state", () => {
-    const autoRestart = container.opencodeAutoRestartService as unknown as {
-      opencodeReadyLifecycle: unknown;
-    };
+  it("wires the runtime to the container foreground session state", () => {
     const runtime = container.scheduledTaskRuntime as unknown as { foregroundSessionState: unknown };
 
-    expect(autoRestart.opencodeReadyLifecycle).toBe(container.opencodeReadyLifecycle);
     expect(runtime.foregroundSessionState).toBe(container.foregroundSessionState);
   });
 
@@ -112,14 +103,14 @@ describe("app/bootstrap/app-container", () => {
 
     container.setReadyRestoreHandler(first);
     container.setReadyRestoreHandler(second);
-    await container.opencodeReadyLifecycle.notifyReady("test_ready");
+    await container.reasonixReadyLifecycle.notifyReady("test_ready");
 
     expect(first).not.toHaveBeenCalled();
     expect(second).toHaveBeenCalledWith("test_ready");
 
     container.cleanupProcess("test_shutdown");
-    container.opencodeReadyLifecycle.notifyUnavailable("test_down");
-    await container.opencodeReadyLifecycle.notifyReady("test_ready_again");
+    container.reasonixReadyLifecycle.notifyUnavailable("test_down");
+    await container.reasonixReadyLifecycle.notifyReady("test_ready_again");
 
     expect(second).toHaveBeenCalledTimes(1);
   });

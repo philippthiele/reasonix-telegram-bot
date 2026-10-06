@@ -1,6 +1,6 @@
 import { CommandContext, Context } from "grammy";
 import type { AppContainer } from "../../app/bootstrap/app-container.js";
-import { checkOpencodeHealth } from "../../opencode/server-health.js";
+import { checkReasonixHealth } from "../../reasonix/health.js";
 import { getGitWorktreeContext } from "../../app/services/worktree-service.js";
 import { fetchSessionTitle, getCurrentSession } from "../../app/services/session-service.js";
 import { formatSessionTitle } from "../../app/formatters/session-title-formatter.js";
@@ -9,7 +9,7 @@ import { fetchCurrentAgent } from "../../app/services/agent-selection-service.js
 import { fetchCurrentModel } from "../../app/services/model-selection-service.js";
 import { getAgentDisplayName } from "../../app/types/agent.js";
 import { logger } from "../../utils/logger.js";
-import { isExpectedOpencodeUnavailableError } from "../../utils/opencode-error.js";
+import { isExpectedServerUnavailableError } from "../../utils/reasonix-error.js";
 import { t } from "../../i18n/index.js";
 import { sendBotText } from "../messages/telegram-text.js";
 import { getBotVersion } from "../../runtime/bot-version.js";
@@ -18,7 +18,7 @@ export type StatusCommandDeps = Pick<AppContainer, "keyboardManager" | "pinnedMe
 
 export async function statusCommand(ctx: CommandContext<Context>, deps: StatusCommandDeps) {
   try {
-    const health = await checkOpencodeHealth();
+    const health = await checkReasonixHealth();
 
     if (!health.healthy) {
       throw health.error || new Error("No data received from server");
@@ -110,8 +110,8 @@ export async function statusCommand(ctx: CommandContext<Context>, deps: StatusCo
       await ctx.reply(message, keyboard ? { reply_markup: keyboard } : {});
     }
   } catch (error) {
-    if (isExpectedOpencodeUnavailableError(error)) {
-      logger.warn("[Bot] OpenCode server unavailable; cannot report status");
+    if (isExpectedServerUnavailableError(error)) {
+      logger.warn("[Bot] Reasonix server unavailable; cannot report status");
     } else {
       logger.error("[Bot] Error checking server status:", error);
     }

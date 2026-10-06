@@ -403,7 +403,7 @@ async function showModelSearchResultsAgain(
   transitionToModelSearchResults(deps, meta.query, meta.messageId, results);
 }
 
-// A model can leave OpenCode after the menu showing it was drawn. When the list cannot be
+// A model can leave Reasonix after the menu showing it was drawn. When the list cannot be
 // read the tap goes through as before.
 async function isModelStillOffered(modelInfo: ModelInfo): Promise<boolean> {
   const availability = await getModelAvailability(modelInfo.providerID, modelInfo.modelID);
@@ -411,7 +411,7 @@ async function isModelStillOffered(modelInfo: ModelInfo): Promise<boolean> {
 }
 
 /**
- * Redraw the screen a tap on a model OpenCode no longer offers came from, without a
+ * Redraw the screen a tap on a model Reasonix no longer offers came from, without a
  * message: the model is gone from the current list.
  */
 async function redrawAfterStaleModelTap(ctx: Context, redraw: () => Promise<void>): Promise<void> {
@@ -439,6 +439,7 @@ async function applyModelSelectionAndNotify(
   selectModel(modelInfo);
   deps.keyboardManager.updateModel(modelInfo);
   await deps.pinnedMessageManager.refreshContextLimit();
+  await deps.pinnedMessageManager.refresh();
 
   const currentAgent = await resolveProjectAgent(getStoredAgent());
   const contextInfo =
@@ -455,7 +456,6 @@ async function applyModelSelectionAndNotify(
 
   const variantName = formatVariantForButton(modelInfo.variant || "default");
   const keyboard = createMainKeyboard(
-    currentAgent,
     modelInfo,
     contextInfo ?? undefined,
     variantName,

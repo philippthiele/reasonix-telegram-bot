@@ -224,7 +224,7 @@ export async function applyPermissionPromptChanges(
 }
 
 /**
- * The answer did not reach OpenCode: the prompt stays answerable and says so. When the
+ * The answer did not reach Reasonix: the prompt stays answerable and says so. When the
  * prompt cannot be edited, the warning comes as a message of its own.
  */
 export async function showPermissionDeliveryWarning(

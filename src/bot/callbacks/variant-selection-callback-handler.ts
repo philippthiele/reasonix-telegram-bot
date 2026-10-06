@@ -84,7 +84,6 @@ export async function handleVariantSelect(ctx: Context, deps: VariantSelectDeps)
 
     const variantName = formatVariantForButton(variantId);
     const keyboard = createMainKeyboard(
-      currentAgent,
       updatedModel,
       contextInfo ?? undefined,
       variantName,

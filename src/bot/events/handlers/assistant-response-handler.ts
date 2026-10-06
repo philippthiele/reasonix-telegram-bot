@@ -46,7 +46,7 @@ type AssistantResponseDeps = EventHandlerDeps<
 >;
 
 /**
- * OpenCode picked up a prompt the bot sent into the session inbox: its button is already
+ * Reasonix picked up a prompt the bot sent into the session inbox: its button is already
  * gone, the quote is sent with the refreshed keyboard. A queued prompt is picked up only
  * once the turn has answered, inside the same execution, so it closes that run and opens
  * its own - as a prompt queued in the bot does.
@@ -62,12 +62,10 @@ async function pickUpInboxPrompt(
     return;
   }
 
-  logger.info(
-    `[PromptQueue] Inbox prompt picked up: inboxId=${item.inbox?.inboxId}, delivery=${item.inbox?.delivery}`,
-  );
+  logger.info(`[PromptQueue] Inbox prompt picked up: inboxId=${item.inbox?.inboxId}`);
 
   try {
-    if (item.inbox?.delivery === "queue" && deps.assistantRunState.hasRun(sessionId)) {
+    if (item.inbox && deps.assistantRunState.hasRun(sessionId)) {
       const completedRun = deps.assistantRunState.finishRun(sessionId, "inbox_queue_pickup");
       clearPromptResponseMode(sessionId);
       await closeForegroundRun(deps, sessionId, destination, completedRun, "inbox_queue_pickup");
@@ -479,14 +477,14 @@ export function registerAssistantResponseHandlers(deps: AssistantResponseDeps): 
 
   summaryAggregator.setOnExternalUserInput(async (sessionId, messageId, messageText) => {
     void runtime.enqueueCompletionTask(sessionId, async () => {
-      // A V2 user message carries the inbox id it waited under.
+      // A Reasonix user message carries the inbox id it waited under.
       const mirrored = promptQueue.findByInboxId(messageId);
       if (mirrored) {
         promptQueue.removeById(mirrored.id);
         await pickUpInboxPrompt(deps, sessionId, mirrored);
         return;
       }
-      // The admission of this prompt may still be on its way back from OpenCode.
+      // The admission of this prompt may still be on its way back from Reasonix.
       promptQueue.rememberDeliveredInboxId(messageId);
       // A prompt handed over at /detach can no longer be withdrawn once picked up.
       promptHandover.forgetInboxId(messageId);

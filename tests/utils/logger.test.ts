@@ -5,7 +5,7 @@ import { describe, expect, it, vi } from "vitest";
 import { setRuntimeMode } from "../../src/runtime/mode.js";
 
 async function createTempHome(): Promise<string> {
-  return fs.mkdtemp(path.join(os.tmpdir(), "opencode-telegram-bot-logger-"));
+  return fs.mkdtemp(path.join(os.tmpdir(), "reasonix-telegram-bot-logger-"));
 }
 
 async function loadLoggerModule() {
@@ -38,7 +38,7 @@ describe("utils/logger", () => {
     vi.useFakeTimers();
     vi.setSystemTime(new Date("2026-04-11T12:34:56.000Z"));
     vi.stubEnv("LOG_LEVEL", "info");
-    vi.stubEnv("OPENCODE_TELEGRAM_HOME", tempHome);
+    vi.stubEnv("REASONIX_TELEGRAM_HOME", tempHome);
     setRuntimeMode("sources");
 
     const { initializeLogger, logger, flushLogger, __resetLoggerForTests } =
@@ -66,7 +66,7 @@ describe("utils/logger", () => {
     vi.useFakeTimers();
     vi.setSystemTime(new Date("2026-04-11T12:34:56.000Z"));
     vi.stubEnv("LOG_LEVEL", "info");
-    vi.stubEnv("OPENCODE_TELEGRAM_HOME", tempHome);
+    vi.stubEnv("REASONIX_TELEGRAM_HOME", tempHome);
     setRuntimeMode("sources");
 
     const {
@@ -97,7 +97,7 @@ describe("utils/logger", () => {
     vi.useFakeTimers();
     vi.setSystemTime(new Date("2026-04-11T12:34:56.000Z"));
     vi.stubEnv("LOG_LEVEL", "info");
-    vi.stubEnv("OPENCODE_TELEGRAM_HOME", tempHome);
+    vi.stubEnv("REASONIX_TELEGRAM_HOME", tempHome);
     setRuntimeMode("sources");
 
     const {
@@ -130,7 +130,7 @@ describe("utils/logger", () => {
     vi.useFakeTimers();
     vi.setSystemTime(new Date("2026-04-11T12:34:56.000Z"));
     vi.stubEnv("LOG_LEVEL", "info");
-    vi.stubEnv("OPENCODE_TELEGRAM_HOME", tempHome);
+    vi.stubEnv("REASONIX_TELEGRAM_HOME", tempHome);
     setRuntimeMode("installed");
 
     const {
@@ -164,7 +164,7 @@ describe("utils/logger", () => {
     vi.setSystemTime(new Date("2026-04-11T23:59:59.000Z"));
     vi.stubEnv("LOG_LEVEL", "info");
     vi.stubEnv("LOG_RETENTION", "10");
-    vi.stubEnv("OPENCODE_TELEGRAM_HOME", tempHome);
+    vi.stubEnv("REASONIX_TELEGRAM_HOME", tempHome);
     setRuntimeMode("installed");
 
     const {
@@ -218,7 +218,7 @@ describe("utils/logger", () => {
     vi.setSystemTime(new Date("2026-04-11T23:59:59.000Z"));
     vi.stubEnv("LOG_LEVEL", "info");
     vi.stubEnv("LOG_RETENTION", "2");
-    vi.stubEnv("OPENCODE_TELEGRAM_HOME", tempHome);
+    vi.stubEnv("REASONIX_TELEGRAM_HOME", tempHome);
     setRuntimeMode("installed");
 
     const { initializeLogger, logger, __flushLoggerForTests, __resetLoggerForTests } =
@@ -253,7 +253,7 @@ describe("utils/logger", () => {
     vi.useFakeTimers();
     vi.setSystemTime(new Date("2026-04-11T12:34:56.000Z"));
     vi.stubEnv("LOG_RETENTION", "2");
-    vi.stubEnv("OPENCODE_TELEGRAM_HOME", tempHome);
+    vi.stubEnv("REASONIX_TELEGRAM_HOME", tempHome);
     setRuntimeMode("sources");
 
     const { initializeLogger, __flushLoggerForTests, __resetLoggerForTests } =
@@ -287,7 +287,7 @@ describe("utils/logger", () => {
     vi.useFakeTimers();
     vi.setSystemTime(new Date("2026-04-11T12:34:56.000Z"));
     vi.stubEnv("LOG_RETENTION", "2");
-    vi.stubEnv("OPENCODE_TELEGRAM_HOME", tempHome);
+    vi.stubEnv("REASONIX_TELEGRAM_HOME", tempHome);
     setRuntimeMode("installed");
 
     const { initializeLogger, __flushLoggerForTests, __resetLoggerForTests } =
@@ -311,7 +311,7 @@ describe("utils/logger", () => {
     vi.useFakeTimers();
     vi.setSystemTime(new Date("2026-04-11T12:34:56.000Z"));
     vi.stubEnv("LOG_LEVEL", "info");
-    vi.stubEnv("OPENCODE_TELEGRAM_HOME", tempHome);
+    vi.stubEnv("REASONIX_TELEGRAM_HOME", tempHome);
     setRuntimeMode("sources");
 
     const { initializeLogger, logger, flushLogger, __resetLoggerForTests } =
@@ -348,7 +348,7 @@ describe("utils/logger", () => {
     vi.useFakeTimers();
     vi.setSystemTime(new Date("2026-04-11T12:34:56.000Z"));
     vi.stubEnv("LOG_LEVEL", "info");
-    vi.stubEnv("OPENCODE_TELEGRAM_HOME", tempHome);
+    vi.stubEnv("REASONIX_TELEGRAM_HOME", tempHome);
     setRuntimeMode("sources");
 
     const { initializeLogger, logger, __resetLoggerForTests } =
@@ -386,7 +386,7 @@ describe("utils/logger", () => {
     vi.useFakeTimers();
     vi.setSystemTime(new Date("2026-04-11T12:34:56.000Z"));
     vi.stubEnv("LOG_LEVEL", "info");
-    vi.stubEnv("OPENCODE_TELEGRAM_HOME", tempHome);
+    vi.stubEnv("REASONIX_TELEGRAM_HOME", tempHome);
     setRuntimeMode("sources");
 
     const { initializeLogger, logger, flushLogger, __resetLoggerForTests } =

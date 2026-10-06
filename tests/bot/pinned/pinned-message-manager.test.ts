@@ -2,7 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { defined } from "../../helpers/defined.js";
 
 const mocked = vi.hoisted(() => ({
-  opencodeClient: {
+  reasonixClient: {
     session: {
       list: vi.fn().mockResolvedValue({ data: [] }),
       messages: vi.fn().mockResolvedValue({ data: [] }),
@@ -24,7 +24,7 @@ const mocked = vi.hoisted(() => ({
   formatModelDisplayName: vi.fn(() => "test-model"),
 }));
 
-vi.mock("../../../src/opencode/client.js", () => ({ opencodeClient: mocked.opencodeClient }));
+vi.mock("../../../src/reasonix/client.js", () => ({ reasonixClient: mocked.reasonixClient }));
 vi.mock("../../../src/app/services/worktree-service.js", () => ({
   getGitWorktreeContext: mocked.getGitWorktreeContext,
 }));
@@ -112,9 +112,8 @@ describe("pinned/manager", () => {
     mocked.waitForModelContextLimit.mockResolvedValue(null);
     mocked.getPinnedMessageId.mockReturnValue(null);
     mocked.getPinnedDashboardEnabled.mockReturnValue(true);
-    mocked.opencodeClient.session.messages.mockResolvedValue({ data: [] });
-    mocked.opencodeClient.session.diff.mockResolvedValue({ data: [] });
-    mocked.opencodeClient.session.get.mockResolvedValue({ data: null });
+    mocked.reasonixClient.session.messages.mockResolvedValue({ data: [] });
+    mocked.reasonixClient.session.get.mockResolvedValue({ data: null });
     mocked.getGitWorktreeContext.mockResolvedValue({
       mainProjectPath: "D:/repo",
       activeWorktreePath: "D:/repo",
@@ -127,7 +126,7 @@ describe("pinned/manager", () => {
   describe("loadContextFromHistory", () => {
     it("restores the latest non-summary non-zero context instead of the historical peak", async () => {
       await pinnedMessageManager.onSessionChange("ses-1", "Test Session");
-      mocked.opencodeClient.session.messages.mockResolvedValue({
+      mocked.reasonixClient.session.messages.mockResolvedValue({
         data: [
           {
             info: {
@@ -518,31 +517,8 @@ describe("pinned/manager", () => {
   });
 
   describe("loading file diffs on session change", () => {
-    it("uses session.diff() results and ignores entries without a file", async () => {
-      mocked.opencodeClient.session.diff.mockResolvedValue({
-        data: [
-          { file: "D:/repo/src/a.ts", additions: 3, deletions: 1 },
-          { additions: 9, deletions: 9 },
-          { file: "D:/repo/src/b.ts", additions: 0, deletions: 2 },
-        ],
-      });
-
-      await pinnedMessageManager.onSessionChange("ses-1", "Test Session");
-
-      expect(pinnedMessageManager.getState().changedFiles).toEqual([
-        { file: "D:/repo/src/a.ts", additions: 3, deletions: 1 },
-        { file: "D:/repo/src/b.ts", additions: 0, deletions: 2 },
-      ]);
-      expect(mocked.opencodeClient.session.messages).not.toHaveBeenCalled();
-      expect(fakeApi.editMessageText).toHaveBeenCalledWith(
-        123,
-        999,
-        expect.stringContaining("src/a.ts (+3 -1)"),
-      );
-    });
-
-    it("falls back to tool parts from session messages when session.diff() is empty", async () => {
-      mocked.opencodeClient.session.messages.mockResolvedValue({
+    it("reads the changed files from the session's file tool parts", async () => {
+      mocked.reasonixClient.session.messages.mockResolvedValue({
         data: [
           {
             info: { role: "assistant" },
@@ -601,7 +577,7 @@ describe("pinned/manager", () => {
     });
 
     it("restores every file of a multi-file apply_patch from session messages", async () => {
-      mocked.opencodeClient.session.messages.mockResolvedValue({
+      mocked.reasonixClient.session.messages.mockResolvedValue({
         data: [
           {
             info: { role: "assistant" },
@@ -658,17 +634,16 @@ describe("pinned/manager", () => {
     it("leaves the diff list empty when neither source reports file changes", async () => {
       await pinnedMessageManager.onSessionChange("ses-1", "Test Session");
 
-      expect(mocked.opencodeClient.session.messages).toHaveBeenCalledTimes(1);
+      expect(mocked.reasonixClient.session.messages).toHaveBeenCalledTimes(1);
       expect(pinnedMessageManager.getState().changedFiles).toEqual([]);
     });
 
-    it("does not call the diff API when no project is selected", async () => {
+    it("does not read the transcript when no project is selected", async () => {
       mocked.getCurrentProject.mockReturnValue(null);
 
       await pinnedMessageManager.onSessionChange("ses-1", "Test Session");
 
-      expect(mocked.opencodeClient.session.diff).not.toHaveBeenCalled();
-      expect(mocked.opencodeClient.session.messages).not.toHaveBeenCalled();
+      expect(mocked.reasonixClient.session.messages).not.toHaveBeenCalled();
     });
   });
 
@@ -750,8 +725,22 @@ describe("pinned/manager", () => {
     });
 
     it("restores the file diffs of the session it reattaches to", async () => {
-      mocked.opencodeClient.session.diff.mockResolvedValue({
-        data: [{ file: "D:/repo/src/a.ts", additions: 4, deletions: 0 }],
+      mocked.reasonixClient.session.messages.mockResolvedValue({
+        data: [
+          {
+            info: { role: "assistant" },
+            parts: [
+              {
+                type: "tool",
+                tool: "edit",
+                state: {
+                  status: "completed",
+                  metadata: { filediff: { file: "D:/repo/src/a.ts", additions: 4, deletions: 0 } },
+                },
+              },
+            ],
+          },
+        ],
       });
 
       await pinnedMessageManager.restoreExistingSession("ses-1", "Restored session");
@@ -896,7 +885,7 @@ describe("pinned/manager", () => {
     });
 
     it("reloads context from history after a compaction", async () => {
-      mocked.opencodeClient.session.messages.mockResolvedValue({
+      mocked.reasonixClient.session.messages.mockResolvedValue({
         data: [
           {
             info: {
@@ -924,7 +913,7 @@ describe("pinned/manager", () => {
         cacheRead: 0,
         cacheWrite: 0,
       });
-      mocked.opencodeClient.session.messages.mockResolvedValue({ error: { message: "boom" } });
+      mocked.reasonixClient.session.messages.mockResolvedValue({ error: { message: "boom" } });
 
       await pinnedMessageManager.loadContextFromHistory("ses-1", "D:/repo");
 

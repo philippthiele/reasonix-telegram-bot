@@ -52,7 +52,7 @@ describe("app/services/prompt-attachment-service", () => {
     expect(await resolvePendingAttachment(projectRoot)).toBeNull();
   });
 
-  it("builds a file part OpenCode reads as text", async () => {
+  it("builds a file part Reasonix reads as text", async () => {
     promptAttachment.set(filePath, projectRoot);
 
     const part = await resolvePendingAttachment(projectRoot);

@@ -28,8 +28,8 @@ vi.mock("../../../src/app/stores/settings-store.js", () => ({
   getCurrentProject: vi.fn(() => mocked.currentProject),
 }));
 
-vi.mock("../../../src/opencode/client.js", () => ({
-  opencodeClient: {
+vi.mock("../../../src/reasonix/client.js", () => ({
+  reasonixClient: {
     command: {
       list: mocked.commandListMock,
     },
@@ -345,11 +345,11 @@ describe("skills pagination helpers", () => {
 
   describe("formatSkillsSelectText", () => {
     it("returns base text for first page", () => {
-      expect(formatSkillsSelectText(0)).toBe("Choose an OpenCode skill:");
+      expect(formatSkillsSelectText(0)).toBe("Choose a Reasonix skill:");
     });
 
     it("returns page-specific text for subsequent pages", () => {
-      expect(formatSkillsSelectText(1)).toBe("Choose an OpenCode skill (page 2):");
+      expect(formatSkillsSelectText(1)).toBe("Choose a Reasonix skill (page 2):");
     });
   });
 

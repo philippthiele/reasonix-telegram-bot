@@ -6,10 +6,8 @@ import { beforeEach, describe, expect, it, vi, type MockInstance } from "vitest"
 const mocked = vi.hoisted(() => ({
   createBotMock: vi.fn(),
   cleanupProcessMock: vi.fn(),
-  autoRestartStartMock: vi.fn(),
-  autoRestartStopMock: vi.fn(),
-  notifyOpencodeReadyIfHealthyMock: vi.fn(),
-  registerOpenCodeReadyRefreshHandlerMock: vi.fn(),
+  notifyReasonixReadyIfHealthyMock: vi.fn(),
+  registerReasonixReadyRefreshHandlerMock: vi.fn(),
   loadSettingsMock: vi.fn(),
   flushSettingsMock: vi.fn(),
   scheduledTaskInitializeMock: vi.fn(),
@@ -28,9 +26,6 @@ const mocked = vi.hoisted(() => ({
   flushLoggerMock: vi.fn(),
   restoreFollowedSessionOnPollingStartMock: vi.fn(),
   config: {
-    opencode: {
-      apiUrl: "http://localhost:4096",
-    },
     telegram: {
       allowedUserId: 123,
     },
@@ -39,10 +34,6 @@ const mocked = vi.hoisted(() => ({
 
 const container = vi.hoisted(() => ({
   cleanupProcess: mocked.cleanupProcessMock,
-  opencodeAutoRestartService: {
-    start: mocked.autoRestartStartMock,
-    stop: mocked.autoRestartStopMock,
-  },
   scheduledTaskRuntime: {
     initialize: mocked.scheduledTaskInitializeMock,
     shutdown: mocked.scheduledTaskShutdownMock,
@@ -62,9 +53,9 @@ vi.mock("../../src/config.js", () => ({
   config: mocked.config,
 }));
 
-vi.mock("../../src/opencode/ready-refresh.js", () => ({
-  notifyOpencodeReadyIfHealthy: mocked.notifyOpencodeReadyIfHealthyMock,
-  registerOpenCodeReadyRefreshHandler: mocked.registerOpenCodeReadyRefreshHandlerMock,
+vi.mock("../../src/reasonix/ready-refresh.js", () => ({
+  notifyReasonixReadyIfHealthy: mocked.notifyReasonixReadyIfHealthyMock,
+  registerReasonixReadyRefreshHandler: mocked.registerReasonixReadyRefreshHandlerMock,
 }));
 
 vi.mock("../../src/app/stores/settings-store.js", () => ({
@@ -182,10 +173,8 @@ describe("app/start-bot-app", () => {
   beforeEach(() => {
     mocked.createBotMock.mockReset();
     mocked.cleanupProcessMock.mockReset();
-    mocked.autoRestartStartMock.mockReset();
-    mocked.autoRestartStopMock.mockReset();
-    mocked.notifyOpencodeReadyIfHealthyMock.mockReset();
-    mocked.registerOpenCodeReadyRefreshHandlerMock.mockReset();
+    mocked.notifyReasonixReadyIfHealthyMock.mockReset();
+    mocked.registerReasonixReadyRefreshHandlerMock.mockReset();
     mocked.loadSettingsMock.mockReset();
     mocked.flushSettingsMock.mockReset();
     mocked.scheduledTaskInitializeMock.mockReset();
@@ -205,8 +194,7 @@ describe("app/start-bot-app", () => {
     mocked.restoreFollowedSessionOnPollingStartMock.mockReset();
 
     mocked.createBotMock.mockReturnValue(createBot());
-    mocked.autoRestartStartMock.mockResolvedValue(false);
-    mocked.notifyOpencodeReadyIfHealthyMock.mockResolvedValue(false);
+    mocked.notifyReasonixReadyIfHealthyMock.mockResolvedValue(false);
     mocked.loadSettingsMock.mockResolvedValue(undefined);
     mocked.flushSettingsMock.mockResolvedValue(undefined);
     mocked.scheduledTaskInitializeMock.mockResolvedValue(undefined);
@@ -233,9 +221,9 @@ describe("app/start-bot-app", () => {
     await startBotApp();
     await flushBackgroundTasks();
 
-    expect(mocked.registerOpenCodeReadyRefreshHandlerMock).toHaveBeenCalledTimes(1);
-    expect(mocked.registerOpenCodeReadyRefreshHandlerMock).toHaveBeenCalledWith(container);
-    expect(mocked.notifyOpencodeReadyIfHealthyMock).toHaveBeenCalledWith("startup", container);
+    expect(mocked.registerReasonixReadyRefreshHandlerMock).toHaveBeenCalledTimes(1);
+    expect(mocked.registerReasonixReadyRefreshHandlerMock).toHaveBeenCalledWith(container);
+    expect(mocked.notifyReasonixReadyIfHealthyMock).toHaveBeenCalledWith("startup", container);
   });
 
   it("opens the model catalog warm-up window before the startup stored-model check", async () => {
@@ -247,20 +235,11 @@ describe("app/start-bot-app", () => {
     );
   });
 
-  it("runs startup health notification even when auto-restart handled startup", async () => {
-    mocked.autoRestartStartMock.mockResolvedValue(true);
-
-    await startBotApp();
-    await flushBackgroundTasks();
-
-    expect(mocked.notifyOpencodeReadyIfHealthyMock).toHaveBeenCalledWith("startup", container);
-  });
-
-  it("starts Telegram polling without waiting for OpenCode startup checks", async () => {
-    let resolveAutoRestart: (value: boolean) => void = () => undefined;
-    mocked.autoRestartStartMock.mockReturnValue(
+  it("starts Telegram polling without waiting for the Reasonix startup health check", async () => {
+    let resolveStartupHealth: (value: boolean) => void = () => undefined;
+    mocked.notifyReasonixReadyIfHealthyMock.mockReturnValue(
       new Promise<boolean>((resolve) => {
-        resolveAutoRestart = resolve;
+        resolveStartupHealth = resolve;
       }),
     );
     const bot = createBot();
@@ -269,11 +248,10 @@ describe("app/start-bot-app", () => {
     await startBotApp();
 
     expect(bot.start).toHaveBeenCalledTimes(1);
-    expect(mocked.notifyOpencodeReadyIfHealthyMock).not.toHaveBeenCalled();
 
-    resolveAutoRestart(false);
+    resolveStartupHealth(true);
     await flushBackgroundTasks();
-    expect(mocked.notifyOpencodeReadyIfHealthyMock).toHaveBeenCalledWith("startup", container);
+    expect(mocked.notifyReasonixReadyIfHealthyMock).toHaveBeenCalledWith("startup", container);
   });
 
   it("logs an unhandled rejection and keeps the process alive", async () => {
@@ -338,7 +316,7 @@ describe("app/start-bot-app", () => {
   });
 
   it("exits on uncaught exception even when clearing service state fails", async () => {
-    const stateDir = await mkdtemp(path.join(os.tmpdir(), "opencode-telegram-service-state-"));
+    const stateDir = await mkdtemp(path.join(os.tmpdir(), "reasonix-telegram-service-state-"));
     const stateFilePath = path.join(stateDir, "bot-service.json");
     await writeFile(stateFilePath, "{}");
     mocked.isServiceChildProcessMock.mockReturnValue(true);
@@ -378,13 +356,12 @@ describe("app/start-bot-app", () => {
     await appPromise;
   });
 
-  it("cleans up the container runtime beside auto-restart and the scheduler on SIGINT", async () => {
+  it("cleans up the container runtime beside the scheduler on SIGINT", async () => {
     const { bot, releaseStart, appPromise } = await startAppWithPendingBot();
 
     expectHandler("SIGINT")();
 
     expect(mocked.cleanupProcessMock).toHaveBeenCalledWith("app_shutdown_sigint");
-    expect(mocked.autoRestartStopMock).toHaveBeenCalledTimes(1);
     expect(mocked.scheduledTaskShutdownMock).toHaveBeenCalledTimes(1);
     expect(bot.stop).toHaveBeenCalledTimes(1);
 

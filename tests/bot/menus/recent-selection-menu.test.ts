@@ -63,7 +63,7 @@ describe("recent session buttons", () => {
     expect(labels.every((label) => [...label].length <= 64)).toBe(true);
   });
 
-  it("shows a session OpenCode has not named yet as a new session", () => {
+  it("shows a session Reasonix has not named yet as a new session", () => {
     const { keyboard } = buildRecentMenu([
       { session: { id: "a", directory: "/repo", title: "" } as RecentSession["session"], status: "idle" },
     ]);

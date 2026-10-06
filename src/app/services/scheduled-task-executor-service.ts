@@ -1,8 +1,8 @@
 import { config } from "../../config.js";
 import { t } from "../../i18n/index.js";
-import { opencodeClient } from "../../opencode/client.js";
+import { reasonixClient } from "../../reasonix/client.js";
 import { logger } from "../../utils/logger.js";
-import { extractErrorMessage } from "../../utils/opencode-error.js";
+import { extractErrorMessage } from "../../utils/reasonix-error.js";
 import { checkFolderPresence } from "./folder-presence-service.js";
 import {
   cleanupScheduledTaskSessionIgnores,
@@ -17,7 +17,7 @@ const MAX_IDLE_POLLS_WITHOUT_RESULT = 3;
 const MAX_STARTUP_POLLS_WITHOUT_ACTIVITY = 45;
 const COMPLETED_EMPTY_RESULT_RECHECK_INTERVAL_MS = 500;
 const MAX_COMPLETED_EMPTY_RESULT_RECHECKS = 3;
-const MODELS_DOCS_URL = "https://opencode.ai/docs/config/#models";
+const MODELS_DOCS_URL = "https://reasonix.ai/docs/config/#models";
 const EXECUTION_TIMEOUT_ERROR_PREFIX = "Scheduled task exceeded bot execution timeout";
 const INTERACTIVE_PERMISSION_REJECT_MESSAGE =
   "Scheduled task cannot continue because it requires interactive permission.";
@@ -118,7 +118,7 @@ function normalizeScheduledTaskErrorMessage(message: string): string {
     return message;
   }
 
-  return `${message} Check OpenCode model timeout settings: ${MODELS_DOCS_URL}`;
+  return `${message} Check Reasonix model timeout settings: ${MODELS_DOCS_URL}`;
 }
 
 function toErrorMessage(error: unknown): string {
@@ -253,8 +253,8 @@ async function loadPendingInteractiveRequest(
   directory: string,
 ): Promise<PendingInteractiveRequest | null> {
   const [questionsResult, permissionsResult] = await Promise.all([
-    opencodeClient.question.list({ directory }),
-    opencodeClient.permission.list({ directory }),
+    reasonixClient.question.list({ directory }),
+    reasonixClient.permission.list({ directory }),
   ]);
 
   if (questionsResult.error) {
@@ -290,7 +290,7 @@ async function rejectInteractiveRequest(
 ): Promise<void> {
   try {
     if (request.kind === "question") {
-      const { error } = await opencodeClient.question.reject({
+      const { error } = await reasonixClient.question.reject({
         requestID: request.request.id,
         directory,
       });
@@ -305,7 +305,7 @@ async function rejectInteractiveRequest(
       return;
     }
 
-    const { error } = await opencodeClient.permission.reply({
+    const { error } = await reasonixClient.permission.reply({
       requestID: request.request.id,
       directory,
       reply: "reject",
@@ -328,7 +328,7 @@ async function rejectInteractiveRequest(
 
 async function abortScheduledTaskSession(sessionId: string, directory: string): Promise<void> {
   try {
-    const { error } = await opencodeClient.session.abort({ sessionID: sessionId, directory });
+    const { error } = await reasonixClient.session.abort({ sessionID: sessionId, directory });
     if (error) {
       logger.warn(
         `[ScheduledTaskExecutor] Failed to abort interactive scheduled task session: sessionId=${sessionId}`,
@@ -376,7 +376,7 @@ async function loadAssistantResult(
   sessionId: string,
   directory: string,
 ): Promise<ReturnType<typeof extractAssistantResult>> {
-  const { data: messages, error: messagesError } = await opencodeClient.session.messages({
+  const { data: messages, error: messagesError } = await reasonixClient.session.messages({
     sessionID: sessionId,
     directory,
   });
@@ -436,7 +436,7 @@ async function waitForScheduledTaskResult(
 
     completedEmptyResultReadCount = 0;
 
-    const { data: statuses, error: statusError } = await opencodeClient.session.status({
+    const { data: statuses, error: statusError } = await reasonixClient.session.status({
       directory,
     });
     if (statusError || !statuses) {
@@ -509,7 +509,7 @@ export async function executeScheduledTask(
       throw new Error(t("task.run.error.folder_missing", { path: task.projectWorktree }));
     }
 
-    const { data: session, error: createError } = await opencodeClient.session.create({
+    const { data: session, error: createError } = await reasonixClient.session.create({
       directory: task.projectWorktree,
       title: SCHEDULED_TASK_SESSION_TITLE,
     });
@@ -546,7 +546,7 @@ export async function executeScheduledTask(
       promptOptions.variant = task.model.variant;
     }
 
-    const { error: promptError } = await opencodeClient.session.promptAsync(promptOptions);
+    const { error: promptError } = await reasonixClient.session.promptAsync(promptOptions);
 
     if (promptError) {
       throw promptError || new Error("Scheduled task prompt execution failed");
@@ -586,7 +586,7 @@ export async function executeScheduledTask(
   } finally {
     if (sessionId && deleteTemporarySession) {
       try {
-        await opencodeClient.session.delete({ sessionID: sessionId });
+        await reasonixClient.session.delete({ sessionID: sessionId });
       } catch (error) {
         logger.warn(
           `[ScheduledTaskExecutor] Failed to delete temporary session: sessionId=${sessionId}`,

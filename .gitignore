@@ -43,10 +43,6 @@ e2e/output/
 .boardown/
 manager/
 
-# Porting leftovers from the OpenCode basis
-.opencode/
-src/opencode/
-
 # Runtime state that can carry a serve token
 *.pid
 run/

@@ -2,9 +2,19 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const withdrawInboxPromptMock = vi.hoisted(() => vi.fn());
 
-vi.mock("../../../src/app/services/prompt-inbox-service.js", () => ({
-  withdrawInboxPrompt: withdrawInboxPromptMock,
-}));
+vi.mock("../../../src/app/services/prompt-inbox-service.js", async () => {
+  const { promptQueue } = await import("../../../src/app/managers/prompt-queue-manager.js");
+  return {
+    // The real service drops the mirror entry; the tests only steer its answer.
+    withdrawInboxPrompt: vi.fn(async (item: { id: string }) => {
+      const result = withdrawInboxPromptMock(item) as "removed" | "gone" | "failed";
+      if (result === "removed") {
+        promptQueue.removeById(item.id);
+      }
+      return result;
+    }),
+  };
+});
 
 import { registerMessageRouter } from "../../../src/bot/routers/message-router.js";
 import { QUEUED_PROMPT_BUTTON_TEXT_PATTERN } from "../../../src/bot/message-patterns.js";
@@ -12,7 +22,7 @@ import { promptQueue } from "../../../src/app/managers/prompt-queue-manager.js";
 import { t } from "../../../src/i18n/index.js";
 import { defined } from "../../helpers/defined.js";
 import { createTestAppContainer } from "../../helpers/app-container.js";
-import { createIncomingPrompt } from "../../../src/app/types/prompt.js";
+import { mirrorQueuedPrompt } from "../../helpers/prompt-queue.js";
 
 describe("bot/routers/message-router", () => {
   it("registers reply keyboard, media, and text routes", () => {
@@ -25,7 +35,7 @@ describe("bot/routers/message-router", () => {
       container: createTestAppContainer({ ensureEventSubscription: vi.fn(), setTelegramContext: vi.fn() }),
     });
 
-    expect(bot.hears).toHaveBeenCalledTimes(5);
+    expect(bot.hears).toHaveBeenCalledTimes(4);
     // The queued prompt route must win over the other reply keyboard routes.
     expect(defined(bot.hears.mock.calls[0]?.[0])).toBe(QUEUED_PROMPT_BUTTON_TEXT_PATTERN);
     expect(bot.on.mock.calls.map(([event]) => event)).toEqual([
@@ -62,24 +72,25 @@ describe("bot/routers/message-router", () => {
 
     beforeEach(() => {
       promptQueue.__resetForTests();
+      withdrawInboxPromptMock.mockReset().mockReturnValue("removed");
     });
 
     it("removes the pressed prompt from the middle of the queue", async () => {
-      promptQueue.add(createIncomingPrompt("first"));
-      promptQueue.add(createIncomingPrompt("second"));
-      promptQueue.add(createIncomingPrompt("third"));
+      mirrorQueuedPrompt("first");
+      mirrorQueuedPrompt("second");
+      mirrorQueuedPrompt("third");
       const handler = registerAndGetQueuedPromptHandler();
       const ctx = makeButtonContext("❌ 2. second");
       const next = vi.fn();
 
       await handler(ctx, next);
 
-      expect(promptQueue.list().map((item) => item.text)).toEqual(["first", "third"]);
+      expect(promptQueue.list().map((item) => item.displayText)).toEqual(["first", "third"]);
       expect(ctx.reply).toHaveBeenCalledWith(t("queue.removed"), expect.anything());
       expect(next).not.toHaveBeenCalled();
     });
 
-    it("never forwards a stale button label to OpenCode when the queue is empty", async () => {
+    it("never forwards a stale button label to Reasonix when the queue is empty", async () => {
       const handler = registerAndGetQueuedPromptHandler();
       const ctx = makeButtonContext("❌ 1. cleared by abort");
       const next = vi.fn();
@@ -95,13 +106,13 @@ describe("bot/routers/message-router", () => {
       { result: "gone", replyKey: "queue.not_found" },
       { result: "failed", replyKey: "bot.prompt_send_error" },
     ] as const)(
-      "withdraws a prompt waiting in OpenCode and answers $replyKey when it is $result",
+      "withdraws a prompt waiting in Reasonix and answers $replyKey when it is $result",
       async ({ result, replyKey }) => {
         const item = promptQueue.confirmReservation(promptQueue.reserve()!, {
           displayText: "steered",
-          inbox: { sessionId: "ses-1", inboxId: "msg-1", delivery: "steer" },
+          inbox: { sessionId: "ses-1", inboxId: "msg-1" },
         });
-        withdrawInboxPromptMock.mockReset().mockResolvedValue(result);
+        withdrawInboxPromptMock.mockReset().mockReturnValue(result);
         const handler = registerAndGetQueuedPromptHandler();
         const ctx = makeButtonContext("❌ 1. steered");
 
@@ -113,7 +124,7 @@ describe("bot/routers/message-router", () => {
     );
 
     it("answers not_found when the label no longer matches the queue", async () => {
-      promptQueue.add(createIncomingPrompt("still queued"));
+      mirrorQueuedPrompt("still queued");
       const handler = registerAndGetQueuedPromptHandler();
       const ctx = makeButtonContext("❌ 3. already gone");
       const next = vi.fn();

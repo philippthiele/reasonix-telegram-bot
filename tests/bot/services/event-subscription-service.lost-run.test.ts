@@ -17,14 +17,9 @@ const mocked = vi.hoisted(() => ({
   restorePendingInteractionsAfterReconnect: vi.fn(),
 }));
 
-vi.mock("../../../src/opencode/events.js", () => ({
+vi.mock("../../../src/reasonix/event-stream.js", () => ({
   subscribeToEvents: mocked.subscribeToEvents,
   stopEventListening: mocked.stopEventListening,
-}));
-
-vi.mock("../../../src/opencode/client.js", async (importOriginal) => ({
-  ...(await importOriginal<typeof import("../../../src/opencode/client.js")>()),
-  opencodeServerVersion: "v2",
 }));
 
 vi.mock("../../../src/app/services/attach-service.js", async (importOriginal) => ({
@@ -105,10 +100,10 @@ describe("bot/services/event-subscription-service lost run", () => {
   beforeEach(async () => {
     vi.stubEnv("TELEGRAM_BOT_TOKEN", "test-telegram-token");
     vi.stubEnv("TELEGRAM_ALLOWED_USER_ID", "123456789");
-    vi.stubEnv("OPENCODE_MODEL_PROVIDER", "test-provider");
-    vi.stubEnv("OPENCODE_MODEL_ID", "test-model");
-    vi.stubEnv("OPENCODE_TELEGRAM_HOME", await mkdtemp(path.join(os.tmpdir(), "lost-run-")));
-    tempHome = process.env.OPENCODE_TELEGRAM_HOME!;
+    vi.stubEnv("REASONIX_MODEL_PROVIDER", "test-provider");
+    vi.stubEnv("REASONIX_MODEL_ID", "test-model");
+    vi.stubEnv("REASONIX_TELEGRAM_HOME", await mkdtemp(path.join(os.tmpdir(), "lost-run-")));
+    tempHome = process.env.REASONIX_TELEGRAM_HOME!;
     setRuntimeMode("installed");
 
     mocked.subscribeToEvents.mockReset().mockResolvedValue(undefined);
@@ -167,7 +162,7 @@ describe("bot/services/event-subscription-service lost run", () => {
     emitTool(container, "bash", "running", "call-bash", { command: "npm test" });
     await settle();
 
-    const ending = service!.endRunLostWithServer("opencode_stop");
+    const ending = service!.endRunLostWithServer("reasonix_stop");
     await settle();
     await ending;
 
@@ -186,9 +181,9 @@ describe("bot/services/event-subscription-service lost run", () => {
     emitTool(container, "bash", "running", "call-bash", { command: "npm test" });
     await settle();
 
-    // /opencode_stop resets runtime streams as soon as the ending resolves.
-    const ending = service!.endRunLostWithServer("opencode_stop").then(() => {
-      service!.clearRuntimeState("opencode_stop");
+    // /reasonix_stop resets runtime streams as soon as the ending resolves.
+    const ending = service!.endRunLostWithServer("reasonix_stop").then(() => {
+      service!.clearRuntimeState("reasonix_stop");
     });
     await settle();
     await ending;
@@ -208,7 +203,7 @@ describe("bot/services/event-subscription-service lost run", () => {
     container.questionManager.addMessageId(700);
     container.questionManager.setActiveMessageId(700);
 
-    const ending = service!.endRunLostWithServer("opencode_restarted");
+    const ending = service!.endRunLostWithServer("reasonix_restarted");
     await settle();
     await ending;
 
@@ -222,7 +217,7 @@ describe("bot/services/event-subscription-service lost run", () => {
     container.assistantRunState.clearRun("session-1", "test");
     const sentBefore = collectSentTexts(api).length;
 
-    const ending = service!.endRunLostWithServer("opencode_restarted");
+    const ending = service!.endRunLostWithServer("reasonix_restarted");
     await settle();
     await ending;
 

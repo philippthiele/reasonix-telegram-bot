@@ -23,8 +23,8 @@ vi.mock("../../../src/app/services/folder-presence-service.js", () => ({
   checkFolderPresence: mocked.checkFolderPresenceMock,
 }));
 
-vi.mock("../../../src/opencode/client.js", () => ({
-  opencodeClient: {
+vi.mock("../../../src/reasonix/client.js", () => ({
+  reasonixClient: {
     session: {
       create: mocked.createMock,
       promptAsync: mocked.promptAsyncMock,
@@ -329,7 +329,7 @@ describe("app/services/scheduled-task-executor-service", () => {
     await expect(executeScheduledTask(createTask())).resolves.toMatchObject({
       status: "error",
       resultText: null,
-      errorMessage: expect.stringContaining("https://opencode.ai/docs/config/#models"),
+      errorMessage: expect.stringContaining("https://reasonix.ai/docs/config/#models"),
     });
     expect(mocked.messagesMock).not.toHaveBeenCalled();
     expect(mocked.deleteMock).toHaveBeenCalledWith({ sessionID: "session-1" });
@@ -356,7 +356,7 @@ describe("app/services/scheduled-task-executor-service", () => {
     await expect(executeScheduledTask(createTask())).resolves.toMatchObject({
       status: "error",
       resultText: null,
-      errorMessage: expect.stringContaining("Check OpenCode model timeout settings"),
+      errorMessage: expect.stringContaining("Check Reasonix model timeout settings"),
     });
   });
 

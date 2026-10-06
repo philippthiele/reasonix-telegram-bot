@@ -5,7 +5,6 @@ import {
 } from "../../../src/app/managers/interaction-manager.js";
 import { PermissionManager } from "../../../src/app/managers/permission-manager.js";
 import { QuestionManager } from "../../../src/app/managers/question-manager.js";
-import { RenameManager } from "../../../src/app/managers/rename-manager.js";
 import { TaskCreationManager } from "../../../src/app/managers/scheduled-task-creation-manager.js";
 import type { PermissionRequest } from "../../../src/app/types/permission.js";
 import type { WaitingAgentRequest } from "../../../src/app/types/interaction.js";
@@ -16,14 +15,12 @@ import type { Question } from "../../../src/app/types/question.js";
 let interactionManager: InteractionManager;
 let permissionManager: PermissionManager;
 let questionManager: QuestionManager;
-let renameManager: RenameManager;
 let taskCreationManager: TaskCreationManager;
 
 beforeEach(() => {
   interactionManager = new InteractionManager();
   permissionManager = new PermissionManager(interactionManager);
   questionManager = new QuestionManager(interactionManager);
-  renameManager = new RenameManager(interactionManager);
   taskCreationManager = new TaskCreationManager(interactionManager);
 });
 
@@ -412,7 +409,6 @@ describe("interactionManager waiting request", () => {
     startPoll();
 
     interactionManager.clearKind("permission", "permission_replied");
-    renameManager.clear();
     taskCreationManager.clear();
 
     expect(questionManager.isActive()).toBe(true);
@@ -462,10 +458,7 @@ describe("stateful managers on the shared slot", () => {
   });
 
   it("lets an agent request preempt a user flow", () => {
-    renameManager.startWaiting("session-1", "D:/repo", "Old title");
-
     expect(permissionManager.startPermission(PERMISSION, 101)).toBe("started");
-    expect(renameManager.isWaitingForName()).toBe(false);
     expect(interactionManager.getSnapshot()?.kind).toBe("permission");
   });
 

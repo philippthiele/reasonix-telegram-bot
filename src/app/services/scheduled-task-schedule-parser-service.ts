@@ -1,4 +1,4 @@
-import { opencodeClient } from "../../opencode/client.js";
+import { reasonixClient } from "../../reasonix/client.js";
 import { logger } from "../../utils/logger.js";
 import {
   cleanupScheduledTaskSessionIgnores,
@@ -178,7 +178,7 @@ export async function parseTaskSchedule(
     );
     await cleanupScheduledTaskSessionIgnores();
 
-    const { data: session, error: createError } = await opencodeClient.session.create({
+    const { data: session, error: createError } = await reasonixClient.session.create({
       directory: trimmedDirectory,
       title: SCHEDULE_PARSE_SESSION_TITLE,
     });
@@ -217,7 +217,7 @@ export async function parseTaskSchedule(
       promptOptions.variant = model.variant;
     }
 
-    const { data: response, error: promptError } = await opencodeClient.session.prompt(
+    const { data: response, error: promptError } = await reasonixClient.session.prompt(
       promptOptions,
     );
 
@@ -237,7 +237,7 @@ export async function parseTaskSchedule(
   } finally {
     if (sessionId) {
       try {
-        await opencodeClient.session.delete({ sessionID: sessionId });
+        await reasonixClient.session.delete({ sessionID: sessionId });
       } catch (error) {
         logger.warn(
           `[ScheduledTaskScheduleParser] Failed to delete temporary session: sessionId=${sessionId}`,

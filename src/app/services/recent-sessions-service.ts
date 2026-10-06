@@ -1,5 +1,5 @@
 import type { GlobalSession } from "@opencode-ai/sdk/v2";
-import { opencodeClient } from "../../opencode/client.js";
+import { reasonixClient } from "../../reasonix/client.js";
 import { getCurrentSession } from "../stores/settings-store.js";
 import { logger } from "../../utils/logger.js";
 import { checkFolderPresence, collectFromPresentFolders } from "./folder-presence-service.js";
@@ -9,8 +9,8 @@ type RecentSessionInfo = Pick<GlobalSession, "id" | "directory" | "title" | "tim
 export type RecentSession = { session: RecentSessionInfo; status: RecentStatus };
 
 async function loadGlobalSessions(limit: number): Promise<GlobalSession[]> {
-  const { data, error } = await opencodeClient.experimental.session.list({ roots: true, limit });
-  if (error || !data) throw error || new Error("No sessions received from OpenCode");
+  const { data, error } = await reasonixClient.experimental.session.list({ roots: true, limit });
+  if (error || !data) throw error || new Error("No sessions received from Reasonix");
   return data;
 }
 
@@ -24,7 +24,7 @@ export async function resolveSessionParentChain(
   let id = sessionId;
   while (!roots.has(id) && !seen.has(id)) {
     seen.add(id);
-    const { data, error } = await opencodeClient.session.get({ sessionID: id, directory });
+    const { data, error } = await reasonixClient.session.get({ sessionID: id, directory });
     if (error || !data?.parentID) return null;
     links.push({ child: id, parent: data.parentID });
     id = data.parentID;
@@ -39,7 +39,7 @@ export async function loadRecentSessions(limit: number): Promise<RecentSession[]
   ).slice(0, limit);
   const attached = getCurrentSession();
   if (attached && !sessions.some((session) => session.id === attached.id) && sessions.length > 0) {
-    const { data, error } = await opencodeClient.session.get({
+    const { data, error } = await reasonixClient.session.get({
       sessionID: attached.id,
       directory: attached.directory,
     });
@@ -58,9 +58,9 @@ export async function loadRecentSessions(limit: number): Promise<RecentSession[]
   const statuses = new Map<string, RecentStatus>();
   await Promise.all([...byDirectory].map(async ([directory, group]) => {
     const [statusResult, questionResult, permissionResult] = await Promise.all([
-      opencodeClient.session.status({ directory }),
-      opencodeClient.question.list({ directory }),
-      opencodeClient.permission.list({ directory }),
+      reasonixClient.session.status({ directory }),
+      reasonixClient.question.list({ directory }),
+      reasonixClient.permission.list({ directory }),
     ]);
     // A failed lookup counts as "nothing found" for its own part only, so one bad folder never fails the list.
     const warnFailed = (lookup: string, error: unknown) =>

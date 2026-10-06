@@ -228,20 +228,7 @@ export class MediaGroupAttachmentHandler {
         return;
       }
 
-      const mediaBytes = items.reduce<number | undefined>((total, item) => {
-        if (total === undefined) {
-          return undefined;
-        }
-        if (item.kind === "photo") {
-          const size = item.photos[item.photos.length - 1]?.file_size;
-          return size === undefined ? undefined : total + size;
-        }
-        if (item.kind === "document") {
-          return item.document.file_size === undefined ? undefined : total + item.document.file_size;
-        }
-        return total;
-      }, 0);
-      if (await rejectQueuedMediaBeforePreparation(replyCtx, mediaBytes)) {
+      if (await rejectQueuedMediaBeforePreparation(replyCtx)) {
         return;
       }
       await replyCtx.reply(t("bot.files_downloading"));
@@ -263,7 +250,6 @@ export class MediaGroupAttachmentHandler {
             ...createIncomingPrompt(promptText, { fileParts }),
             displayText: captions.join(" / ") || `[Album: ${items.length} files]`,
             fileParts,
-            ...(mediaBytes === undefined ? {} : { mediaBytes }),
           },
           batch.ticket,
         )

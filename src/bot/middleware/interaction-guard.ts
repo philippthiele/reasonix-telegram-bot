@@ -63,18 +63,6 @@ function getInteractionBlockedMessage(
     }
   }
 
-  if (interactionKind === "rename") {
-    switch (reason) {
-      case "command_not_allowed":
-        return t("rename.blocked.command_not_allowed");
-      case "expected_callback":
-      case "expected_command":
-      case "expected_text":
-      default:
-        return t("rename.blocked.expected_name");
-    }
-  }
-
   if (interactionKind === "task") {
     switch (reason) {
       case "command_not_allowed":
@@ -100,29 +88,6 @@ function getInteractionBlockedMessage(
     default:
       return t("interaction.blocked.expected_text");
   }
-}
-
-function getQueuedPhotoMediaBytes(input: ReturnType<typeof getIncomingPrompt>): number | undefined {
-  if (!input?.photos.length) {
-    return 0;
-  }
-
-  let mediaBytes = 0;
-  for (const photo of input.photos) {
-    if (
-      typeof photo.fileSize !== "number" ||
-      !Number.isSafeInteger(photo.fileSize) ||
-      photo.fileSize < 0
-    ) {
-      return undefined;
-    }
-    mediaBytes += photo.fileSize;
-    if (!Number.isSafeInteger(mediaBytes)) {
-      return undefined;
-    }
-  }
-
-  return mediaBytes;
 }
 
 export async function interactionGuardMiddleware(
@@ -153,17 +118,10 @@ export async function interactionGuardMiddleware(
   );
 
   if (isQueueableInput && incomingPrompt) {
-    const mediaBytes = getQueuedPhotoMediaBytes(incomingPrompt);
-    if (incomingPrompt.photos.length > 0) {
-      if (await rejectQueuedMediaBeforePreparation(ctx, mediaBytes)) {
-        return;
-      }
+    if (incomingPrompt.photos.length > 0 && (await rejectQueuedMediaBeforePreparation(ctx))) {
+      return;
     }
-    const queued = await tryEnqueuePrompt(
-      ctx,
-      mediaBytes === undefined ? incomingPrompt : { ...incomingPrompt, mediaBytes },
-    );
-    if (queued) {
+    if (await tryEnqueuePrompt(ctx, incomingPrompt)) {
       return;
     }
   }

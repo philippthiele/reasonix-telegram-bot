@@ -3,7 +3,7 @@ import { checkFolderPresence } from "./folder-presence-service.js";
 import { findWorktreeOwner } from "./worktree-service.js";
 
 /**
- * The notice for a project folder the OpenCode server confirms is gone, or null otherwise.
+ * The notice for a project folder the Reasonix server confirms is gone, or null otherwise.
  * It points to /worktree only when a still-existing repository lists the folder as one of
  * its worktrees — the same lookup /worktree then lists from — and to /projects otherwise.
  */

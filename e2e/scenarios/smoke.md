@@ -1,7 +1,7 @@
 # Smoke: the bot answers in a fresh session
 
 The basic loop: the bot starts, a new session is created, a prompt goes to
-OpenCode, and the reply comes back rendered in Telegram.
+Reasonix, and the reply comes back rendered in Telegram.
 
 Run this **first, before the feature cases**. The build already contains the
 change under test, so a failure here is a regression in the basic loop — and it
@@ -14,7 +14,7 @@ Cost is deliberately minimal: one short prompt, no tool calls.
 
 - The bot was started from a fresh build (`.\e2e\run-test-bot.ps1`, no
   `-SkipBuild`) and printed `Bot @... started!`.
-- OpenCode is up (`/opencode_start` if not).
+- The Reasonix instance is up (`/reasonix_start` if not).
 - The pinned dashboard shows the project under test and an allowed model.
 
 ## Steps

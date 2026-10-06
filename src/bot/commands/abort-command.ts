@@ -1,6 +1,6 @@
 import { CommandContext, Context } from "grammy";
 import type { AppContainer } from "../../app/bootstrap/app-container.js";
-import { opencodeClient } from "../../opencode/client.js";
+import { reasonixClient } from "../../reasonix/client.js";
 import { getCurrentSession } from "../../app/services/session-service.js";
 import { logger } from "../../utils/logger.js";
 import { t } from "../../i18n/index.js";
@@ -49,7 +49,7 @@ async function pollSessionStatus(
 
   while (Date.now() - startedAt < maxWaitMs) {
     try {
-      const { data, error } = await opencodeClient.session.status({ directory });
+      const { data, error } = await reasonixClient.session.status({ directory });
 
       if (error || !data) {
         break;
@@ -87,7 +87,7 @@ export async function abortCurrentOperation(
 
   try {
     deps.resetInteractions("abort_command");
-    // Awaited: a prompt still waiting in the OpenCode V2 inbox must not start a new turn
+    // Awaited: a prompt still waiting in the Reasonix inbox must not start a new turn
     // once the current one is interrupted.
     await withdrawPromptQueue("abort_command");
     // The interactions reset drops the waiting mode, so the attachment has to go with it -
@@ -127,13 +127,17 @@ export async function abortCurrentOperation(
     markUserAbortRequested(currentSession.id);
 
     try {
-      const { data: abortResult, error: abortError } = await opencodeClient.session.abort(
-        {
+      const { data: abortResult, error: abortError } = (await Promise.race([
+        reasonixClient.session.abort({
           sessionID: currentSession.id,
           directory: currentSession.directory,
-        },
-        { signal: controller.signal },
-      );
+        }),
+        new Promise<never>((_resolve, rejectRace) => {
+          controller.signal.addEventListener("abort", () =>
+            rejectRace(new Error("abort request timed out")),
+          );
+        }),
+      ])) as Awaited<ReturnType<typeof reasonixClient.session.abort>>;
 
       clearTimeout(timeoutId);
 

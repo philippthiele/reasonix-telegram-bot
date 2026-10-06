@@ -9,8 +9,8 @@ const mocked = vi.hoisted(() => ({
   flushDeferredDeliveriesMock: vi.fn(),
 }));
 
-vi.mock("../../../src/opencode/client.js", () => ({
-  opencodeClient: {
+vi.mock("../../../src/reasonix/client.js", () => ({
+  reasonixClient: {
     session: {
       status: mocked.sessionStatusMock,
     },

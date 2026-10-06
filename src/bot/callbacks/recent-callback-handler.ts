@@ -1,6 +1,6 @@
 import type { Context } from "grammy";
 import type { AppContainer } from "../../app/bootstrap/app-container.js";
-import { opencodeClient } from "../../opencode/client.js";
+import { reasonixClient } from "../../reasonix/client.js";
 import { getCurrentProject } from "../../app/stores/settings-store.js";
 import { switchToProject } from "../../app/services/project-switch-service.js";
 import { isForegroundBusy } from "../../app/services/run-control-service.js";
@@ -38,7 +38,7 @@ export async function handleRecentSelect(ctx: Context, deps: RecentSelectDeps): 
   }
 
   try {
-    const { data: session, error } = await opencodeClient.session.get({ sessionID: sessionId, directory });
+    const { data: session, error } = await reasonixClient.session.get({ sessionID: sessionId, directory });
     if (error || !session || session.directory !== directory || session.parentID) {
       await ctx.answerCallbackQuery({ text: t("inline.inactive_callback"), show_alert: true });
       return true;

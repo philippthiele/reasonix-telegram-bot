@@ -61,8 +61,8 @@ vi.mock("../../../src/app/services/session-service.js", () => ({
   clearSession: mocked.clearSessionMock,
 }));
 
-vi.mock("../../../src/opencode/client.js", () => ({
-  opencodeClient: {
+vi.mock("../../../src/reasonix/client.js", () => ({
+  reasonixClient: {
     global: {
       health: mocked.healthMock,
     },
@@ -79,7 +79,7 @@ vi.mock("../../../src/opencode/client.js", () => ({
   },
 }));
 
-vi.mock("../../../src/opencode/events.js", () => ({
+vi.mock("../../../src/reasonix/event-stream.js", () => ({
   stopEventListening: mocked.stopEventListeningMock,
 }));
 
@@ -483,7 +483,7 @@ describe("attach/service", () => {
       container.attachManager.attach("session-1", "D:\\Projects\\Repo");
     });
 
-    it("ends a permission prompt OpenCode no longer lists as answered outside Telegram", async () => {
+    it("ends a permission prompt Reasonix no longer lists as answered outside Telegram", async () => {
       container.permissionManager.startPermission(permission, 501);
 
       await restorePendingInteractionsAfterReconnect({ ...deps, bot: createBot(), chatId: 777 });
@@ -497,7 +497,7 @@ describe("attach/service", () => {
       expect(container.permissionManager.isActive()).toBe(false);
     });
 
-    it("closes a poll OpenCode no longer lists", async () => {
+    it("closes a poll Reasonix no longer lists", async () => {
       container.questionManager.startQuestions([], "question-1", "session-1");
 
       await restorePendingInteractionsAfterReconnect({ ...deps, bot: createBot(), chatId: 777 });
@@ -535,7 +535,7 @@ describe("attach/service", () => {
       expect(mocked.closeQuestionSettledOutsideMock).not.toHaveBeenCalled();
     });
 
-    it("drops waiting requests OpenCode no longer lists", async () => {
+    it("drops waiting requests Reasonix no longer lists", async () => {
       container.questionManager.startQuestions([], "question-1", "session-1");
       container.interactionManager.waitPermission(permission);
       container.interactionManager.waitQuestion([], "question-2", "child");
@@ -591,7 +591,7 @@ describe("attach/service", () => {
     });
 
     describe("after the server restarted", () => {
-      it("ends a permission prompt OpenCode no longer lists as not answered", async () => {
+      it("ends a permission prompt Reasonix no longer lists as not answered", async () => {
         container.permissionManager.startPermission(permission, 501);
 
         await restorePendingInteractionsAfterReconnect(
@@ -607,7 +607,7 @@ describe("attach/service", () => {
         );
       });
 
-      it("closes a poll OpenCode no longer lists as not answered", async () => {
+      it("closes a poll Reasonix no longer lists as not answered", async () => {
         container.questionManager.startQuestions([], "question-1", "session-1");
 
         await restorePendingInteractionsAfterReconnect(
@@ -707,7 +707,7 @@ describe("attach/service", () => {
     expect(container.attachManager.getSnapshot()).toBeNull();
   });
 
-  it("skips guarded startup restore when OpenCode server is unavailable", async () => {
+  it("skips guarded startup restore when Reasonix server is unavailable", async () => {
     mocked.healthMock.mockRejectedValueOnce(new Error("fetch failed"));
 
     const restored = await restoreAttachedCurrentSession({

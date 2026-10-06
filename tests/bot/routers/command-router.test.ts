@@ -5,7 +5,7 @@ import { createTestAppContainer } from "../../helpers/app-container.js";
 
 const mocked = vi.hoisted(() => ({
   flushPendingPrompt: vi.fn(),
-  opencodeStopCommand: vi.fn(),
+  reasonixStopCommand: vi.fn(),
 }));
 
 vi.mock("../../../src/bot/handlers/message-merger.js", () => ({
@@ -13,8 +13,8 @@ vi.mock("../../../src/bot/handlers/message-merger.js", () => ({
   __resetMessageMergerForTests: vi.fn(),
 }));
 
-vi.mock("../../../src/bot/commands/opencode-stop-command.js", () => ({
-  opencodeStopCommand: mocked.opencodeStopCommand,
+vi.mock("../../../src/bot/commands/reasonix-stop-command.js", () => ({
+  reasonixStopCommand: mocked.reasonixStopCommand,
 }));
 
 import {
@@ -37,8 +37,9 @@ describe("bot/routers/command-router", () => {
       "help",
       "status",
       "settings",
-      "opencode_start",
-      "opencode_stop",
+      "reasonix_start",
+      "reasonix_stop",
+      "reload",
       "projects",
       "worktree",
       "open",
@@ -51,15 +52,13 @@ describe("bot/routers/command-router", () => {
       "detach",
       "task",
       "tasklist",
-      "rename",
       "commands",
       "skills",
-      "mcps",
     ]);
   });
 
-  it("registers /reload after /opencode_stop only on V2", async () => {
-    vi.stubEnv("OPENCODE_SERVER_VERSION", "v2");
+  it("registers /reload after /reasonix_stop only on V2", async () => {
+    vi.stubEnv("REASONIX_SERVER_VERSION", "v2");
     vi.resetModules();
     const router = await import("../../../src/bot/routers/command-router.js");
     const bot = { command: vi.fn(), use: vi.fn() };
@@ -67,8 +66,8 @@ describe("bot/routers/command-router", () => {
     router.registerCommandRouter(bot as never, { container: createTestAppContainer() });
 
     const commands = bot.command.mock.calls.map(([command]) => command);
-    expect(commands.slice(commands.indexOf("opencode_stop"), commands.indexOf("opencode_stop") + 2)).toEqual([
-      "opencode_stop",
+    expect(commands.slice(commands.indexOf("reasonix_stop"), commands.indexOf("reasonix_stop") + 2)).toEqual([
+      "reasonix_stop",
       "reload",
     ]);
 
@@ -91,21 +90,21 @@ describe("bot/routers/command-router", () => {
     expect(next).toHaveBeenCalledOnce();
   });
 
-  it("passes the container to the opencode_stop handler", async () => {
+  it("passes the container to the reasonix_stop handler", async () => {
     const bot = { command: vi.fn(), use: vi.fn() };
     const container = createTestAppContainer();
-    mocked.opencodeStopCommand.mockReset();
-    mocked.opencodeStopCommand.mockResolvedValue(undefined);
+    mocked.reasonixStopCommand.mockReset();
+    mocked.reasonixStopCommand.mockResolvedValue(undefined);
 
     registerCommandRouter(bot as never, { container });
 
-    const stopRegistration = bot.command.mock.calls.find(([command]) => command === "opencode_stop");
+    const stopRegistration = bot.command.mock.calls.find(([command]) => command === "reasonix_stop");
     expect(stopRegistration).toBeDefined();
 
     const ctx = { chat: { id: 123 } } as unknown as Context;
     await stopRegistration?.[1](ctx);
 
-    expect(mocked.opencodeStopCommand).toHaveBeenCalledWith(ctx, container);
+    expect(mocked.reasonixStopCommand).toHaveBeenCalledWith(ctx, container);
   });
 
   it("initializes commands for the authorized chat", async () => {

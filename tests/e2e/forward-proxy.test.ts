@@ -36,6 +36,7 @@ interface RunningProxy {
 
 let upstream: http.Server;
 let upstreamPort = 0;
+let ipv6Loopback = false;
 let stateDir = "";
 const proxies: RunningProxy[] = [];
 
@@ -52,7 +53,20 @@ beforeAll(async () => {
     upstream.listen({ port: 0, host: "::", ipv6Only: false }, resolveListen),
   );
   upstreamPort = (upstream.address() as AddressInfo).port;
+  ipv6Loopback = await canListenOnIpv6Loopback();
 });
+
+// A host without IPv6 on the loopback interface cannot answer an ::1 destination,
+// so the IPv6 destinations are only exercised where the stack really has them.
+function canListenOnIpv6Loopback(): Promise<boolean> {
+  return new Promise<boolean>((resolveCheck) => {
+    const probe = net.createServer();
+    probe.once("error", () => resolveCheck(false));
+    probe.listen({ port: 0, host: "::1" }, () => {
+      probe.close(() => resolveCheck(true));
+    });
+  });
+}
 
 afterAll(async () => {
   upstream.closeAllConnections();
@@ -194,7 +208,9 @@ describe("forward proxy tunnels through the bot's own agents", () => {
 
   for (const { scheme, hosts } of cases) {
     for (const host of hosts) {
-      it(`${scheme} carries a request to ${host}`, async () => {
+      // The IPv6 flag is only known after `beforeAll`, so skip at runtime instead of registration.
+      it(`${scheme} carries a request to ${host}`, async (context) => {
+        context.skip(host.includes(":") && !ipv6Loopback, "no IPv6 loopback");
         const port = await startProxy(scheme);
 
         const response = await get(host, botAgent(`${scheme}://127.0.0.1:${port}`));

@@ -3,12 +3,10 @@ import type { AppContainer } from "../../app/bootstrap/app-container.js";
 import type { InteractionErrorScope } from "../../app/managers/interaction-manager.js";
 import { t } from "../../i18n/index.js";
 import { logger } from "../../utils/logger.js";
-import { handleAgentSelect } from "./agent-selection-callback-handler.js";
 import { handleCommandsCallback } from "./command-catalog-callback-handler.js";
 import { handleCompactConfirm, handleCompactDetails } from "./context-control-callback-handler.js";
 import { handleLsCallback, handleOpenCallback } from "./file-browser-callback-handler.js";
 import { handleInlineMenuCancel } from "./inline-menu-cancel-callback-handler.js";
-import { handleMcpsCallback } from "./mcp-catalog-callback-handler.js";
 import { handleMessagesCallback } from "./message-history-callback-handler.js";
 import {
   handleModelProvidersCallback,
@@ -21,7 +19,6 @@ import { handleProjectSelect } from "./project-callback-handler.js";
 import { handlePromptAttachmentCancel } from "./prompt-attachment-callback-handler.js";
 import { handleQuestionCallback } from "./question-callback-handler.js";
 import { handleRecentSelect } from "./recent-callback-handler.js";
-import { handleRenameCancel } from "./rename-callback-handler.js";
 import { handleSettingsCallback } from "./settings-callback-handler.js";
 import {
   handleBackgroundSessionOpen,
@@ -62,14 +59,6 @@ export function registerCallbackRouter(bot: Bot<Context>, deps: CallbackRouterDe
   const botDeps = { ...container, bot };
   const routes = new Map<string, CallbackRoute>([
     [
-      "agent",
-      {
-        name: "agent",
-        handlers: [(ctx) => handleAgentSelect(ctx, container)],
-        errorScope: "interaction",
-      },
-    ],
-    [
       "attach",
       {
         name: "attach",
@@ -94,14 +83,6 @@ export function registerCallbackRouter(bot: Bot<Context>, deps: CallbackRouterDe
       {
         name: "ls",
         handlers: [(ctx) => handleLsCallback(ctx, container)],
-        errorScope: "interaction",
-      },
-    ],
-    [
-      "mcps",
-      {
-        name: "mcps",
-        handlers: [(ctx) => handleMcpsCallback(ctx, container)],
         errorScope: "interaction",
       },
     ],
@@ -169,14 +150,6 @@ export function registerCallbackRouter(bot: Bot<Context>, deps: CallbackRouterDe
     [
       "recent",
       { name: "recent", handlers: [(ctx) => handleRecentSelect(ctx, botDeps)], errorScope: "interaction" },
-    ],
-    [
-      "rename",
-      {
-        name: "rename",
-        handlers: [(ctx) => handleRenameCancel(ctx, container)],
-        errorScope: "rename",
-      },
     ],
     [
       "session",

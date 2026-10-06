@@ -19,17 +19,15 @@ export const en = {
   "cmd.description.tasklist": "List scheduled tasks",
   "cmd.description.commands": "Custom commands",
   "cmd.description.skills": "Skills catalog",
-  "cmd.description.mcps": "MCP servers",
-  "cmd.description.opencode_start": "Start OpenCode server",
-  "cmd.description.opencode_stop": "Stop OpenCode server",
-  "cmd.description.reload": "Reload OpenCode configuration",
+  "cmd.description.reasonix_start": "Start the Reasonix server",
+  "cmd.description.reasonix_stop": "Stop the Reasonix servers",
+  "cmd.description.reload": "Reload Reasonix configuration",
   "cmd.description.ls": "List directory contents",
   "cmd.description.help": "Help",
 
   "callback.unknown_command": "Unknown command",
   "callback.processing_error": "Processing error",
 
-  "error.load_agents": "❌ Failed to load agents list",
   "error.load_models": "❌ Failed to load models list",
   "error.load_variants": "❌ Failed to load variants list",
   "error.context_button": "❌ Failed to process context button",
@@ -63,11 +61,9 @@ export const en = {
   "common.unknown_error": "unknown error",
 
   "start.welcome":
-    "👋 Welcome to OpenCode Telegram Bot!\n\nUse commands:\n/projects — select project\n/sessions — session list\n/new — new session\n/commands — custom commands\n/skills — skills catalog\n/task — scheduled task\n/tasklist — scheduled tasks\n/status — status\n/help — help\n\nUse the bottom buttons to select the agent, model, and variant.",
+    "👋 Welcome to Reasonix Telegram Bot!\n\nUse commands:\n/projects — select project\n/sessions — session list\n/new — new session\n/commands — custom commands\n/skills — skills catalog\n/task — scheduled task\n/tasklist — scheduled tasks\n/status — status\n/help — help\n\nUse the bottom buttons to select the agent, model, and variant.",
   "help.keyboard_hint":
     "💡 Use the bottom keyboard buttons for the agent, model, variant, and context actions.",
-  "help.text":
-    "📖 **Help**\n\n/status - Check server status\n/sessions - Session list\n/new - Create new session\n/help - Help",
 
   "bot.thinking": "💭 Thinking...",
   "progress.compact.activity": "{header}\n{activity}",
@@ -75,7 +71,6 @@ export const en = {
   "progress.compact.finished_header": "✅ Finished Work",
   "progress.compact.thinking": "💭 Thinking...",
   "progress.compact.responding": "✍️ Writing answer...",
-  "progress.compact.waiting_question": "❓ Waiting for your answer...",
   "progress.compact.waiting_permission": "🔐 Waiting for permission...",
   "progress.compact.retrying": "🔁 Retrying...",
   "progress.compact.task": "🤖 Running Task",
@@ -90,12 +85,12 @@ export const en = {
     "⏳ Agent is already running a task. Wait for completion or use /abort to interrupt current run.",
   "bot.session_reset_project_mismatch":
     "⚠️ Active session does not match the selected project, so it was reset. Use /sessions to pick one or /new to create a new session.",
-  "bot.prompt_send_error": "Failed to send request to OpenCode.",
+  "bot.prompt_send_error": "Failed to send request to Reasonix.",
   "bot.project_folder_missing":
     "🚫 The project folder no longer exists: {path}. Choose another project in /projects.",
   "bot.project_folder_missing_worktree":
     "🚫 The project folder no longer exists: {path}. Choose another worktree in /worktree.",
-  "bot.session_error": "🔴 OpenCode returned an error: {message}",
+  "bot.session_error": "🔴 Reasonix returned an error: {message}",
   "bot.assistant_reply_undelivered":
     "⚠️ The last assistant reply could not be delivered. Send your message again if you still need it.",
   "bot.stale_messages_skipped":
@@ -110,39 +105,28 @@ export const en = {
   "background.open_session_button": "Open session",
   "bot.unknown_command": "⚠️ Unknown command: {command}. Use /help to see available commands.",
   "bot.photo_downloading": "⏳ Downloading photo...",
-  "bot.photo_too_large": "⚠️ Photo is too large (max {maxSizeMb}MB)",
   "bot.photo_model_no_image": "⚠️ Current model doesn't support image input. Sending text only.",
   "bot.photo_download_error": "🔴 Failed to download photo",
-  "bot.photo_no_caption": "💡 Tip: Add a caption to describe what you want to do with this photo.",
   "bot.file_downloading": "⏳ Downloading file...",
   "bot.files_downloading": "⏳ Downloading files...",
-  "bot.file_too_large": "⚠️ File is too large (max {maxSizeMb}MB)",
   "bot.file_download_error": "🔴 Failed to download file",
   "bot.file_type_unsupported":
     "⚠️ This file type is not supported. Send an image, document (PDF, DOCX, PPTX), or text/code file.",
   "bot.rich_message_media_skipped": "⚠️ Skipped {count} unsupported media part(s).",
   "bot.message_type_unsupported": "⚠️ This message type is not supported.",
   "bot.media_group_not_processed":
-    "⚠️ One or more files in this album cannot be processed. Nothing was sent to OpenCode.",
+    "⚠️ One or more files in this album cannot be processed. Nothing was sent to Reasonix.",
   "bot.media_group_download_error":
-    "🔴 Failed to download one of the files. Nothing was sent to OpenCode.",
+    "🔴 Failed to download one of the files. Nothing was sent to Reasonix.",
   "bot.model_no_pdf": "⚠️ Current model doesn't support PDF input. Sending text only.",
   "bot.document_extraction_error": "🔴 Failed to extract document text.",
   "bot.text_file_too_large": "⚠️ Text file is too large (max {maxSizeKb}KB)",
 
-  "status.header_running": "🟢 OpenCode Server is running",
-  "status.health.healthy": "Healthy",
-  "status.health.unhealthy": "Unhealthy",
-  "status.line.health": "Status: {health}",
-  "status.line.version": "OpenCode version: {version}",
+  "status.header_running": "🟢 Reasonix Server is running",
+  "status.line.version": "Reasonix version: {version}",
   "status.line.bot_version": "Bot version: {version}",
-  "status.line.managed_yes": "Started by bot: Yes",
-  "status.line.managed_no": "Started by bot: No",
-  "status.line.pid": "PID: {pid}",
-  "status.line.uptime_sec": "Uptime: {seconds} sec",
   "status.line.mode": "Agent: {mode}",
   "status.line.model": "Model: {model}",
-  "status.line.tts": "Audio replies: {tts}",
   "status.tts.off": "Off",
   "status.tts.all": "All",
   "status.tts.auto": "Auto",
@@ -154,8 +138,8 @@ export const en = {
   "status.session_selected": "Current session: {title}",
   "status.session_not_selected": "Current session: not selected",
   "status.session_hint": "Use /sessions to select one or /new to create one",
-  "status.header_unavailable": "🔴 OpenCode Server is unavailable",
-  "status.unavailable_hint": "Use /opencode_start to start the server.",
+  "status.header_unavailable": "🔴 Reasonix Server is unavailable",
+  "status.unavailable_hint": "Use /reasonix_start to start the server.",
 
   "tts.off": "🔇 Audio replies disabled.",
   "tts.all": "🔊 Audio replies enabled for all messages.",
@@ -179,18 +163,17 @@ export const en = {
   "settings.value.on": "On",
   "settings.value.off": "Off",
   "settings.prompt_queue.queue": "Queue",
-  "settings.prompt_queue.steer": "Steer",
   "settings.saved": "✅ Setting saved.",
 
   "projects.empty":
-    "📭 No projects found.\n\nOpen a directory in OpenCode and create at least one session, then it will appear here.",
+    "📭 No projects found.\n\nOpen a directory in Reasonix and create at least one session, then it will appear here.",
   "projects.select": "Select a project:",
   "projects.select_with_current": "Select a project:\n\nCurrent: 🏗 {project}",
   "projects.page_indicator": "Page {current}/{total}",
   "projects.prev_page": "⬅️ Previous",
   "projects.next_page": "Next ➡️",
   "projects.fetch_error":
-    "🔴 OpenCode Server is unavailable or an error occurred while loading projects.",
+    "🔴 Reasonix Server is unavailable or an error occurred while loading projects.",
   "projects.page_load_error": "Cannot load this page. Please try again.",
   "projects.selected":
     "✅ Project selected: {project}\n\n📋 Session was reset. Use /sessions or /new for this project.",
@@ -202,7 +185,7 @@ export const en = {
   "sessions.select": "Select a session:",
   "sessions.select_page": "Select a session (page {page}):",
   "sessions.fetch_error":
-    "🔴 OpenCode Server is unavailable or an error occurred while loading sessions.",
+    "🔴 Reasonix Server is unavailable or an error occurred while loading sessions.",
   "sessions.select_project_first": "🔴 Project is not selected. Use /projects.",
   "sessions.page_empty_callback": "No sessions on this page",
   "sessions.page_load_error_callback": "Cannot load this page. Please try again.",
@@ -225,7 +208,7 @@ export const en = {
   "messages.select": "Choose a message:",
   "messages.select_page": "Choose a message (page {page}):",
   "messages.fetch_error":
-    "🔴 OpenCode Server is unavailable or an error occurred while loading messages.",
+    "🔴 Reasonix Server is unavailable or an error occurred while loading messages.",
   "messages.inactive_callback": "This messages menu is inactive",
   "messages.page_empty_callback": "No messages on this page",
   "messages.button.prev_page": "⬅️ Prev",
@@ -239,33 +222,18 @@ export const en = {
   "messages.fork_success": "🔀 Fork created from message:\n\n{text}",
   "messages.fork_error": "❌ Failed to create fork. Please try again.",
 
-  "attach.project_not_selected":
-    "🏗 Project is not selected.\n\nFirst select a project with /projects.",
-  "attach.session_not_selected":
-    "💬 Session is not selected.\n\nFirst choose a session with /sessions.",
-  "attach.session_project_mismatch":
-    "⚠️ The selected session does not match the current project. Choose the session again via /sessions.",
-  "attach.connected": "✅ Connected to session: {title}",
-  "attach.already_connected": "ℹ️ Already connected to session: {title}",
-  "attach.status.idle_message": "Status: idle. Waiting for new events.",
-  "attach.status.busy_message": "Status: busy. New prompts are temporarily blocked.",
-  "attach.restored_question": "Recovered a pending question for this session.",
-  "attach.restored_permissions": "Recovered pending permission requests: {count}.",
-  "attach.disconnect_hint": "To disconnect, switch to another session or project.",
-  "attach.error": "🔴 Failed to attach to the current session.",
-
   "detach.project_not_selected":
     "🏗 Project is not selected.\n\nFirst select a project with /projects.",
   "detach.no_active_session": "ℹ️ Bot is already detached from any session.",
   "detach.success":
-    "✅ Detached from session: {title}\n\nThe OpenCode session was not stopped. If it is still running, it will continue separately. To check it later, select it again via /sessions.",
+    "✅ Detached from session: {title}\n\nThe Reasonix session was not stopped. If it is still running, it will continue separately. To check it later, select it again via /sessions.",
   "detach.error": "🔴 Failed to detach from the current session.",
 
   "new.project_not_selected":
     "🏗 Project is not selected.\n\nFirst select a project with /projects.",
   "new.created": "✅ New session created: {title}",
   "new.create_error":
-    "🔴 OpenCode Server is unavailable or an error occurred while creating session.",
+    "🔴 Reasonix Server is unavailable or an error occurred while creating session.",
 
   "stop.no_active_session":
     "🛑 Agent was not started\n\nCreate a session with /new or select one via /sessions.",
@@ -282,56 +250,32 @@ export const en = {
   "stop.warn_local_only": "⚠️ Event stream stopped locally, but server-side abort failed.",
   "stop.error": "🔴 Failed to stop action.\n\nEvent stream is stopped, try /abort again.",
 
-  "opencode_start.already_running_managed":
-    "⚠️ OpenCode Server is already running\n\nPID: {pid}\nUptime: {seconds} seconds",
-  "opencode_start.already_running_external":
-    "✅ OpenCode Server is already running as an external process\n\nVersion: {version}\n\nThis server was not started by bot, so /opencode-stop cannot stop it.",
-  "opencode_start.already_running": "✅ OpenCode Server is already running\n\nVersion: {version}",
-  "opencode_start.remote_configured": "⚠️ /opencode_start works only with a local OpenCode Server.",
-  "opencode_start.starting": "🔄 Starting OpenCode Server...",
-  "opencode_start.start_error":
-    "🔴 Failed to start OpenCode Server\n\nError: {error}\n\nCheck that OpenCode CLI is installed and available in PATH:\nopencode --version\nnpm install -g @opencode-ai/cli",
-  "opencode_start.started_not_ready":
-    "⚠️ OpenCode Server started, but is not responding\n\nPID: {pid}\n\nServer may still be starting. Try /status in a few seconds.",
-  "opencode_start.success":
-    "✅ OpenCode Server started successfully\n\nPID: {pid}\nVersion: {version}",
-  "opencode_start.error":
-    "🔴 An error occurred while starting server.\n\nCheck application logs for details.",
-  "opencode_stop.external_running":
-    "⚠️ OpenCode Server is running as an external process\n\nThis server was not started via /opencode-start.\nStop it manually or use /status to check state.",
-  "opencode_stop.remote_configured": "⚠️ /opencode_stop works only with a local OpenCode Server.",
-  "opencode_stop.not_running": "⚠️ OpenCode Server is not running",
-  "opencode_stop.pid_not_found":
-    "⚠️ OpenCode Server responds on port {port}, but no local process was found to stop.",
-  "opencode_stop.stopping": "🛑 Stopping OpenCode Server...\n\nPID: {pid}",
-  "opencode_stop.stop_error": "🔴 Failed to stop OpenCode Server\n\nError: {error}",
-  "opencode_stop.still_running": "Server is still responding after the stop request.",
-  "opencode_stop.success": "✅ OpenCode Server stopped successfully",
-  "opencode_stop.error":
-    "🔴 An error occurred while stopping server.\n\nCheck application logs for details.",
-  "reload.reloading": "🔄 Reloading OpenCode configuration...",
-  "reload.success": "✅ OpenCode configuration reloaded",
-  "reload.failed": "🔴 Failed to reload OpenCode configuration",
-  "reload.failed_with_error": "🔴 Failed to reload OpenCode configuration\n\nError: {error}",
-
-  "agent.changed_message": "✅ Agent changed to: {name}",
-  "agent.change_error_callback": "Failed to change agent",
-  "agent.menu.current": "Current agent: {name}\n\nSelect agent:",
-  "agent.menu.select": "Select agent:",
-  "agent.menu.empty": "⚠️ No available agents",
-  "agent.menu.error": "🔴 Failed to get agents list",
+  "reasonix_start.already_running": "\u2705 Reasonix server is already running for this project",
+  "reasonix_start.starting": "\U0001f504 Starting the Reasonix server for this project...",
+  "reasonix_start.start_error":
+    "\U0001f534 Failed to start the Reasonix server\n\nError: {error}\n\nCheck that the Reasonix CLI is installed and on PATH:\nreasonix --version",
+  "reasonix_start.success":
+    "\u2705 Reasonix server started\n\nProject: {root}\nPort: {port}\nVersion: {version}",
+  "reasonix_start.error":
+    "\U0001f534 An error occurred while starting the server.\n\nCheck application logs for details.",
+  "reasonix_stop.not_running": "\u26a0\ufe0f No Reasonix server started by the bot is running.",
+  "reasonix_stop.stopping": "\U0001f6d1 Stopping {count} Reasonix server(s)...",
+  "reasonix_stop.success":
+    "\u2705 Stopped {count} Reasonix server(s). They start again on next use.",
+  "reasonix_stop.error":
+    "\U0001f534 An error occurred while stopping the server.\n\nCheck application logs for details.",
+  "reload.reloading": "🔄 Reloading Reasonix configuration...",
+  "reload.success": "✅ Reasonix configuration reloaded",
+  "reload.failed": "🔴 Failed to reload Reasonix configuration",
+  "reload.failed_with_error": "🔴 Failed to reload Reasonix configuration\n\nError: {error}",
 
   "model.changed_message": "✅ Model changed to: {name}",
   "model.change_error_callback": "Failed to change model",
-  "model.menu.empty": "⚠️ No available models",
   "model.menu.select": "Select model:",
-  "model.menu.current": "Current model: {name}\n\nSelect model:",
-  "model.menu.favorites_title": "⭐ Favorites (Add models to favorites in OpenCode CLI)",
+  "model.menu.favorites_title": "⭐ Favorites (Add models to favorites in Reasonix CLI)",
   "model.menu.favorites_empty": "— Empty.",
   "model.menu.recent_title": "🕘 Recent",
   "model.menu.recent_empty": "— Empty.",
-  "model.menu.favorites_hint":
-    "ℹ️ Add models to favorites in OpenCode CLI to keep them at the top.",
   "model.menu.error": "🔴 Failed to get models list",
   "model.search.button": "🔍 Search",
   "model.search.prompt": "🔍 Enter model name to search:",
@@ -390,7 +334,8 @@ export const en = {
   "permission.blocked.command_not_allowed":
     "⚠️ This command is not available until you answer the permission request.",
   "permission.header": "{emoji} Permission request: {name}\n\n",
-  "permission.grouped_count": "\n⚠️ {count} identical requests pending — your answer applies to all of them.\n",
+  "permission.grouped_count":
+    "\n⚠️ {count} identical requests pending — your answer applies to all of them.\n",
   "permission.button.allow": "✅ Allow once",
   "permission.button.always": "🔓 Allow always",
   "permission.button.reject": "❌ Reject",
@@ -400,7 +345,7 @@ export const en = {
   "permission.outcome.outside_suffix": " · answered outside Telegram",
   "permission.outcome.settled_outside": "☑️ Answered outside Telegram",
   "permission.outcome.not_answered": "⏹ Not answered",
-  "permission.delivery_failed": "⚠️ The answer did not reach OpenCode — tap again",
+  "permission.delivery_failed": "⚠️ The answer did not reach Reasonix — tap again",
   "permission.name.bash": "Bash",
   "permission.name.edit": "Edit",
   "permission.name.write": "Write",
@@ -434,18 +379,16 @@ export const en = {
   "question.summary.question": "Question {index}:\n{question}\n\n",
   "question.summary.answer": "Answer:\n{answer}\n\n",
 
-  "keyboard.agent_mode": "{emoji} {name} Agent",
   "keyboard.context": "📊 {used} / {limit} ({percent}%)",
   "keyboard.context_empty": "📊 0",
-  "keyboard.variant": "💭 {name}",
   "keyboard.variant_default": "💡 Default",
   "keyboard.queued_prompt": "❌ {index}. {text}",
-  "queue.added": "📥 Added to queue ({count}/{max}). It will be sent when the current task finishes.",
-  "queue.full": "⚠️ Queue is full ({max}). Remove a message or wait for the current task to finish.",
-  "queue.media_limit": "⚠️ Queued media is limited to {maxSizeMb} MiB. Wait for an item to send, then try again.",
+  "queue.added":
+    "📥 Added to queue ({count}/{max}). It will be sent when the current task finishes.",
+  "queue.full":
+    "⚠️ Queue is full ({max}). Remove a message or wait for the current task to finish.",
   "queue.removed": "🗑 Message removed from the queue.",
   "queue.not_found": "This message is no longer in the queue.",
-  "queue.steer_added": "📥 Added to the current task ({count}/{max}).",
   "queue.disabled_hint": "The message queue can be enabled in /settings.",
   "keyboard.updated": "⌨️ Keyboard updated",
 
@@ -454,23 +397,13 @@ export const en = {
   "pinned.line.project": "Project: {project}",
   "pinned.line.worktree": "Worktree: {worktree}",
   "pinned.line.model": "Model: {model}",
-  "pinned.line.attach": "Tracking: {status}",
-  "pinned.attach.status.idle": "active, idle",
-  "pinned.attach.status.busy": "active, busy",
   "pinned.line.context": "Context: {used} / {limit} ({percent}%)",
   "pinned.line.cost": "Cost: {cost} spent",
-  "subagent.header": "Subagent {agent}: {description}",
-  "subagent.line.status": "Status: {status}",
   "subagent.line.task": "Task: {task}",
   "subagent.line.agent": "Agent: {agent}",
   "subagent.working": "Working...",
-  "subagent.working_with_details": "Working: {details}",
   "subagent.completed": "Completed",
   "subagent.failed": "Task failed",
-  "subagent.status.pending": "pending",
-  "subagent.status.running": "running",
-  "subagent.status.completed": "completed",
-  "subagent.status.error": "error",
   "pinned.files.title": "Files ({count}):",
   "pinned.files.item": "  {path}{diff}",
   "pinned.files.more": "  ... and {count} more",
@@ -493,44 +426,15 @@ export const en = {
   "runtime.wizard.ask_user_id":
     "Enter your Telegram User ID (you can get it from @userinfobot).\n> ",
   "runtime.wizard.user_id_invalid": "Enter a positive integer (> 0).\n",
-  "runtime.wizard.ask_api_url":
-    "Enter OpenCode API URL (optional).\nPress Enter to use default: {defaultUrl}\n> ",
-  "runtime.wizard.ask_server_username":
-    "Enter OpenCode server username (optional).\nPress Enter to use default: {defaultUsername}\n> ",
-  "runtime.wizard.ask_server_password":
-    "Enter OpenCode server password (optional).\nPress Enter to keep it empty.\n> ",
-  "runtime.wizard.ask_server_version":
-    "Select OpenCode server version:\n1 - OpenCode V1 (1.x, npm package opencode-ai)\n2 - OpenCode V2 (2.x, npm package @opencode/cli)\nPress Enter to use default: {defaultVersion}\n> ",
-  "runtime.wizard.server_version_invalid": "Enter 1 or 2, or press Enter for default.\n",
-  "runtime.wizard.ask_server_password_required":
-    "Enter OpenCode V2 server password (required).\nShow it with: opencode service get password\n> ",
-  "runtime.wizard.server_password_required":
-    "The password is required for OpenCode V2. Please try again.\n",
-  "runtime.wizard.ask_server_password_keep":
-    "Enter OpenCode server password.\nPress Enter to keep the saved password.\n> ",
-  "runtime.wizard.api_url_invalid": "Enter a valid URL (http/https) or press Enter for default.\n",
-  "runtime.wizard.start": "OpenCode Telegram Bot setup.\n",
+  "runtime.wizard.start": "Reasonix Telegram Bot setup.\n",
   "runtime.wizard.saved": "Configuration saved:\n- {envPath}\n",
   "runtime.wizard.not_configured_starting":
     "Application is not configured yet. Starting wizard...\n",
   "runtime.wizard.tty_required":
-    "Interactive wizard requires a TTY terminal. Run `opencode-telegram config` in an interactive shell.",
-  "runtime.container.command_unavailable":
-    "⚠️ This command is not available in the Docker image.",
+    "Interactive wizard requires a TTY terminal. Run `reasonix-telegram config` in an interactive shell.",
+  "runtime.container.command_unavailable": "⚠️ This command is not available in the Docker image.",
 
-  "rename.no_session": "⚠️ No active session. Create or select a session first.",
-  "rename.prompt": "📝 Enter new title for session:\n\nCurrent: {title}",
-  "rename.empty_title": "⚠️ Title cannot be empty.",
-  "rename.success": "✅ Session renamed to: {title}",
-  "rename.error": "🔴 Failed to rename session.",
   "rename.cancelled": "❌ Rename cancelled.",
-  "rename.inactive_callback": "Rename request is inactive",
-  "rename.inactive": "⚠️ Rename request is not active. Run /rename again.",
-  "rename.blocked.expected_name":
-    "⚠️ Enter a new session name as text or tap Cancel in rename message.",
-  "rename.blocked.command_not_allowed":
-    "⚠️ This command is not available while rename is waiting for a new name.",
-  "rename.button.cancel": "❌ Cancel",
 
   "task.prompt.schedule":
     "⏰ Send the task schedule in natural language.\n\nExamples:\n- every 5 minutes\n- every day at 17:00\n- tomorrow at 12:00",
@@ -579,9 +483,9 @@ export const en = {
   "tasklist.inactive_callback": "This scheduled task menu is inactive",
   "tasklist.load_error": "🔴 Failed to load scheduled tasks.",
 
-  "commands.select": "Choose an OpenCode command:",
-  "commands.empty": "📭 No OpenCode commands are available for this project.",
-  "commands.fetch_error": "🔴 Failed to load OpenCode commands.",
+  "commands.select": "Choose a Reasonix command:",
+  "commands.empty": "📭 No Reasonix commands are available for this project.",
+  "commands.fetch_error": "🔴 Failed to load Reasonix commands.",
   "commands.no_description": "No description",
   "commands.button.execute": "✅ Execute",
   "commands.button.cancel": "❌ Cancel",
@@ -591,13 +495,11 @@ export const en = {
   "commands.execute_callback": "Executing command...",
   "commands.executing_prefix": "⚡ Executing command:",
   "commands.arguments_empty": "⚠️ Arguments cannot be empty. Send text or tap Execute.",
-  "commands.execute_error": "🔴 Failed to execute OpenCode command.",
-  "commands.select_page": "Choose an OpenCode command (page {page}):",
+  "commands.execute_error": "🔴 Failed to execute Reasonix command.",
+  "commands.select_page": "Choose a Reasonix command (page {page}):",
   "commands.button.prev_page": "⬅️ Prev",
   "commands.button.next_page": "Next ➡️",
   "commands.page_empty_callback": "No commands on this page",
-  "commands.page_load_error_callback": "Cannot load this page. Please try again.",
-  "commands.download.no_roots": "No allowed browser roots are configured.",
   "commands.download.downloading": "Downloading file...",
   "commands.download.not_found": "File not found",
   "commands.download.not_file": "Path is not a file",
@@ -606,9 +508,9 @@ export const en = {
   "commands.download.modified": "Modified",
   "commands.download.error": "Failed to download file.",
 
-  "skills.select": "Choose an OpenCode skill:",
-  "skills.empty": "📭 No OpenCode skills are available for this project.",
-  "skills.fetch_error": "🔴 Failed to load OpenCode skills.",
+  "skills.select": "Choose a Reasonix skill:",
+  "skills.empty": "📭 No Reasonix skills are available for this project.",
+  "skills.fetch_error": "🔴 Failed to load Reasonix skills.",
   "skills.no_description": "No description",
   "skills.button.execute": "✅ Execute",
   "skills.button.cancel": "❌ Cancel",
@@ -618,39 +520,10 @@ export const en = {
   "skills.execute_callback": "Using skill...",
   "skills.executing_prefix": "⚡ Using skill:",
   "skills.arguments_empty": "⚠️ Arguments cannot be empty. Send text or tap Execute.",
-  "skills.select_page": "Choose an OpenCode skill (page {page}):",
+  "skills.select_page": "Choose a Reasonix skill (page {page}):",
   "skills.button.prev_page": "⬅️ Prev",
   "skills.button.next_page": "Next ➡️",
   "skills.page_empty_callback": "No skills on this page",
-  "skills.page_load_error_callback": "Cannot load this page. Please try again.",
-
-  "mcps.select": "MCP servers:",
-  "mcps.empty": "📭 No MCP servers configured.",
-  "mcps.fetch_error": "🔴 Failed to load MCP servers.",
-  "mcps.toggle_error": "🔴 Failed to toggle MCP server.",
-  "mcps.enabling": "Enabling...",
-  "mcps.disabling": "Disabling...",
-  "mcps.status.connected": "🟢 Connected",
-  "mcps.status.disabled": "🔴 Disabled",
-  "mcps.status.failed": "⚠️ Failed",
-  "mcps.status.needs_auth": "🔒 Needs auth",
-  "mcps.status.needs_client_registration": "🔒 Needs registration",
-  "mcps.detail.title": "Server: {name}",
-  "mcps.detail.status": "Status: {status}",
-  "mcps.detail.error": "Error: {error}",
-  "mcps.button.enable": "🟢 Enable",
-  "mcps.button.disable": "🔴 Disable",
-  "mcps.button.back": "⬅️ Back",
-  "mcps.auth_required": "This server requires authorization and cannot be enabled from the bot.",
-
-  "cmd.description.rename": "Rename current session",
-
-  "legacy.models.fetch_error": "🔴 Failed to get models list. Check server status with /status.",
-  "legacy.models.empty": "📋 No available models. Configure providers in OpenCode.",
-  "legacy.models.header": "📋 Available models:\n\n",
-  "legacy.models.no_provider_models": "  ⚠️ No available models\n",
-  "legacy.models.env_hint": "💡 To use model in .env:\n",
-  "legacy.models.error": "🔴 An error occurred while loading models list.",
 
   "stt.recognizing": "🎤 Recognizing audio...",
   "stt.recognized": "🎤 Recognized:",
@@ -660,7 +533,6 @@ export const en = {
   "stt.empty_result": "🎤 No speech detected in the audio message.",
 
   "cmd.description.open": "Add a project by browsing directories",
-  "worktree.branch_detached": "detached HEAD",
   "worktree.select_with_current": "Select a worktree:",
   "worktree.project_not_selected":
     "🏗 Project is not selected.\n\nFirst select a project with /projects.",
@@ -700,7 +572,8 @@ export const en = {
   "attachment.added": "📎 Attached: {path}\n\nSend your message and the file will go with it.",
   "attachment.cancel": "❌ Cancel attachment",
   "attachment.cancelled": "❌ Attachment cancelled",
-  "attachment.invalid": "⚠️ The attached file is no longer available. Sending the message without it.",
+  "attachment.invalid":
+    "⚠️ The attached file is no longer available. Sending the message without it.",
   "local_command.empty_output": "The command produced no output.",
   "local_command.failed": "Command failed with exit code {exitCode}: {stderr}",
   "local_command.timeout": "The command timed out.",

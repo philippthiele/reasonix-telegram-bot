@@ -15,7 +15,6 @@ import { flushTelegramOutageNotices, isUnretriedTelegramSend } from "./telegram-
 import { LocalCommandRegistry } from "../app/services/local-command-registry.js";
 import { registerCallbackRouter } from "./callbacks/callback-router.js";
 import {
-  dispatchNextQueuedPrompt,
   initializePromptQueueDispatch,
 } from "./handlers/prompt-queue-dispatch.js";
 import { initializePromptHandover } from "./handlers/prompt-handover.js";
@@ -94,7 +93,7 @@ export function createBot(
   container.setTelegramContext(bot, config.telegram.allowedUserId);
 
   initializePromptQueueDispatch({ ...container, bot });
-  initializePromptHandover({ ...container, bot }, dispatchNextQueuedPrompt);
+  initializePromptHandover({ ...container, bot });
 
   container.setReadyRestoreHandler(async (reason) => {
     const restored = await restoreAttachedCurrentSession({
@@ -106,7 +105,7 @@ export function createBot(
     refreshModelViewsAfterLateCatalogSettle(container, reason);
 
     if (restored) {
-      logger.info(`[Bot] Restored followed session after OpenCode ready: reason=${reason}`);
+      logger.info(`[Bot] Restored followed session after Reasonix ready: reason=${reason}`);
       return;
     }
 
@@ -114,7 +113,7 @@ export function createBot(
     if (config.bot.trackBackgroundSessions && currentProject?.worktree) {
       await container.ensureEventSubscription(currentProject.worktree);
       logger.info(
-        `[Bot] Started background session tracking after OpenCode ready: reason=${reason}, directory=${currentProject.worktree}`,
+        `[Bot] Started background session tracking after Reasonix ready: reason=${reason}, directory=${currentProject.worktree}`,
       );
     }
   });

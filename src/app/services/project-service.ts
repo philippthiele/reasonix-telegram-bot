@@ -1,6 +1,6 @@
 import { readFile, stat } from "node:fs/promises";
 import path from "node:path";
-import { opencodeClient } from "../../opencode/client.js";
+import { reasonixClient } from "../../reasonix/client.js";
 import { config } from "../../config.js";
 import { getCachedSessionProjects } from "./session-cache-service.js";
 import { logger } from "../../utils/logger.js";
@@ -15,7 +15,7 @@ async function getResolvedProjects(options?: {
   includeLinkedWorktrees?: boolean;
 }): Promise<InternalProject[]> {
   const includeLinkedWorktrees = options?.includeLinkedWorktrees === true;
-  const { data: projects, error } = await opencodeClient.project.list();
+  const { data: projects, error } = await reasonixClient.project.list();
 
   if (error || !projects) {
     throw error || new Error("No data received from server");
@@ -137,7 +137,7 @@ export async function getProjects(): Promise<ProjectInfo[]> {
   return projects.map(({ id, worktree, name }) => ({ id, worktree, name }));
 }
 
-/** The projects to list: those whose folder the OpenCode server confirms is gone are left out. */
+/** The projects to list: those whose folder the Reasonix server confirms is gone are left out. */
 export async function getListedProjects(): Promise<ProjectInfo[]> {
   const projects = await getProjects();
   const missing = await findMissingFolders(projects.map((project) => project.worktree));

@@ -210,6 +210,17 @@ export interface ReasonixModelSettingsStatus {
   [key: string]: unknown;
 }
 
+/**
+ * `GET /status`. `window` is the active model's context window in tokens — the
+ * only place Reasonix exposes it; `GET /models` carries no context limit.
+ */
+export interface ReasonixStatusResponse {
+  window?: number;
+  used?: number;
+  label?: string;
+  [key: string]: unknown;
+}
+
 /** One entry of `GET /commands`. */
 export interface ReasonixCommand {
   name?: string;
@@ -287,4 +298,17 @@ export interface ReasonixInboxState {
     createdAt?: string;
   }> | null;
   capacity?: { items?: number; maxItems?: number };
+}
+
+/** The `ask` payload of a pending prompt: the questions and the id they answer. */
+export interface ReasonixAskFrame {
+  id?: string;
+  turnId?: string;
+  questions?: Array<{
+    id?: string;
+    header?: string;
+    prompt?: string;
+    multi?: boolean;
+    options?: Array<{ label?: string; description?: string }>;
+  }>;
 }

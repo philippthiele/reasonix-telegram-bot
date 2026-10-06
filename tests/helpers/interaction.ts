@@ -50,17 +50,6 @@ export function startInteractionForTest(
           sendsByMessageId: new Map(),
         },
       });
-    case "rename":
-      return interactionManager.start({
-        ...options,
-        kind: "rename",
-        payload: {
-          sessionId: "session-test",
-          sessionDirectory: "D:/repo",
-          currentTitle: "Test session",
-          messageId: null,
-        },
-      });
     case "task":
       return interactionManager.start({
         ...options,

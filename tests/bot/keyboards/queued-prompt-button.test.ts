@@ -1,11 +1,11 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import { promptQueue } from "../../../src/app/managers/prompt-queue-manager.js";
-import { createIncomingPrompt } from "../../../src/app/types/prompt.js";
 import {
   findQueuedPromptByButtonLabel,
   formatQueuedPromptButtonLabel,
   getQueuedPromptButtonLabels,
 } from "../../../src/bot/keyboards/queued-prompt-button.js";
+import { mirrorQueuedPrompt } from "../../helpers/prompt-queue.js";
 
 describe("bot/keyboards/queued-prompt-button", () => {
   beforeEach(() => {
@@ -27,29 +27,29 @@ describe("bot/keyboards/queued-prompt-button", () => {
   });
 
   it("numbers labels by queue position", () => {
-    promptQueue.add(createIncomingPrompt("first"));
-    promptQueue.add(createIncomingPrompt("second"));
+    mirrorQueuedPrompt("first");
+    mirrorQueuedPrompt("second");
 
     expect(getQueuedPromptButtonLabels()).toEqual(["❌ 1. first", "❌ 2. second"]);
   });
 
   it("finds the queued prompt behind a label", () => {
-    promptQueue.add(createIncomingPrompt("first"));
-    const second = promptQueue.add(createIncomingPrompt("second"));
+    mirrorQueuedPrompt("first");
+    const second = mirrorQueuedPrompt("second");
 
     expect(findQueuedPromptByButtonLabel("❌ 2. second")?.id).toBe(second!.id);
   });
 
   it("distinguishes duplicate texts by their position number", () => {
-    const first = promptQueue.add(createIncomingPrompt("same text"));
-    const second = promptQueue.add(createIncomingPrompt("same text"));
+    const first = mirrorQueuedPrompt("same text");
+    const second = mirrorQueuedPrompt("same text");
 
     expect(findQueuedPromptByButtonLabel("❌ 1. same text")?.id).toBe(first!.id);
     expect(findQueuedPromptByButtonLabel("❌ 2. same text")?.id).toBe(second!.id);
   });
 
   it("returns null for a label that no longer matches the queue", () => {
-    promptQueue.add(createIncomingPrompt("first"));
+    mirrorQueuedPrompt("first");
 
     expect(findQueuedPromptByButtonLabel("❌ 2. gone")).toBeNull();
   });

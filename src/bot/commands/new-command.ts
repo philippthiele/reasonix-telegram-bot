@@ -1,7 +1,7 @@
 import type { Bot } from "grammy";
 import type { AppContainer } from "../../app/bootstrap/app-container.js";
 import { CommandContext, Context } from "grammy";
-import { opencodeClient } from "../../opencode/client.js";
+import { reasonixClient } from "../../reasonix/client.js";
 import { setCurrentSession } from "../../app/services/session-service.js";
 import type { SessionInfo } from "../../app/types/session.js";
 import { ingestSessionInfoForCache } from "../../app/services/session-cache-service.js";
@@ -55,7 +55,7 @@ export async function newCommand(ctx: CommandContext<Context>, deps: NewCommandD
 
     logger.debug("[Bot] Creating new session for directory:", currentProject.worktree);
 
-    const { data: session, error } = await opencodeClient.session.create({
+    const { data: session, error } = await reasonixClient.session.create({
       directory: currentProject.worktree,
     });
 
@@ -89,7 +89,6 @@ export async function newCommand(ctx: CommandContext<Context>, deps: NewCommandD
     const contextInfo = deps.keyboardManager.getContextInfo();
     const variantName = formatVariantForButton(currentModel.variant || "default");
     const keyboard = createMainKeyboard(
-      currentAgent,
       currentModel,
       contextInfo ?? undefined,
       variantName,

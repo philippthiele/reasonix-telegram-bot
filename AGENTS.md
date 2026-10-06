@@ -4,7 +4,7 @@ Instructions for AI agents working on this project.
 
 ## About the project
 
-**opencode-telegram-bot** is a Telegram bot that acts as a mobile client for OpenCode.
+**reasonix-telegram-bot** is a Telegram bot that acts as a mobile client for Reasonix.
 It lets a user run and monitor coding tasks on a local machine through Telegram.
 
 Functional requirements, features, and development status are in [PRODUCT.md](./PRODUCT.md).
@@ -21,7 +21,7 @@ Functional requirements, features, and development status are in [PRODUCT.md](./
 
 - `grammy` - Telegram Bot API framework (https://grammy.dev/)
 - `@grammyjs/menu` - inline keyboards and menus
-- `@opencode-ai/sdk` - official OpenCode Server SDK
+- `@opencode-ai/sdk` - Reasonix server SDK, used for payload types; all requests go through `src/reasonix/http.ts`
 - `dotenv` - environment variable loading
 
 ### Test dependencies
@@ -39,10 +39,10 @@ Functional requirements, features, and development status are in [PRODUCT.md](./
 ### Main components
 
 1. **Bot Layer** - grammY setup, middleware, commands, callback handlers
-2. **OpenCode Client Layer** - SDK wrapper and SSE event subscription
+2. **Reasonix Client Layer** - HTTP/SSE client, event subscription, and event translation
 3. **State Managers** - session/project/settings/question/permission/model/agent/variant/keyboard/pinned
 4. **Summary Pipeline** - event aggregation and Telegram-friendly formatting
-5. **Process Manager** - local OpenCode server process start, stop, and status
+5. **Instance Manager** - one `reasonix serve` per project root (stable port, own token)
 6. **Runtime/CLI Layer** - runtime mode, config bootstrap, CLI commands
 7. **I18n Layer** - localized bot and CLI strings to multiple languages
 
@@ -51,10 +51,10 @@ Functional requirements, features, and development status are in [PRODUCT.md](./
 ```text
 Telegram User
   -> Telegram Bot (grammY)
-  -> Managers + OpenCodeClient
-  -> OpenCode Server
+  -> Managers + reasonixClient
+  -> reasonix serve (per root)
 
-OpenCode Server
+reasonix serve
   -> SSE Events
   -> Event Listener
   -> Summary Aggregator / Tool Managers
@@ -66,7 +66,7 @@ OpenCode Server
 
 - Persistent state is stored in `settings.json`.
 - Active runtime state is kept in dedicated in-memory managers.
-- Session/project/model/agent context is synchronized through OpenCode API calls.
+- Session/project/model/agent context is synchronized through Reasonix API calls.
 - The app is currently single-user by design.
 
 ## AI agent behavior rules
@@ -180,11 +180,22 @@ const COMMAND_DEFINITIONS: BotCommandI18nDefinition[] = [
   { command: "status", descriptionKey: "cmd.description.status" },
   { command: "new", descriptionKey: "cmd.description.new" },
   { command: "abort", descriptionKey: "cmd.description.stop" },
+  { command: "detach", descriptionKey: "cmd.description.detach" },
   { command: "sessions", descriptionKey: "cmd.description.sessions" },
+  { command: "recent", descriptionKey: "cmd.description.recent" },
+  { command: "messages", descriptionKey: "cmd.description.messages" },
+  { command: "settings", descriptionKey: "cmd.description.settings" },
   { command: "projects", descriptionKey: "cmd.description.projects" },
-  { command: "rename", descriptionKey: "cmd.description.rename" },
-  { command: "opencode_start", descriptionKey: "cmd.description.opencode_start" },
-  { command: "opencode_stop", descriptionKey: "cmd.description.opencode_stop" },
+  { command: "worktree", descriptionKey: "cmd.description.worktree" },
+  { command: "task", descriptionKey: "cmd.description.task" },
+  { command: "tasklist", descriptionKey: "cmd.description.tasklist" },
+  { command: "commands", descriptionKey: "cmd.description.commands" },
+  { command: "skills", descriptionKey: "cmd.description.skills" },
+  { command: "reasonix_start", descriptionKey: "cmd.description.reasonix_start" },
+  { command: "reasonix_stop", descriptionKey: "cmd.description.reasonix_stop" },
+  { command: "reload", descriptionKey: "cmd.description.reload" },
+  { command: "open", descriptionKey: "cmd.description.open" },
+  { command: "ls", descriptionKey: "cmd.description.ls" },
   { command: "help", descriptionKey: "cmd.description.help" },
 ];
 ```
@@ -236,7 +247,7 @@ Important:
 ### What to test
 
 - Unit tests for business logic, formatters, managers, runtime helpers
-- Integration-style tests around OpenCode SDK interaction using mocks
+- Integration-style tests around Reasonix HTTP/SSE interaction using mocks
 - Focus on critical paths; avoid over-testing trivial code
 
 ### Test structure
@@ -246,35 +257,42 @@ Important:
 - Follow Arrange-Act-Assert
 - Use `vi.mock()` for external dependencies
 
-## OpenCode SDK quick reference
+### End-to-end (browser) checks
 
-The example below is the V1 client. OpenCode V2 goes through `@opencode/client`, wrapped in `src/opencode/v2/`.
+Beyond vitest, the bot is checked end-to-end by driving the real test bot
+through Telegram Web with Playwright MCP. The agent runbook is
+[`e2e/AGENTS.md`](./e2e/AGENTS.md); one-time human setup is in
+[`e2e/README.md`](./e2e/README.md). Run `e2e/scenarios/` first, then the
+feature scenario, and always stop the stand when done.
+
+## Reasonix client quick reference
+
+There is no SDK client instance. `src/reasonix/instance.ts` starts one `reasonix serve` per project root on a stable port in `47610`-`47809` with its own token, and `src/reasonix/http.ts` performs the authenticated requests and the SSE subscription.
 
 ```typescript
-import { createOpencodeClient } from "@opencode-ai/sdk";
+import { getInstance, configuredRoots } from "./reasonix/instance.js";
+import { request, streamEvents } from "./reasonix/http.js";
 
-const client = createOpencodeClient({ baseUrl: "http://localhost:4096" });
+// Every call resolves the instance for its project root first.
+const instance = await getInstance(root);
+const { data, error } = await request<SessionListData>(
+  instance.baseUrl,
+  instance.token,
+  "/session",
+);
 
-await client.global.health();
-
-await client.project.list();
-await client.project.current();
-
-await client.session.list();
-await client.session.create({ body: { title: "My session" } });
-await client.session.prompt({
-  path: { id: "session-id" },
-  body: { parts: [{ type: "text", text: "Implement feature X" }] },
-});
-await client.session.abort({ path: { id: "session-id" } });
-
-const events = await client.event.subscribe();
-for await (const event of events.stream) {
-  // handle SSE event
+for await (const event of streamEvents(instance.baseUrl, instance.token)) {
+  // raw Reasonix SSE event
 }
 ```
 
-Full docs: https://opencode.ai/docs/sdk
+Key modules:
+
+- `src/reasonix/instance.ts` - per-root `serve` lifecycle, stable port allocation, token state
+- `src/reasonix/http.ts` - authenticated HTTP requests, `request()` result type, SSE streaming
+- `src/reasonix/mappers.ts` - Reasonix payloads to internal domain types
+- `src/reasonix/events.ts` - Reasonix SSE event translation
+- `src/reasonix/client.ts` - the facade used by the bot layer
 
 ## Workflow
 

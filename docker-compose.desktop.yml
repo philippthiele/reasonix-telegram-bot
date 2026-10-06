@@ -1,8 +1,9 @@
 services:
-  opencode-bot:
+  reasonix-bot:
+    # Docker Desktop does not support `network_mode: host`, so the Linux base
+    # override is replaced with the default bridge network. The bot only talks to
+    # the `reasonix serve` instances it spawns on its own container loopback, so
+    # no host port forwarding is required.
     network_mode: bridge
-    extra_hosts:
-      - "host.docker.internal:host-gateway"
     environment:
-      OPENCODE_API_URL: http://host.docker.internal:4096
-      OPENCODE_TELEGRAM_CONTAINER: "1"
+      REASONIX_TELEGRAM_CONTAINER: "1"

@@ -13,15 +13,8 @@ import {
   t,
   type Locale,
 } from "../i18n/index.js";
-import type { OpencodeServerVersion } from "../config.js";
 
-const DEFAULT_API_URLS: Record<OpencodeServerVersion, string> = {
-  v1: "http://localhost:4096",
-  v2: "http://127.0.0.1:49374",
-};
-const SERVER_VERSION_OPTIONS: ReadonlyArray<OpencodeServerVersion> = ["v1", "v2"];
-const DEFAULT_SERVER_USERNAME = "opencode";
-const FALLBACK_MODEL_PROVIDER = "opencode";
+const FALLBACK_MODEL_PROVIDER = "reasonix";
 const FALLBACK_MODEL_ID = "big-pickle";
 
 interface ModelDefaults {
@@ -38,22 +31,14 @@ interface WizardCollectedValues {
   locale: Locale;
   token: string;
   allowedUserId: string;
-  serverVersion: OpencodeServerVersion;
-  apiUrl?: string | undefined;
-  serverUsername: string;
-  serverPassword?: string | undefined;
 }
 
 export interface WizardEnvValues {
   BOT_LOCALE: Locale;
   TELEGRAM_BOT_TOKEN: string;
   TELEGRAM_ALLOWED_USER_ID: string;
-  OPENCODE_SERVER_VERSION: OpencodeServerVersion;
-  OPENCODE_API_URL?: string | undefined;
-  OPENCODE_SERVER_USERNAME: string;
-  OPENCODE_SERVER_PASSWORD?: string | undefined;
-  OPENCODE_MODEL_PROVIDER: string;
-  OPENCODE_MODEL_ID: string;
+  REASONIX_MODEL_PROVIDER: string;
+  REASONIX_MODEL_ID: string;
 }
 
 interface ParsedEnvAssignmentLine {
@@ -67,25 +52,12 @@ const WIZARD_ENV_KEYS: ReadonlyArray<keyof WizardEnvValues> = [
   "BOT_LOCALE",
   "TELEGRAM_BOT_TOKEN",
   "TELEGRAM_ALLOWED_USER_ID",
-  "OPENCODE_SERVER_VERSION",
-  "OPENCODE_API_URL",
-  "OPENCODE_SERVER_USERNAME",
-  "OPENCODE_SERVER_PASSWORD",
-  "OPENCODE_MODEL_PROVIDER",
-  "OPENCODE_MODEL_ID",
+  "REASONIX_MODEL_PROVIDER",
+  "REASONIX_MODEL_ID",
 ];
 
 function isPositiveInteger(value: string): boolean {
   return /^[1-9]\d*$/.test(value);
-}
-
-function isValidHttpUrl(value: string): boolean {
-  try {
-    const parsed = new URL(value);
-    return parsed.protocol === "http:" || parsed.protocol === "https:";
-  } catch {
-    return false;
-  }
 }
 
 export function validateRuntimeEnvValues(values: Record<string, string>): EnvValidationResult {
@@ -97,17 +69,12 @@ export function validateRuntimeEnvValues(values: Record<string, string>): EnvVal
     return { isValid: false, reason: "Invalid TELEGRAM_ALLOWED_USER_ID" };
   }
 
-  if (!values.OPENCODE_MODEL_PROVIDER || values.OPENCODE_MODEL_PROVIDER.trim().length === 0) {
-    return { isValid: false, reason: "Missing OPENCODE_MODEL_PROVIDER" };
+  if (!values.REASONIX_MODEL_PROVIDER || values.REASONIX_MODEL_PROVIDER.trim().length === 0) {
+    return { isValid: false, reason: "Missing REASONIX_MODEL_PROVIDER" };
   }
 
-  if (!values.OPENCODE_MODEL_ID || values.OPENCODE_MODEL_ID.trim().length === 0) {
-    return { isValid: false, reason: "Missing OPENCODE_MODEL_ID" };
-  }
-
-  const apiUrl = values.OPENCODE_API_URL?.trim();
-  if (apiUrl && !isValidHttpUrl(apiUrl)) {
-    return { isValid: false, reason: "Invalid OPENCODE_API_URL" };
+  if (!values.REASONIX_MODEL_ID || values.REASONIX_MODEL_ID.trim().length === 0) {
+    return { isValid: false, reason: "Missing REASONIX_MODEL_ID" };
   }
 
   return { isValid: true };
@@ -220,12 +187,8 @@ function buildFlatEnvFileContent(existingContent: string, values: WizardEnvValue
     ["BOT_LOCALE", values.BOT_LOCALE],
     ["TELEGRAM_BOT_TOKEN", values.TELEGRAM_BOT_TOKEN],
     ["TELEGRAM_ALLOWED_USER_ID", values.TELEGRAM_ALLOWED_USER_ID],
-    ["OPENCODE_SERVER_VERSION", values.OPENCODE_SERVER_VERSION],
-    ["OPENCODE_API_URL", values.OPENCODE_API_URL],
-    ["OPENCODE_SERVER_USERNAME", values.OPENCODE_SERVER_USERNAME],
-    ["OPENCODE_SERVER_PASSWORD", values.OPENCODE_SERVER_PASSWORD],
-    ["OPENCODE_MODEL_PROVIDER", values.OPENCODE_MODEL_PROVIDER],
-    ["OPENCODE_MODEL_ID", values.OPENCODE_MODEL_ID],
+    ["REASONIX_MODEL_PROVIDER", values.REASONIX_MODEL_PROVIDER],
+    ["REASONIX_MODEL_ID", values.REASONIX_MODEL_ID],
   ];
 
   for (const [key, value] of orderedUpdates) {
@@ -340,8 +303,8 @@ function loadModelDefaultsFromEnvExample(envExampleContent: string | null): Mode
 
     const parsed = dotenv.parse(envExampleContent);
 
-    const provider = parsed.OPENCODE_MODEL_PROVIDER?.trim();
-    const modelId = parsed.OPENCODE_MODEL_ID?.trim();
+    const provider = parsed.REASONIX_MODEL_PROVIDER?.trim();
+    const modelId = parsed.REASONIX_MODEL_ID?.trim();
 
     if (!provider || !modelId) {
       return fallbackDefaults;
@@ -486,116 +449,7 @@ async function askAllowedUserId(): Promise<string> {
   }
 }
 
-/**
- * The version offered by default: the saved choice on a re-run (an `.env` without it runs
- * V1), V2 on a first setup.
- */
-export function getWizardServerVersionDefault(
-  existingEnvContent: string | null,
-): OpencodeServerVersion {
-  if (existingEnvContent === null) {
-    return "v2";
-  }
-
-  const savedVersion = dotenv.parse(existingEnvContent).OPENCODE_SERVER_VERSION;
-  return savedVersion?.trim().toLowerCase() === "v2" ? "v2" : "v1";
-}
-
-/** An empty answer keeps the saved password. */
-export function pickServerPassword(
-  answer: string,
-  savedPassword: string | undefined,
-): string | undefined {
-  return answer || savedPassword || undefined;
-}
-
-function formatServerVersion(version: OpencodeServerVersion): string {
-  return version.toUpperCase();
-}
-
-async function askServerVersion(
-  defaultVersion: OpencodeServerVersion,
-): Promise<OpencodeServerVersion> {
-  const prompt = t("runtime.wizard.ask_server_version", {
-    defaultVersion: formatServerVersion(defaultVersion),
-  });
-
-  for (;;) {
-    const answer = (await askVisible(prompt)).toLowerCase();
-
-    if (!answer) {
-      return defaultVersion;
-    }
-
-    const selectedVersion = SERVER_VERSION_OPTIONS.find(
-      (version, index) => answer === version || answer === String(index + 1),
-    );
-    if (selectedVersion) {
-      return selectedVersion;
-    }
-
-    process.stdout.write(t("runtime.wizard.server_version_invalid"));
-  }
-}
-
-async function askApiUrl(serverVersion: OpencodeServerVersion): Promise<string | undefined> {
-  const prompt = t("runtime.wizard.ask_api_url", { defaultUrl: DEFAULT_API_URLS[serverVersion] });
-
-  for (;;) {
-    const apiUrl = await askVisible(prompt);
-
-    if (!apiUrl) {
-      return undefined;
-    }
-
-    if (!isValidHttpUrl(apiUrl)) {
-      process.stdout.write(t("runtime.wizard.api_url_invalid"));
-      continue;
-    }
-
-    return apiUrl;
-  }
-}
-
-async function askServerUsername(): Promise<string> {
-  const prompt = t("runtime.wizard.ask_server_username", {
-    defaultUsername: DEFAULT_SERVER_USERNAME,
-  });
-
-  const username = await askVisible(prompt);
-  if (!username) {
-    return DEFAULT_SERVER_USERNAME;
-  }
-
-  return username;
-}
-
-async function askServerPassword(
-  serverVersion: OpencodeServerVersion,
-  savedPassword: string | undefined,
-): Promise<string | undefined> {
-  if (savedPassword) {
-    const answer = await askHidden(t("runtime.wizard.ask_server_password_keep"));
-    return pickServerPassword(answer, savedPassword);
-  }
-
-  if (serverVersion === "v1") {
-    return pickServerPassword(await askHidden(t("runtime.wizard.ask_server_password")), undefined);
-  }
-
-  for (;;) {
-    const password = await askHidden(t("runtime.wizard.ask_server_password_required"));
-    if (password) {
-      return password;
-    }
-
-    process.stdout.write(t("runtime.wizard.server_password_required"));
-  }
-}
-
-async function collectWizardValues(
-  existingEnvContent: string | null,
-): Promise<WizardCollectedValues> {
+async function collectWizardValues(): Promise<WizardCollectedValues> {
   const locale = await askLocale();
   setRuntimeLocale(locale);
   const selectedLocaleOption =
@@ -616,25 +470,10 @@ async function collectWizardValues(
 
   const token = await askToken();
   const allowedUserId = await askAllowedUserId();
-  const serverVersion = await askServerVersion(getWizardServerVersionDefault(existingEnvContent));
-  const apiUrl = await askApiUrl(serverVersion);
-  const serverUsername = await askServerUsername();
-  const savedPassword = existingEnvContent
-    ? dotenv.parse(existingEnvContent).OPENCODE_SERVER_PASSWORD?.trim()
-    : undefined;
-  const serverPassword = await askServerPassword(serverVersion, savedPassword);
 
   process.stdout.write("\n");
 
-  return {
-    locale,
-    token,
-    allowedUserId,
-    serverVersion,
-    apiUrl,
-    serverUsername,
-    serverPassword,
-  };
+  return { locale, token, allowedUserId };
 }
 
 function ensureInteractiveTty(): void {
@@ -664,23 +503,19 @@ async function runWizardAndPersist(runtimePaths: RuntimePaths): Promise<void> {
     readEnvFileIfExists(runtimePaths.envFilePath),
     loadEnvExampleContent(),
   ]);
-  const wizardValues = await collectWizardValues(existingContent);
+  const wizardValues = await collectWizardValues();
 
   const modelDefaults = loadModelDefaultsFromEnvExample(envExampleContent);
   const existingParsed = existingContent ? dotenv.parse(existingContent) : {};
-  const provider = existingParsed.OPENCODE_MODEL_PROVIDER || modelDefaults.provider;
-  const modelId = existingParsed.OPENCODE_MODEL_ID || modelDefaults.modelId;
+  const provider = existingParsed.REASONIX_MODEL_PROVIDER || modelDefaults.provider;
+  const modelId = existingParsed.REASONIX_MODEL_ID || modelDefaults.modelId;
 
   const envValues: WizardEnvValues = {
     BOT_LOCALE: wizardValues.locale,
     TELEGRAM_BOT_TOKEN: wizardValues.token,
     TELEGRAM_ALLOWED_USER_ID: wizardValues.allowedUserId,
-    OPENCODE_SERVER_VERSION: wizardValues.serverVersion,
-    OPENCODE_API_URL: wizardValues.apiUrl,
-    OPENCODE_SERVER_USERNAME: wizardValues.serverUsername,
-    OPENCODE_SERVER_PASSWORD: wizardValues.serverPassword,
-    OPENCODE_MODEL_PROVIDER: provider,
-    OPENCODE_MODEL_ID: modelId,
+    REASONIX_MODEL_PROVIDER: provider,
+    REASONIX_MODEL_ID: modelId,
   };
 
   const envContent = buildEnvFileContent(existingContent ?? "", envValues, envExampleContent);

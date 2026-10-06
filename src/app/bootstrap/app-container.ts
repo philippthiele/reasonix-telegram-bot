@@ -2,12 +2,11 @@ import type { Bot, Context } from "grammy";
 import { createEventSubscriptionService } from "../../bot/services/event-subscription-service.js";
 import { KeyboardManager } from "../../bot/keyboards/keyboard-manager.js";
 import { PinnedMessageManager } from "../../bot/pinned/pinned-message-manager.js";
-import { OpencodeAutoRestartService } from "../../opencode/auto-restart.js";
 import {
-  OpencodeReadyLifecycle,
-  type OpencodeReadyHandler,
-} from "../../opencode/ready-lifecycle.js";
-import { stopModelCatalogWait } from "../../opencode/ready-refresh.js";
+  ReasonixReadyLifecycle,
+  type ReasonixReadyHandler,
+} from "../../reasonix/ready-lifecycle.js";
+import { stopModelCatalogWait } from "../../reasonix/ready-refresh.js";
 import { logger } from "../../utils/logger.js";
 import { AssistantRunState } from "../managers/assistant-run-state-manager.js";
 import { AttachManager } from "../managers/attach-manager.js";
@@ -17,7 +16,6 @@ import { ForegroundSessionState } from "../managers/foreground-session-state-man
 import { InteractionManager, type InteractionErrorScope } from "../managers/interaction-manager.js";
 import { PermissionManager } from "../managers/permission-manager.js";
 import { QuestionManager } from "../managers/question-manager.js";
-import { RenameManager } from "../managers/rename-manager.js";
 import { TaskCreationManager } from "../managers/scheduled-task-creation-manager.js";
 import { SummaryAggregator } from "../managers/summary-aggregation-manager.js";
 import { ScheduledTaskRuntime } from "../services/scheduled-task-runtime-service.js";
@@ -40,12 +38,10 @@ export interface AppContainer {
   readonly foregroundSessionState: ForegroundSessionState;
   readonly interactionManager: InteractionManager;
   readonly keyboardManager: KeyboardManager;
-  readonly opencodeAutoRestartService: OpencodeAutoRestartService;
-  readonly opencodeReadyLifecycle: OpencodeReadyLifecycle;
+  readonly reasonixReadyLifecycle: ReasonixReadyLifecycle;
   readonly permissionManager: PermissionManager;
   readonly pinnedMessageManager: PinnedMessageManager;
   readonly questionManager: QuestionManager;
-  readonly renameManager: RenameManager;
   readonly scheduledTaskRuntime: ScheduledTaskRuntime;
   readonly summaryAggregator: SummaryAggregator;
   readonly taskCreationManager: TaskCreationManager;
@@ -55,7 +51,7 @@ export interface AppContainer {
   /** Replaces any running heartbeat. */
   startHeartbeat(): void;
   /** Replaces any registered ready-restore handler. */
-  setReadyRestoreHandler(handler: OpencodeReadyHandler): void;
+  setReadyRestoreHandler(handler: ReasonixReadyHandler): void;
 
   /** Drops the open interaction and anything waiting behind it. */
   resetInteractions(reason: string): void;
@@ -82,7 +78,7 @@ export interface AppContainer {
 export function createAppContainer(): AppContainer {
   const foregroundSessionState = new ForegroundSessionState();
   const interactionManager = new InteractionManager();
-  const opencodeReadyLifecycle = new OpencodeReadyLifecycle();
+  const reasonixReadyLifecycle = new ReasonixReadyLifecycle();
   const summaryAggregator = new SummaryAggregator();
 
   let heartbeatTimer: ReturnType<typeof setInterval> | null = null;
@@ -108,12 +104,10 @@ export function createAppContainer(): AppContainer {
     foregroundSessionState,
     interactionManager,
     keyboardManager: new KeyboardManager(),
-    opencodeAutoRestartService: new OpencodeAutoRestartService(opencodeReadyLifecycle),
-    opencodeReadyLifecycle,
+    reasonixReadyLifecycle,
     permissionManager: new PermissionManager(interactionManager),
     pinnedMessageManager: new PinnedMessageManager(),
     questionManager: new QuestionManager(interactionManager),
-    renameManager: new RenameManager(interactionManager),
     scheduledTaskRuntime: new ScheduledTaskRuntime(foregroundSessionState),
     summaryAggregator,
     taskCreationManager: new TaskCreationManager(interactionManager),
@@ -134,7 +128,7 @@ export function createAppContainer(): AppContainer {
 
     setReadyRestoreHandler: (handler) => {
       stopReadyRestore();
-      unsubscribeReadyRestore = opencodeReadyLifecycle.onReady(handler);
+      unsubscribeReadyRestore = reasonixReadyLifecycle.onReady(handler);
     },
 
     resetInteractions: (reason) => interactionManager.reset(reason),

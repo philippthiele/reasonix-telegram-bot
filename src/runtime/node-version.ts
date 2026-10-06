@@ -14,10 +14,8 @@ const SUPPORTED_NODE_VERSIONS = "22.14+, 23.6+, or 24+";
 /**
  * Returns an error message when the running Node.js is too old, otherwise null.
  *
- * Must be checked before any module that loads a native addon is imported:
- * better-sqlite3 crashes the process with SIGSEGV on unsupported Node.js
- * versions, and such a crash cannot be caught by try/catch. Its prebuilt addon
- * requires Node-API v10, which landed in Node.js 22.14 and 23.6.
+ * The bot spawns a `reasonix serve` child and talks to it over HTTP and SSE,
+ * which needs Node-API v10 from the runtime: it landed in Node.js 22.14 and 23.6.
  */
 export function getUnsupportedNodeVersionMessage(
   version: string = process.versions.node,
@@ -39,7 +37,7 @@ export function getUnsupportedNodeVersionMessage(
   }
 
   return [
-    `OpenCode Telegram Bot requires Node.js ${SUPPORTED_NODE_VERSIONS}, but the current version is v${version}.`,
+    `Reasonix Telegram Bot requires Node.js ${SUPPORTED_NODE_VERSIONS}, but the current version is v${version}.`,
     "Update Node.js and try again: https://nodejs.org",
   ].join("\n");
 }

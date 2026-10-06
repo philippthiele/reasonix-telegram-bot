@@ -8,9 +8,9 @@ import { warmupSessionDirectoryCache } from "../app/services/session-cache-servi
 import { logger } from "../utils/logger.js";
 import { safeBackgroundTask } from "../utils/safe-background-task.js";
 import type { AppContainer } from "../app/bootstrap/app-container.js";
-import { checkOpencodeHealth } from "./server-health.js";
+import { checkReasonixHealth } from "../reasonix/health.js";
 
-export type ReadyRefreshDeps = Pick<AppContainer, "opencodeReadyLifecycle">;
+export type ReadyRefreshDeps = Pick<AppContainer, "reasonixReadyLifecycle">;
 
 const MODEL_CATALOG_WAIT_TIMEOUT_MS = 3000;
 const MODEL_CATALOG_POLL_INTERVAL_MS = 500;
@@ -146,14 +146,14 @@ async function waitForSettledModelCatalog(
 
     if (!warmupEnded) {
       logger.debug(
-        `[OpenCodeReady] Model catalog warm-up still open, reading again: reason=${reason}`,
+        `[ReasonixReady] Model catalog warm-up still open, reading again: reason=${reason}`,
       );
       continue;
     }
 
     if (!isModelCatalogComplete(result)) {
       logger.warn(
-        `[OpenCodeReady] Model catalog warm-up ended with expected providers missing: reason=${reason}`,
+        `[ReasonixReady] Model catalog warm-up ended with expected providers missing: reason=${reason}`,
       );
     }
 
@@ -174,12 +174,12 @@ async function refreshModelCatalogAfterReady(reason: string): Promise<void> {
     if (Date.now() - startedAt >= MODEL_CATALOG_WAIT_TIMEOUT_MS) {
       const state = result.catalogAvailable ? "incomplete" : "unavailable";
       logger.warn(
-        `[OpenCodeReady] Model catalog still ${state} after ${MODEL_CATALOG_WAIT_TIMEOUT_MS}ms: reason=${reason}`,
+        `[ReasonixReady] Model catalog still ${state} after ${MODEL_CATALOG_WAIT_TIMEOUT_MS}ms: reason=${reason}`,
       );
       break;
     }
 
-    logger.debug(`[OpenCodeReady] Model catalog not ready yet, retrying: reason=${reason}`);
+    logger.debug(`[ReasonixReady] Model catalog not ready yet, retrying: reason=${reason}`);
     await delayModelCatalogWait(MODEL_CATALOG_POLL_INTERVAL_MS);
     if (generation !== modelCatalogWaitGeneration) {
       return;
@@ -194,12 +194,12 @@ async function refreshModelCatalogAfterReady(reason: string): Promise<void> {
 
   const selectedModelListedOnReturn = result.selectedModelListed;
   logger.debug(
-    `[OpenCodeReady] Reading the model catalog in background until the warm-up ends: reason=${reason}`,
+    `[ReasonixReady] Reading the model catalog in background until the warm-up ends: reason=${reason}`,
   );
   const changes = createLateModelCatalogChanges(false);
   lateModelCatalogChanges = changes;
   safeBackgroundTask({
-    taskName: "opencode.modelCatalogWarmup",
+    taskName: "reasonix.modelCatalogWarmup",
     task: () =>
       waitForSettledModelCatalog(reason, generation, selectedModelListedOnReturn, changes),
     onSuccess: () => finishLateModelCatalogChanges(changes),
@@ -216,64 +216,64 @@ export async function refreshModelCatalogAfterConfigReload(): Promise<void> {
   await refreshModelCatalogAfterReady("config_reload");
 }
 
-export async function isOpencodeServerHealthy(): Promise<boolean> {
-  return (await checkOpencodeHealth()).healthy;
+export async function isReasonixServerHealthy(): Promise<boolean> {
+  return (await checkReasonixHealth()).healthy;
 }
 
-export async function refreshSessionCacheAfterOpencodeReady(reason: string): Promise<void> {
+export async function refreshSessionCacheAfterReasonixReady(reason: string): Promise<void> {
   startModelCatalogWarmup();
 
   try {
     await warmupSessionDirectoryCache();
-    logger.debug(`[OpenCodeReady] Session cache refreshed: reason=${reason}`);
+    logger.debug(`[ReasonixReady] Session cache refreshed: reason=${reason}`);
   } catch (error) {
-    logger.warn(`[OpenCodeReady] Failed to refresh session cache: reason=${reason}`, error);
+    logger.warn(`[ReasonixReady] Failed to refresh session cache: reason=${reason}`, error);
   }
 
   try {
     await refreshModelCatalogAfterReady(reason);
-    logger.debug(`[OpenCodeReady] Model catalog refreshed: reason=${reason}`);
+    logger.debug(`[ReasonixReady] Model catalog refreshed: reason=${reason}`);
   } catch (error) {
-    logger.warn(`[OpenCodeReady] Failed to refresh model catalog: reason=${reason}`, error);
+    logger.warn(`[ReasonixReady] Failed to refresh model catalog: reason=${reason}`, error);
   }
 }
 
-export async function refreshSessionCacheIfOpencodeReady(
+export async function refreshSessionCacheIfReasonixReady(
   reason: string,
   deps: ReadyRefreshDeps,
 ): Promise<boolean> {
-  if (!(await isOpencodeServerHealthy())) {
-    deps.opencodeReadyLifecycle.notifyUnavailable(reason);
+  if (!(await isReasonixServerHealthy())) {
+    deps.reasonixReadyLifecycle.notifyUnavailable(reason);
     logger.warn(
-      `[OpenCodeReady] OpenCode server is not running; skipping session cache refresh: reason=${reason}`,
+      `[ReasonixReady] Reasonix server is not running; skipping session cache refresh: reason=${reason}`,
     );
     return false;
   }
 
-  await refreshSessionCacheAfterOpencodeReady(reason);
+  await refreshSessionCacheAfterReasonixReady(reason);
   return true;
 }
 
-export function registerOpenCodeReadyRefreshHandler(deps: ReadyRefreshDeps): void {
+export function registerReasonixReadyRefreshHandler(deps: ReadyRefreshDeps): void {
   if (readyRefreshRegistered) {
     return;
   }
 
   readyRefreshRegistered = true;
-  deps.opencodeReadyLifecycle.onReady((reason) => refreshSessionCacheAfterOpencodeReady(reason));
+  deps.reasonixReadyLifecycle.onReady((reason) => refreshSessionCacheAfterReasonixReady(reason));
 }
 
-export async function notifyOpencodeReadyIfHealthy(
+export async function notifyReasonixReadyIfHealthy(
   reason: string,
   deps: ReadyRefreshDeps,
 ): Promise<boolean> {
-  if (!(await isOpencodeServerHealthy())) {
-    deps.opencodeReadyLifecycle.notifyUnavailable(reason);
-    logger.warn(`[OpenCodeReady] OpenCode server is not running: reason=${reason}`);
+  if (!(await isReasonixServerHealthy())) {
+    deps.reasonixReadyLifecycle.notifyUnavailable(reason);
+    logger.warn(`[ReasonixReady] Reasonix server is not running: reason=${reason}`);
     return false;
   }
 
-  return deps.opencodeReadyLifecycle.notifyReady(reason);
+  return deps.reasonixReadyLifecycle.notifyReady(reason);
 }
 
 export function __resetReadyRefreshForTests(): void {

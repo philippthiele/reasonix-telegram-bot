@@ -3,8 +3,8 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 const settingsSession = vi.hoisted(() => ({ current: null as { id: string } | null }));
 const sessionGet = vi.hoisted(() => vi.fn());
 
-vi.mock("../../../src/opencode/client.js", () => ({
-  opencodeClient: { session: { get: sessionGet } },
+vi.mock("../../../src/reasonix/client.js", () => ({
+  reasonixClient: { session: { get: sessionGet } },
 }));
 
 vi.mock("../../../src/app/stores/settings-store.js", () => ({
@@ -24,7 +24,7 @@ import {
   fetchSessionTitle,
   setCurrentSession,
 } from "../../../src/app/services/session-service.js";
-import { createIncomingPrompt } from "../../../src/app/types/prompt.js";
+import { mirrorQueuedPrompt } from "../../helpers/prompt-queue.js";
 
 const SESSION = { id: "session-1", title: "Session 1", directory: "D:\\Projects\\Repo" };
 
@@ -37,7 +37,7 @@ describe("app/services/session-service", () => {
 
   it("drops queued prompts when switching to another session", () => {
     setCurrentSession(SESSION);
-    promptQueue.add(createIncomingPrompt("queued for session 1"));
+    mirrorQueuedPrompt("queued for session 1");
 
     setCurrentSession({ ...SESSION, id: "session-2" });
 
@@ -46,7 +46,7 @@ describe("app/services/session-service", () => {
 
   it("keeps queued prompts when the same session is only renamed", () => {
     setCurrentSession(SESSION);
-    promptQueue.add(createIncomingPrompt("queued for session 1"));
+    mirrorQueuedPrompt("queued for session 1");
 
     setCurrentSession({ ...SESSION, title: "Renamed" });
 
@@ -55,7 +55,7 @@ describe("app/services/session-service", () => {
 
   it("drops queued prompts when the session is cleared", () => {
     setCurrentSession(SESSION);
-    promptQueue.add(createIncomingPrompt("queued for session 1"));
+    mirrorQueuedPrompt("queued for session 1");
 
     clearSession();
 
@@ -95,7 +95,7 @@ describe("app/services/session-service fetchSessionTitle", () => {
     sessionGet.mockReset();
   });
 
-  it("returns the title OpenCode has for the session now", async () => {
+  it("returns the title Reasonix has for the session now", async () => {
     sessionGet.mockResolvedValue({
       data: { id: "session-1", title: "Generated" },
       error: undefined,
@@ -108,19 +108,19 @@ describe("app/services/session-service fetchSessionTitle", () => {
     });
   });
 
-  it("keeps an empty title OpenCode reports for an unnamed session", async () => {
+  it("keeps an empty title Reasonix reports for an unnamed session", async () => {
     sessionGet.mockResolvedValue({ data: { id: "session-1", title: "" }, error: undefined });
 
     await expect(fetchSessionTitle(SESSION)).resolves.toBe("");
   });
 
-  it("falls back to the remembered title when OpenCode answers with an error", async () => {
+  it("falls back to the remembered title when Reasonix answers with an error", async () => {
     sessionGet.mockResolvedValue({ data: undefined, error: new Error("not found") });
 
     await expect(fetchSessionTitle(SESSION)).resolves.toBe("Session 1");
   });
 
-  it("falls back to the remembered title when OpenCode answers without a session", async () => {
+  it("falls back to the remembered title when Reasonix answers without a session", async () => {
     sessionGet.mockResolvedValue({ data: undefined, error: undefined });
 
     await expect(fetchSessionTitle(SESSION)).resolves.toBe("Session 1");

@@ -31,7 +31,7 @@ interface TrackedCall {
 /**
  * Drives elapsed-time updates for tool calls.
  *
- * OpenCode emits `running` tool events when the tool output changes, not on a
+ * Reasonix emits `running` tool events when the tool output changes, not on a
  * schedule: a tool that blocks without printing anything produces no events at
  * all. Elapsed time therefore has to come from an own interval, never from
  * incoming events.

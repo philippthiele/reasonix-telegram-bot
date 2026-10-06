@@ -133,7 +133,7 @@ describe("bot/commands/ls", () => {
   });
 
   it("warns instead of listing when running in a container", async () => {
-    vi.stubEnv("OPENCODE_TELEGRAM_CONTAINER", "1");
+    vi.stubEnv("REASONIX_TELEGRAM_CONTAINER", "1");
     const ctx = createCommandContext();
 
     await lsCommand(ctx as never, createDeps());

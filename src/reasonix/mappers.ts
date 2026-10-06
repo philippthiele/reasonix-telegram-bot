@@ -1,3 +1,4 @@
+import { createHash } from "node:crypto";
 import type {
   Command,
   Message,
@@ -12,6 +13,7 @@ import type {
   ToolState,
   Todo,
 } from "@opencode-ai/sdk/v2";
+import type { GlobalSession } from "./sdk-types.js";
 import type {
   ReasonixApproval,
   ReasonixAsk,
@@ -110,6 +112,27 @@ export function toTodos(rows: ReasonixTodo[] | undefined): Todo[] {
       status: row.status ?? "pending",
       priority: row.priority ?? "medium",
     }));
+}
+
+/**
+ * The same session as the all-roots shape, which carries the parent link and
+ * the summary a desktop session comes with.
+ */
+export function toGlobalSession(row: ReasonixSessionRow, root: string): GlobalSession {
+  const session: GlobalSession = {
+    ...toSession(row, root),
+    project: { id: `dir_${hashOf(root)}`, worktree: root },
+  };
+  // An in-memory session has no transcript to point at, and Reasonix names it
+  // by id; the field is left out rather than set to something unusable.
+  if (row.path && row.path.length > 0) {
+    session.path = row.path;
+  }
+  return session;
+}
+
+function hashOf(value: string): string {
+  return createHash("sha1").update(value).digest("hex").slice(0, 16);
 }
 
 /**

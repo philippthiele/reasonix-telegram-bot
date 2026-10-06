@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { Context } from "grammy";
 import { settingsCommand } from "../../../src/bot/commands/settings-command.js";
 import { handleSettingsCallback } from "../../../src/bot/callbacks/settings-callback-handler.js";
@@ -50,18 +50,7 @@ const mocked = vi.hoisted(() => ({
   getPromptQueueModeMock: vi.fn(),
   setPromptQueueModeMock: vi.fn(),
   isTtsConfiguredMock: vi.fn(),
-  serverVersion: "v1" as "v1" | "v2",
 }));
-
-vi.mock("../../../src/opencode/client.js", async (importOriginal) => {
-  const original = await importOriginal<typeof import("../../../src/opencode/client.js")>();
-  return {
-    ...original,
-    get opencodeServerVersion() {
-      return mocked.serverVersion;
-    },
-  };
-});
 
 vi.mock("../../../src/app/stores/settings-store.js", () => ({
   getCompactOutputMode: mocked.getCompactOutputModeMock,
@@ -447,15 +436,11 @@ describe("bot/callbacks/settings-callback-handler", () => {
     const [text, opts] = call;
     expect(text).toBe(t("settings.menu.title"));
     expect(defined(opts?.reply_markup?.inline_keyboard[7]?.[0]).text).toBe(
-      `${t("settings.prompt_queue.label")}: ${t("settings.value.on")}`,
+      `${t("settings.prompt_queue.label")}: ${t("settings.prompt_queue.queue")}`,
     );
   });
 
   describe("message queue row", () => {
-    afterEach(() => {
-      mocked.serverVersion = "v1";
-    });
-
     function queueRowText(ctx: ReturnType<typeof createCallbackContext>): string | undefined {
       const call = defined(vi.mocked(ctx.editMessageText).mock.calls[0]);
       const rows = call[1]?.reply_markup?.inline_keyboard ?? [];
@@ -467,12 +452,10 @@ describe("bot/callbacks/settings-callback-handler", () => {
 
     it.each([
       { current: "off", next: "queue", label: "settings.prompt_queue.queue" },
-      { current: "queue", next: "steer", label: "settings.prompt_queue.steer" },
-      { current: "steer", next: "off", label: "settings.value.off" },
+      { current: "queue", next: "off", label: "settings.value.off" },
     ] as const)(
-      "cycles $current to $next on a V2 server",
+      "cycles $current to $next",
       async ({ current, next, label }) => {
-        mocked.serverVersion = "v2";
         mocked.getCompactOutputModeMock.mockReturnValue(false);
         mocked.getTtsModeMock.mockReturnValue("off");
         mocked.getPromptQueueModeMock.mockReturnValueOnce(current).mockReturnValueOnce(next);
@@ -485,21 +468,6 @@ describe("bot/callbacks/settings-callback-handler", () => {
         expect(queueRowText(ctx)).toBe(`${t("settings.prompt_queue.label")}: ${t(label)}`);
       },
     );
-
-    it("toggles the bot queue off on a V1 server", async () => {
-      mocked.getCompactOutputModeMock.mockReturnValue(false);
-      mocked.getTtsModeMock.mockReturnValue("off");
-      mocked.getPromptQueueModeMock.mockReturnValueOnce("queue").mockReturnValueOnce("off");
-      activateSettingsMenu();
-      const ctx = createCallbackContext(SETTINGS_PROMPT_QUEUE_CALLBACK);
-
-      await handleSettingsCallback(ctx, createDeps());
-
-      expect(mocked.setPromptQueueModeMock).toHaveBeenCalledWith("off");
-      expect(queueRowText(ctx)).toBe(
-        `${t("settings.prompt_queue.label")}: ${t("settings.value.off")}`,
-      );
-    });
   });
 
   it("cycles TTS mode and returns to settings menu", async () => {
